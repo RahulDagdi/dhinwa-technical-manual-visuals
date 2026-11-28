@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dhinwa Site Lessons</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,500;9..40,700;9..40,800&family=Work+Sans:wght@400;500;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="assets/gsap.min.js"></script>
+<style>
+/* Layout: same shell as the lesson player. Navy chapter sidebar, a blueprint sheet as the hero, chapter cards grouped by stage of work. */
+:root{
+  --bg:#F7F6F2; --panel:#FFFFFF; --panel-2:#F4F2EC; --ink:#1A1612; --muted:#5E574D; --line:#E6E1D6;
+  --side:#1A1612; --side-2:#2A241D; --side-ink:#FFF8E6; --side-muted:#B5AC9C; --side-line:#3A3229;
+  --bp:#1F1A15; --bp-2:#171310; --bp-line:#F4EFE6; --bp-dim:#A89C88;
+  --yellow:#F9C306; --orange:#E89519; --amber:#F7A70C; --red:#E8573F; --green:#3DBB7E; --water:#3E8FC7; --on-yellow:#1A1612; --accent-ink:#B4650A;
+  --display:"DM Sans","Work Sans","Open Sans",sans-serif;
+  --sans:"Work Sans","DM Sans","Open Sans",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#120F0C; --panel:#1C1814; --panel-2:#241F1A; --ink:#F4EFE6; --muted:#B0A696; --line:#332C24;
+  --side:#0D0B09; --side-2:#1F1A15; --side-line:#2C251E; --accent-ink:#F0A73A; color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#120F0C; --panel:#1C1814; --panel-2:#241F1A; --ink:#F4EFE6; --muted:#B0A696; --line:#332C24;
+  --side:#0D0B09; --side-2:#1F1A15; --side-line:#2C251E; --accent-ink:#F0A73A; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+button,input{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--display);margin:0}
+a{color:inherit}
+
+/* shell */
+.app{display:grid;grid-template-columns:clamp(270px,24vw,320px) minmax(0,1fr);min-height:100%}
+.side{position:sticky;top:0;height:100vh;height:100dvh;overflow-y:auto;background:var(--side);color:var(--side-ink);padding:22px 0 32px}
+.brand{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:0 22px 18px;border-bottom:1px solid var(--side-line)}
+.brand p{margin:0;font:700 15px/1.35 var(--display)}
+.brand p span{display:block;color:var(--yellow);font-size:13px;margin-bottom:4px}
+.side-close{display:none;flex:none;width:36px;height:36px;border:1px solid var(--side-line);background:none;color:var(--side-ink);font-size:24px;line-height:1;cursor:pointer}
+.find{padding:16px 22px 6px}
+.find label{display:block;font:700 12px var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--side-muted);margin-bottom:6px}
+.find input{width:100%;border:1px solid var(--side-line);background:var(--side-2);border-radius:10px;padding:10px 12px;color:var(--side-ink)}
+.find input::placeholder{color:var(--side-muted)}
+.sg h3{font:700 12px var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--side-muted);padding:16px 22px 6px}
+.sl{list-style:none;margin:0;padding:0 12px}
+.sl-a{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:center;padding:7px 10px;border-radius:8px;text-decoration:none;font:500 14px/1.35 var(--sans);color:var(--side-ink)}
+.sl-a:hover{background:var(--side-2)}
+.sl-no{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font:800 13px var(--display);background:var(--side-2);color:var(--side-muted)}
+.sl-a:hover .sl-no{background:var(--yellow);color:var(--on-yellow)}
+.scrim{display:none}
+.col{min-width:0;display:flex;flex-direction:column}
+.mbar{display:none}
+main{width:100%;max-width:1240px;margin:0 auto;padding:clamp(16px,3vw,32px) max(16px,env(safe-area-inset-right,0px)) 48px max(16px,env(safe-area-inset-left,0px));display:grid;gap:clamp(26px,4vw,40px)}
+
+/* hero sheet */
+.sheet{position:relative;border-radius:18px;overflow:hidden;background:var(--yellow);color:#1A1612;
+  --bp-line:#1A1612; --bp-dim:#6B5A3A; --bp:#FFF8E6;
+  background-image:linear-gradient(rgba(26,22,18,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(26,22,18,.07) 1px,transparent 1px);background-size:40px 40px;
+  display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);align-items:center}
+.hero-tx{padding:clamp(22px,4vw,44px);display:grid;gap:14px;align-content:center;z-index:1}
+.eyebrow{margin:0;font:700 12.5px var(--display);letter-spacing:.08em;text-transform:uppercase;color:#1A1612;opacity:.75}
+.hero-tx h1{font:800 clamp(30px,4.2vw,50px)/1.05 var(--display);text-wrap:balance}
+.hero-tx h1 em{font-style:normal;color:#FFFFFF;-webkit-text-stroke:0}
+.lede{margin:0;color:#3B3020;max-width:46ch}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.pill{display:inline-flex;align-items:center;gap:8px;border-radius:4px;padding:12px 22px;font:700 14.5px var(--display);text-decoration:none;border:0;cursor:pointer;letter-spacing:.02em}
+.pill-y{background:#1A1612;color:#FFFFFF}
+.pill-o{background:transparent;color:#1A1612;box-shadow:inset 0 0 0 2px #1A1612}
+.pill:hover{filter:brightness(1.15)}
+#hero .fw{fill:rgba(255,255,255,.6)}
+#hero .fy{fill:#1A1612}
+#hero .dim{stroke:#1A1612}
+.hero-art{min-width:0;align-self:stretch;display:flex;align-items:flex-end}
+.hero-art svg{display:block;width:100%;height:auto}
+.tblock{justify-self:start;margin-top:8px;display:grid;grid-template-columns:auto auto;border:1.5px solid #1A1612;font:500 12px/1.2 var(--display);color:#FFF8E6;background:#1A1612;font-variant-numeric:tabular-nums}
+.tblock span{padding:6px 10px;border-right:1.5px solid #4A4036;border-bottom:1.5px solid #4A4036}
+.tblock span:nth-child(2n){border-right:0}
+.tblock span:nth-last-child(-n+2){border-bottom:0}
+.tblock b{font-weight:700;color:var(--yellow)}
+.ln{fill:none;stroke:var(--bp-line);stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round}
+.thick{stroke-width:6}
+.lnd{fill:none;stroke:var(--bp-dim);stroke-width:2.5;stroke-linecap:round}
+.lno{fill:none;stroke:var(--orange);stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.lny{fill:none;stroke:var(--yellow);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.lnw{fill:none;stroke:var(--bp-line);stroke-width:3;stroke-linecap:round}
+.fy{fill:var(--yellow)}
+.fo{fill:var(--orange)}
+.fa{fill:var(--amber)}
+.fw{fill:rgba(244,239,230,.14)}
+.fbp{fill:var(--bp)}
+.fbp2{fill:var(--bp-2)}
+.nor{fill:none;stroke:var(--red);stroke-width:9;stroke-linecap:round}
+.ckw{fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.ckd{fill:none;stroke:var(--on-yellow);stroke-width:7;stroke-linecap:round}
+.rope{fill:none;stroke:var(--orange);stroke-width:5;stroke-linecap:round}
+.dim{fill:none;stroke:var(--yellow);stroke-width:2.5}
+.zone{fill:rgba(244,239,230,.05);stroke:var(--bp-dim);stroke-width:2.5;stroke-dasharray:10 8}
+.crack{fill:none;stroke:var(--red);stroke-width:4;stroke-linejoin:round}
+.hl{fill:none;stroke:var(--yellow);stroke-width:9;stroke-linecap:round;opacity:.9}
+.tape{fill:none;stroke:var(--yellow);stroke-width:12;stroke-dasharray:18 14}
+.wave{fill:none;stroke:var(--yellow);stroke-width:5;stroke-linecap:round}
+.glow{fill:var(--yellow);opacity:.3}
+.rb{fill:none;stroke:#C9BBA0;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.rbt{fill:none;stroke:#C9BBA0;stroke-width:4;stroke-linecap:round}
+.wire{fill:none;stroke:var(--orange);stroke-width:3;stroke-linecap:round}
+
+/* how it works */
+.how{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.how li{background:var(--panel);border-radius:14px;padding:16px 18px;display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start}
+.how-ic{width:44px;height:44px;border-radius:10px;background:var(--bp);display:grid;place-items:center}
+.how-ic svg{width:30px;height:30px}
+.how b{display:block;font:700 15.5px/1.3 var(--display);margin-bottom:2px}
+.how span{font-size:14.5px;color:var(--muted)}
+
+/* chapters */
+.chapters{display:grid;gap:30px}
+.grp-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.grp-h h2{font:700 20px var(--display)}
+.grp-h span{font:700 12.5px var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink)}
+.cards{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));gap:12px}
+.ch{height:100%;display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:14px;align-items:center;padding:12px 16px 12px 12px;background:var(--panel);border-radius:14px;text-decoration:none;box-shadow:inset 0 0 0 1px var(--line);transition:box-shadow .2s,transform .2s}
+.ch:hover{box-shadow:inset 0 0 0 2px var(--yellow);transform:translateY(-2px)}
+.ch-ic{width:64px;height:64px;border-radius:12px;background:var(--bp);background-image:linear-gradient(rgba(244,239,230,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(244,239,230,.08) 1px,transparent 1px);background-size:12px 12px;display:grid;place-items:center}
+.ch-ic svg{width:60px;height:60px}
+.ch-tx{display:grid;gap:2px;min-width:0}
+.ch-no{font:700 12px var(--display);letter-spacing:.05em;text-transform:uppercase;color:var(--accent-ink)}
+.ch-nm{font:700 16.5px/1.25 var(--display)}
+.ch-mt{font-size:13.5px;color:var(--muted)}
+.ch-go{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--panel-2);font:700 16px var(--display);color:var(--muted);transition:background .2s,color .2s}
+.ch:hover .ch-go{background:var(--yellow);color:var(--on-yellow)}
+.empty{margin:0;padding:18px;border-radius:14px;background:var(--panel);color:var(--muted)}
+footer{font-size:13.5px;color:var(--muted)}
+
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;inset:0 auto 0 0;width:min(86vw,330px);z-index:30;transform:translateX(-102%);transition:transform .25s;padding-top:calc(22px + env(safe-area-inset-top,0px))}
+  .side.show{transform:none}
+  .side-close{display:block}
+  .scrim{display:block;position:fixed;inset:0;background:rgba(13,11,9,.55);z-index:20;opacity:0;pointer-events:none;transition:opacity .25s}
+  .scrim.show{opacity:1;pointer-events:auto}
+  .mbar{display:flex;align-items:center;gap:12px;position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--side);color:var(--side-ink);padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:11;background:var(--side)}
+  .menu-btn{border:1px solid var(--side-line);background:var(--side-2);color:var(--side-ink);border-radius:8px;padding:8px 12px;font:700 13.5px var(--display);cursor:pointer}
+  .mbar-t{font:700 15px var(--display)}
+  .sheet{grid-template-columns:1fr}
+  .hero-art{padding:0}
+  .how{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){.ch,.side,.scrim,.ch-go{transition:none}.ch:hover{transform:none}}
+/*dhinwa-brand*/
+:root{--bg:#FFFFFF; --panel:#FFFFFF; --panel-2:#F6F4EF; --ink:#1A1612; --muted:#5E574D; --line:#E8E3D9;
+  --side:#FFFFFF; --side-2:#FFF4CC; --side-ink:#1A1612; --side-muted:#6B6358; --side-line:#EDE8DE; --accent-ink:#B8700A; color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#FFFFFF; --panel:#FFFFFF; --panel-2:#F6F4EF; --ink:#1A1612; --muted:#5E574D; --line:#E8E3D9;
+  --side:#FFFFFF; --side-2:#FFF4CC; --side-ink:#1A1612; --side-muted:#6B6358; --side-line:#EDE8DE; --accent-ink:#B8700A; color-scheme:light}}
+:root[data-theme="dark"]{--bg:#FFFFFF; --panel:#FFFFFF; --panel-2:#F6F4EF; --ink:#1A1612; --muted:#5E574D; --line:#E8E3D9;
+  --side:#FFFFFF; --side-2:#FFF4CC; --side-ink:#1A1612; --side-muted:#6B6358; --side-line:#EDE8DE; --accent-ink:#B8700A; color-scheme:light}
+.side{border-right:1px solid var(--side-line)}
+.brand p span{color:#B8700A}
+.find input{background:#FFFFFF;border-radius:4px}
+.sl-a:hover .sl-no{background:var(--yellow);color:var(--on-yellow)}
+.how li,.ch{box-shadow:inset 0 0 0 1px var(--line)}
+.how-ic,.ch-ic{background:#F9C306;border-radius:50%;background-image:none;--bp-line:#1A1612;--bp:#FFF8E6;--amber:#FFFFFF;--yellow:#FFFFFF}
+.ch-ic .fw{fill:rgba(255,255,255,.65)}
+.how-ic svg path[fill="#F7C307"],.how-ic svg path[fill="#F9C306"]{fill:#1A1612}
+.how-ic svg path[stroke]{stroke:#1A1612}
+.ch:hover{box-shadow:inset 0 0 0 2px var(--yellow)}
+.ch-go{border-radius:4px}
+.menu-btn{border-radius:4px;background:var(--yellow);color:var(--on-yellow);border-color:var(--yellow)}
+.side-close{border-radius:4px}
+@media (max-width:900px){body::before{background:#FFFFFF}.mbar{box-shadow:0 1px 0 var(--line)}}
+/*end-dhinwa-brand*/
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <pattern id="p-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="rgba(244,239,230,.07)" stroke-width="1.5"/></pattern>
+    <pattern id="p-net" width="16" height="16" patternUnits="userSpaceOnUse"><path d="M0 0L16 16M16 0L0 16" stroke="#A89C88" stroke-width="1.6"/></pattern>
+    <pattern id="p-soil" width="22" height="22" patternUnits="userSpaceOnUse"><rect width="22" height="22" fill="#2E2720"/><path d="M0 22L22 0M-6 6l12-12M16 28l12-12" stroke="#A89C88" stroke-width="1.4" opacity=".55"/><circle cx="6" cy="15" r="1.6" fill="#A89C88"/></pattern>
+    <pattern id="p-hatch" width="14" height="14" patternUnits="userSpaceOnUse"><path d="M0 14L14 0" stroke="#A89C88" stroke-width="1.5"/></pattern>
+    <marker id="m-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#E89519"/></marker>
+  </defs>
+  <symbol id="s-worker" viewBox="0 0 80 200">
+    <path class="fo ln" d="M22 74h36a8 8 0 0 1 8 8v50H14V82a8 8 0 0 1 8-8z"/>
+    <path class="lnw" d="M15 100h50M15 116h50"/>
+    <path class="ln" d="M16 84 8 128M64 84l8 44"/>
+    <path class="ln thick" d="M30 134v54M50 134v54"/>
+    <path class="ln thick" d="M22 192h14M44 192h14"/>
+    <circle class="fbp ln" cx="40" cy="54" r="15"/>
+    <path class="fy ln" d="M20 44a20 19 0 0 1 40 0v2H20z"/>
+    <path class="fy ln" d="M14 44h52v6H14z"/>
+  </symbol>
+  <symbol id="s-worker-bare" viewBox="0 0 80 200">
+    <path class="fo ln" d="M22 74h36a8 8 0 0 1 8 8v50H14V82a8 8 0 0 1 8-8z"/>
+    <path class="lnw" d="M15 100h50M15 116h50"/>
+    <path class="ln" d="M16 84 8 128M64 84l8 44"/>
+    <path class="ln thick" d="M30 134v54M50 134v54"/>
+    <path class="ln thick" d="M22 192h14M44 192h14"/>
+    <circle class="fbp ln" cx="40" cy="54" r="15"/>
+  </symbol>
+  <symbol id="s-helmet" viewBox="0 0 120 80">
+    <path class="fy ln" d="M16 60a44 42 0 0 1 88 0z"/><path class="fy ln" d="M6 60h108v9H6z"/><path class="ln" d="M60 20v40M40 26l6 34M80 26l-6 34"/>
+  </symbol>
+  <symbol id="s-goggles" viewBox="0 0 140 60">
+    <path class="ln thick" d="M3 30h20M117 30h20"/><rect class="fw ln" x="22" y="10" width="44" height="40" rx="16"/><rect class="fw ln" x="74" y="10" width="44" height="40" rx="16"/><path class="ln" d="M66 28h8"/>
+  </symbol>
+  <symbol id="s-ear" viewBox="0 0 120 110">
+    <path class="ln thick" d="M22 62a38 46 0 0 1 76 0"/><rect class="fy ln" x="6" y="54" width="30" height="48" rx="13"/><rect class="fy ln" x="84" y="54" width="30" height="48" rx="13"/>
+  </symbol>
+  <symbol id="s-resp" viewBox="0 0 120 100">
+    <path class="ln" d="M22 34 4 20M98 34l18-14"/><path class="fw ln" d="M22 34q38-34 76 0l-8 40q-30 26-60 0z"/><circle class="fo ln" cx="26" cy="68" r="16"/><circle class="fo ln" cx="94" cy="68" r="16"/>
+  </symbol>
+  <symbol id="s-harness" viewBox="0 0 100 170">
+    <path class="lno" d="M26 6l24 74 24-74M18 92h64M30 92l-12 70M70 92l12 70"/><circle class="ln" cx="50" cy="82" r="9"/>
+  </symbol>
+  <symbol id="s-net" viewBox="0 0 240 120">
+    <rect x="3" y="3" width="234" height="114" rx="6" fill="url(#p-net)" stroke="#F4EFE6" stroke-width="3.5"/>
+  </symbol>
+  <symbol id="s-jacket" viewBox="0 0 110 130">
+    <path class="fo ln" d="M24 18l18-12h26l18 12v104H24z"/><path class="ln" d="M42 6l13 30 13-30"/><path class="lny" d="M26 64h58M26 88h58"/>
+  </symbol>
+  <symbol id="s-specs" viewBox="0 0 120 50">
+    <circle class="ln" cx="30" cy="26" r="18"/><circle class="ln" cx="90" cy="26" r="18"/><path class="ln" d="M48 24q12-8 24 0M12 22 2 16M108 22l10-6"/>
+  </symbol>
+  <symbol id="s-ladder" viewBox="0 0 70 240">
+    <path class="ln thick" d="M10 2v236M60 2v236"/><path class="ln" d="M10 24h50M10 56h50M10 88h50M10 120h50M10 152h50M10 184h50M10 216h50"/>
+  </symbol>
+  <symbol id="s-scaffold" viewBox="0 0 220 280">
+    <path class="ln thick" d="M10 0v280M110 0v280M210 0v280M4 90h212M4 180h212"/><path class="ln" d="M10 280l100-100M110 180l100-90"/>
+    <rect class="fa ln" x="4" y="78" width="212" height="12"/><rect class="fa ln" x="4" y="168" width="212" height="12"/>
+  </symbol>
+  <symbol id="s-plug" viewBox="0 0 90 140">
+    <path class="ln" d="M45 100v38"/><rect class="fy ln" x="14" y="40" width="62" height="62" rx="12"/><path class="ln thick" d="M32 40V12M58 40V12"/>
+  </symbol>
+  <symbol id="s-bulb" viewBox="0 0 70 110">
+    <circle class="fw ln" cx="35" cy="40" r="28"/><path class="ln" d="M24 68h22v20H24zM27 96h16"/>
+  </symbol>
+  <symbol id="s-ext" viewBox="0 0 70 160">
+    <path class="ln" d="M28 40V26h14v14M42 28h18l6 12M28 28q-24 8-20 40"/><rect class="fr ln" x="14" y="40" width="42" height="114" rx="14"/><rect class="fw" x="20" y="80" width="30" height="34" rx="4"/>
+  </symbol>
+  <symbol id="s-aid" viewBox="0 0 120 96">
+    <path class="ln" d="M42 22V10h36v12"/><rect class="fw ln" x="6" y="22" width="108" height="68" rx="10"/><path class="fr" d="M52 38h16v14h14v16H68v14H52V68H38V52h14z"/>
+  </symbol>
+  <symbol id="s-bug" viewBox="0 0 90 70">
+    <ellipse class="ln" cx="28" cy="22" rx="16" ry="9"/><ellipse class="ln" cx="62" cy="22" rx="16" ry="9"/><path class="ln" d="M32 46 16 60M58 46l16 14M32 36l-18 4M58 36l18 4"/><ellipse class="fw ln" cx="45" cy="40" rx="13" ry="20"/>
+  </symbol>
+  <symbol id="s-hook" viewBox="0 0 80 200">
+    <path class="ln" d="M40 0v104"/><rect class="fy ln" x="24" y="104" width="32" height="26" rx="5"/><path class="ln thick" d="M40 130v18a20 20 0 1 1-20 20"/>
+  </symbol>
+  <symbol id="s-meter" viewBox="0 0 90 140">
+    <rect class="fy ln" x="8" y="8" width="74" height="124" rx="14"/><rect class="fbp ln" x="18" y="22" width="54" height="40" rx="6"/><circle class="ln" cx="30" cy="96" r="7"/><circle class="ln" cx="60" cy="96" r="7"/>
+  </symbol>
+  <symbol id="s-clip" viewBox="0 0 120 150">
+    <rect class="fw ln" x="8" y="14" width="104" height="132" rx="10"/><rect class="fy ln" x="38" y="4" width="44" height="20" rx="6"/>
+    <rect class="ln" x="22" y="44" width="14" height="14" rx="3"/><rect class="ln" x="22" y="74" width="14" height="14" rx="3"/><rect class="ln" x="22" y="104" width="14" height="14" rx="3"/>
+    <path class="lnd" d="M46 51h50M46 81h50M46 111h50"/>
+  </symbol>
+  <symbol id="s-bottle" viewBox="0 0 80 130">
+    <path class="fw ln" d="M30 6h20v24l16 20v74H14V50l16-20z"/><path class="fo ln" d="M40 66l16 16-16 16-16-16z"/>
+  </symbol>
+  <symbol id="s-glove" viewBox="0 0 80 110">
+    <path class="fo ln" d="M20 104V58L10 34q-3-8 4-10t9 6l7 16V16q0-8 7-8t7 8v26V10q0-8 7-8t7 8v32V16q0-7 7-7t6 7v54q0 34-26 34z"/>
+  </symbol>
+  <symbol id="s-shav" viewBox="0 0 160 70">
+    <path class="lny" d="M8 60q12-34 30-12t30-4 30-12 34 14"/><path class="lny" d="M22 46q14-24 26-4M78 40q12-20 26-2M118 50q10-16 22-2"/>
+  </symbol>
+  <symbol id="s-cloud" viewBox="0 0 160 130">
+    <path class="fw ln" d="M42 74a26 26 0 0 1 8-50 34 34 0 0 1 64 8 22 22 0 0 1 8 42z"/><path class="lnw" d="M52 90l-8 22M82 90l-8 22M112 90l-8 22"/>
+  </symbol>
+  <symbol id="s-cal" viewBox="0 0 110 110">
+    <rect class="fw ln" x="6" y="16" width="98" height="88" rx="10"/><path class="fr" d="M8 26a8 8 0 0 1 8-8h78a8 8 0 0 1 8 8v12H8z"/><path class="ln" d="M30 6v20M80 6v20"/>
+  </symbol>
+  <symbol id="s-no" viewBox="0 0 100 100"><circle class="nor" cx="50" cy="50" r="42"/><path class="nor" d="M21 21l58 58"/></symbol>
+  <symbol id="s-ok" viewBox="0 0 60 60"><circle class="fg" cx="30" cy="30" r="28"/><path class="ckw" d="M17 31l9 9 17-19"/></symbol>
+  <symbol id="s-bad" viewBox="0 0 60 60"><circle class="fr" cx="30" cy="30" r="28"/><path class="ckw" d="M20 20l20 20M40 20 20 40"/></symbol>
+  <symbol id="s-warn" viewBox="0 0 100 90"><path class="fy ln" d="M50 6l44 78H6z"/><path class="ckd" d="M50 32v24M50 68v3"/></symbol>
+  <symbol id="s-eye" viewBox="0 0 120 70"><path class="fw ln" d="M6 35q54-56 108 0-54 56-108 0z"/><circle class="fy ln" cx="60" cy="35" r="14"/></symbol>
+  <symbol id="s-book" viewBox="0 0 160 110">
+    <path class="fw ln" d="M80 20q-34-16-72-8v88q38-8 72 8 34-16 72-8V12q-38-8-72 8z"/><path class="ln" d="M80 20v88"/><path class="lnd" d="M22 36h40M22 54h40M22 72h40M98 36h40M98 54h40M98 72h40"/>
+  </symbol>
+  <symbol id="s-mag" viewBox="0 0 100 100"><path class="ln thick" d="M60 60l32 32"/><circle class="fw ln" cx="40" cy="40" r="28"/></symbol>
+  <symbol id="s-machine" viewBox="0 0 180 140">
+    <rect class="fy ln" x="10" y="30" width="150" height="80" rx="10"/><rect class="fbp ln" x="26" y="46" width="50" height="30" rx="4"/><path class="ln" d="M100 50h44M100 66h44M100 82h44"/>
+    <circle class="fbp ln" cx="44" cy="118" r="16"/><circle class="fbp ln" cx="126" cy="118" r="16"/>
+  </symbol>
+  <symbol id="s-bin" viewBox="0 0 90 120"><path class="fy ln" d="M10 24h70l-8 90H18z"/><path class="ln" d="M4 24h82M34 24V12h22v12M32 44l4 54M45 44v54M58 44l-4 54"/></symbol>
+  <symbol id="s-tractor" viewBox="0 0 260 130"><rect class="fa ln" x="130" y="30" width="120" height="58" rx="4"/><path class="fy ln" d="M10 88V40h50l20-26h30v74z"/><rect class="fbp ln" x="66" y="22" width="34" height="26" rx="3"/><path class="ln" d="M110 74h20"/><circle class="fbp ln thick" cx="38" cy="96" r="26"/><circle class="fbp ln" cx="100" cy="106" r="14"/><circle class="fbp ln" cx="170" cy="106" r="16"/><circle class="fbp ln" cx="220" cy="106" r="16"/></symbol>
+  <symbol id="s-door" viewBox="0 0 120 220"><path class="ln thick" d="M6 216V6h108v210"/><rect class="fa ln" x="18" y="18" width="84" height="198" rx="3"/><circle class="ln" cx="88" cy="118" r="5"/></symbol>
+  <symbol id="s-lock" viewBox="0 0 70 90"><path class="ln thick" d="M18 40V26a17 17 0 0 1 34 0v14"/><rect class="fy ln" x="8" y="40" width="54" height="44" rx="8"/><circle class="ln" cx="35" cy="60" r="5"/><path class="ln" d="M35 65v8"/></symbol>
+  <symbol id="s-cig" viewBox="0 0 160 70"><rect class="fw ln" x="10" y="30" width="110" height="18" rx="3"/><rect class="fo ln" x="120" y="30" width="26" height="18" rx="3"/><path class="lnd" d="M30 22q-8-10 0-18M50 24q-8-10 0-18"/></symbol>
+  <symbol id="s-boot" viewBox="0 0 110 120"><path class="fy ln" d="M22 6h40v70l36 14q8 4 8 12v12H10V6z"/><path class="ln" d="M10 98h96"/></symbol>
+  <symbol id="s-stretcher" viewBox="0 0 260 80"><rect class="fw ln" x="30" y="24" width="200" height="26" rx="6"/><path class="ln thick" d="M6 37h24M230 37h24M60 50v18M200 50v18"/><path class="fr" d="M118 30h12v8h8v10h-8v0h-12v0h-8V38h8z"/></symbol>
+  <symbol id="s-flood" viewBox="0 0 120 90"><rect class="fy ln" x="10" y="10" width="100" height="54" rx="8"/><rect class="fw ln" x="22" y="20" width="76" height="34" rx="4"/><path class="ln" d="M60 64v20M40 86h40"/></symbol>
+  <symbol id="s-drum" viewBox="0 0 80 110"><rect class="fr ln" x="8" y="8" width="64" height="96" rx="8"/><path class="ln" d="M8 38h64M8 72h64"/></symbol>
+  <symbol id="s-paint" viewBox="0 0 90 100"><path class="fo ln" d="M10 26h70v66a6 6 0 0 1-6 6H16a6 6 0 0 1-6-6z"/><path class="ln" d="M10 26q35-30 70 0"/><path class="fy" d="M24 50h42v22H24z"/></symbol>
+  <symbol id="s-bag" viewBox="0 0 120 36"><rect class="fw ln" x="4" y="4" width="112" height="28" rx="10"/><path class="lnd" d="M30 18h60"/></symbol>
+  <symbol id="s-hframe" viewBox="0 0 120 140"><path class="ln thick" d="M14 4v132M106 4v132"/><path class="ln" d="M14 40h92M14 96h92M14 40l92 56"/></symbol>
+  <symbol id="s-phone" viewBox="0 0 40 40"><path class="fy" d="M10 4l8 8-4 6q4 8 12 12l6-4 8 8-6 6Q10 38 4 10z"/></symbol>
+  <symbol id="s-exit" viewBox="0 0 120 60"><rect class="fg" x="2" y="2" width="116" height="56" rx="6"/><text x="60" y="40" text-anchor="middle" style="fill:#fff;font:800 26px var(--display)">EXIT</text></symbol>
+  <symbol id="s-amb" viewBox="0 0 200 120"><path class="fw ln" d="M10 90V30h110l40 30h30v30z"/><path class="fbp ln" d="M126 38h22l24 20h-46z"/><path class="fr" d="M48 42h14v14h14v14H62v14H48V70H34V56h14z"/><circle class="fbp ln" cx="50" cy="96" r="16"/><circle class="fbp ln" cx="150" cy="96" r="16"/></symbol>
+  <symbol id="s-sign" viewBox="0 0 160 220"><path class="ln thick" d="M80 120v96"/><rect class="fy ln" x="6" y="6" width="148" height="114" rx="8"/></symbol>
+  <symbol id="s-grinder" viewBox="0 0 200 110"><rect class="fy ln" x="60" y="40" width="120" height="34" rx="12"/><circle class="fw ln" cx="44" cy="57" r="38"/><path class="ln" d="M44 19v76M6 57h76"/></symbol>
+  <symbol id="s-saw" viewBox="0 0 120 120"><circle class="fw ln" cx="60" cy="60" r="44"/><path class="ln" d="M60 8l8 14M104 36l-14 4M112 70l-14-4M96 106l-10-12M60 112l-2-14M20 104l10-12M8 66l14-4M16 30l14 8M38 10l6 14M84 12l-6 14"/><circle class="fbp ln" cx="60" cy="60" r="10"/></symbol>
+  <symbol id="s-theo" viewBox="0 0 120 220"><path class="ln" d="M60 110L18 214M60 110l42 104M60 110v104"/><rect class="fy ln" x="38" y="30" width="44" height="58" rx="8"/><rect class="fbp ln" x="30" y="40" width="60" height="18" rx="9"/><circle class="ln" cx="60" cy="49" r="5"/><rect class="ln" x="34" y="88" width="52" height="20" rx="4"/></symbol>
+  <symbol id="s-dumpy" viewBox="0 0 140 220"><path class="ln" d="M70 96L26 214M70 96l44 118M70 96v118"/><rect class="fy ln" x="16" y="52" width="108" height="30" rx="12"/><rect class="fbp ln" x="2" y="56" width="18" height="22" rx="4"/><rect class="ln" x="44" y="82" width="52" height="14" rx="3"/></symbol>
+  <symbol id="s-staff" viewBox="0 0 40 300"><rect class="fw ln" x="6" y="4" width="28" height="292" rx="3"/><path class="fr" d="M10 20h12v10H10zM10 60h12v10H10zM10 100h12v10H10zM10 140h12v10H10zM10 180h12v10H10zM10 220h12v10H10zM10 260h12v10H10z"/></symbol>
+  <symbol id="s-peg" viewBox="0 0 30 110"><path class="fa ln" d="M6 4h18v80l-9 22-9-22z"/><path class="fr" d="M6 4h18v14H6z"/></symbol>
+  <symbol id="s-pillar" viewBox="0 0 120 140"><path class="fw ln" d="M20 40h80v96H20z"/><path class="fy ln" d="M10 28h100v14H10z"/><circle class="fr" cx="60" cy="20" r="8"/></symbol>
+  <symbol id="s-excav" viewBox="0 0 300 200"><rect class="fbp ln" x="40" y="150" width="170" height="34" rx="17"/><circle class="ln" cx="62" cy="167" r="9"/><circle class="ln" cx="188" cy="167" r="9"/><rect class="fy ln" x="50" y="100" width="150" height="50" rx="6"/><rect class="fbp ln" x="140" y="62" width="56" height="40" rx="6"/><path class="fy ln" d="M196 110l50-70 14 6-44 70z"/><path class="fy ln" d="M246 40l40 60-12 8-40-58z"/><path class="fa ln" d="M274 108l20 6-6 30h-34z"/></symbol>
+  <symbol id="s-pump" viewBox="0 0 160 110"><rect class="fy ln" x="20" y="30" width="100" height="62" rx="10"/><circle class="fbp ln" cx="70" cy="61" r="20"/><path class="ln thick" d="M120 50h36"/><path class="ln" d="M30 92v14M110 92v14"/></symbol>
+  <symbol id="s-roller" viewBox="0 0 240 150"><rect class="fy ln" x="70" y="30" width="140" height="62" rx="10"/><rect class="fbp ln" x="150" y="8" width="50" height="34" rx="6"/><circle class="fw ln thick" cx="46" cy="104" r="40"/><circle class="fbp ln" cx="186" cy="118" r="26"/><path class="ln" d="M46 64V32h30"/></symbol>
+  <symbol id="s-jack" viewBox="0 0 90 220"><path class="ln thick" d="M14 20h62"/><rect class="fy ln" x="28" y="26" width="34" height="110" rx="8"/><path class="ln thick" d="M45 136v70"/><path class="fw ln" d="M37 206h16l-8 12z"/></symbol>
+  <symbol id="s-spray" viewBox="0 0 120 200"><rect class="fy ln" x="20" y="60" width="70" height="120" rx="20"/><path class="ln" d="M55 60V30h-12M55 20v10"/><path class="ln thick" d="M90 90q24 0 24 30v30"/><path class="ln" d="M114 150l-4 30"/></symbol>
+  <symbol id="s-cone" viewBox="0 0 100 130"><rect class="fw ln" x="20" y="6" width="60" height="50" rx="6"/><path class="fy ln" d="M20 56h60l-24 44h-12z"/><rect class="fbp ln" x="8" y="100" width="84" height="24" rx="3"/></symbol>
+  <symbol id="s-toolbox" viewBox="0 0 160 120"><path class="ln thick" d="M56 34V16h48v18"/><rect class="fy ln" x="10" y="34" width="140" height="80" rx="10"/><path class="ln" d="M10 64h140M70 56h20v16H70z"/></symbol>
+  <symbol id="s-stamp" viewBox="0 0 160 70"><rect x="4" y="4" width="152" height="62" rx="8" fill="none" stroke="#3DBB7E" stroke-width="5"/></symbol>
+  <symbol id="s-stone" viewBox="0 0 120 60"><rect class="fw ln" x="3" y="3" width="114" height="54" rx="4"/><path class="lnd" d="M14 16l8 4M40 12l6 6M70 18l10-4M96 14l8 6M20 40l10 4M56 44l8-4M88 40l10 6"/></symbol>
+  <symbol id="s-trowel" viewBox="0 0 140 80"><path class="fw ln" d="M6 70L70 20h20L60 70z"/><path class="ln" d="M80 20V8h40"/><rect class="fa ln" x="110" y="2" width="28" height="12" rx="5"/></symbol>
+  <symbol id="s-hammer" viewBox="0 0 120 120"><rect class="fy ln" x="10" y="10" width="70" height="30" rx="6"/><path class="ln thick" d="M45 40v76"/></symbol>
+  <symbol id="s-nail" viewBox="0 0 30 120"><path class="ln" d="M4 6h22M15 6v100l-4 10"/></symbol>
+  <symbol id="s-sieve" viewBox="0 0 160 70"><ellipse class="ln thick" cx="80" cy="30" rx="74" ry="22"/><ellipse cx="80" cy="30" rx="66" ry="17" fill="url(#p-net)"/><path class="ln" d="M6 30v12q74 40 148 0V30"/></symbol>
+  <symbol id="s-mbox" viewBox="0 0 200 90"><path class="fw ln" d="M6 10h188l-16 74H22z"/><path class="fa" d="M20 30h160l-10 46H30z" opacity=".8"/></symbol>
+  <symbol id="s-square" viewBox="0 0 120 120"><path class="fy ln" d="M6 6h22v86h86v22H6z"/></symbol>
+  <symbol id="s-prop" viewBox="0 0 40 240"><rect class="fy ln" x="6" y="4" width="28" height="10" rx="2"/><path class="ln thick" d="M20 14v110"/><rect class="fw ln" x="12" y="120" width="16" height="104"/><rect class="fa ln" x="10" y="116" width="20" height="10" rx="3"/><rect class="fy ln" x="4" y="224" width="32" height="10" rx="2"/></symbol>
+  <symbol id="s-oil" viewBox="0 0 120 120"><rect class="fy ln" x="16" y="40" width="70" height="72" rx="8"/><path class="ln thick" d="M86 60l28-30"/><path class="ln" d="M36 40V24h30v16"/><path class="fo" d="M110 36q6 14 0 20-6-6 0-20z"/></symbol>
+  <symbol id="s-foreman" viewBox="0 0 80 200"><path class="fy ln" d="M22 74h36a8 8 0 0 1 8 8v50H14V82a8 8 0 0 1 8-8z"/><path class="lnw" d="M15 100h50M15 116h50"/><path class="ln" d="M16 84 8 128M64 84l8 44"/><path class="ln thick" d="M30 134v54M50 134v54"/><path class="ln thick" d="M22 192h14M44 192h14"/><circle class="fbp ln" cx="40" cy="54" r="15"/><path class="ln" d="M20 44a20 19 0 0 1 40 0v2H20z" style="fill:#F4EFE6"/><path class="ln" d="M14 44h52v6H14z" style="fill:#F4EFE6"/></symbol>
+  <symbol id="s-wb" viewBox="0 0 260 120"><rect class="fw ln" x="10" y="80" width="240" height="20"/><rect class="fy ln" x="190" y="20" width="60" height="50" rx="6"/><rect class="fbp ln" x="200" y="30" width="40" height="18" rx="3"/><path class="ln" d="M220 70v10"/></symbol>
+  <symbol id="s-cover" viewBox="0 0 60 50"><rect class="fw ln" x="4" y="10" width="52" height="36" rx="4" style="fill:rgba(244,239,230,.45)"/><path class="ln" d="M22 10V2M38 10V2"/></symbol>
+  <symbol id="s-chair" viewBox="0 0 100 80"><path class="ln thick" d="M6 74h18l14-60h24l14 60h18" style="stroke:#C9BBA0"/></symbol>
+  <symbol id="s-cutter" viewBox="0 0 200 80"><path class="ln thick" d="M10 20l120 30M10 60l120-30"/><path class="fy ln" d="M130 30l50-10v40l-50-10z"/></symbol>
+  <symbol id="s-block" viewBox="0 0 120 60"><rect class="fw ln" x="3" y="3" width="114" height="54" rx="3" style="fill:rgba(205,195,180,.35)"/><rect class="fbp ln" x="16" y="14" width="36" height="32" rx="3"/><rect class="fbp ln" x="68" y="14" width="36" height="32" rx="3"/></symbol>
+  <symbol id="s-bwall" viewBox="0 0 400 240" preserveAspectRatio="none">
+    <g fill="rgba(205,195,180,.35)" stroke="#F4EFE6" stroke-width="3">
+      <rect x="2" y="200" width="98" height="38"/><rect x="100" y="200" width="98" height="38"/><rect x="198" y="200" width="98" height="38"/><rect x="296" y="200" width="102" height="38"/>
+      <rect x="2" y="160" width="48" height="40"/><rect x="50" y="160" width="98" height="40"/><rect x="148" y="160" width="98" height="40"/><rect x="246" y="160" width="98" height="40"/><rect x="344" y="160" width="54" height="40"/>
+      <rect x="2" y="120" width="98" height="40"/><rect x="100" y="120" width="98" height="40"/><rect x="198" y="120" width="98" height="40"/><rect x="296" y="120" width="102" height="40"/>
+      <rect x="2" y="80" width="48" height="40"/><rect x="50" y="80" width="98" height="40"/><rect x="148" y="80" width="98" height="40"/><rect x="246" y="80" width="98" height="40"/><rect x="344" y="80" width="54" height="40"/>
+      <rect x="2" y="40" width="98" height="40"/><rect x="100" y="40" width="98" height="40"/><rect x="198" y="40" width="98" height="40"/><rect x="296" y="40" width="102" height="40"/>
+      <rect x="2" y="2" width="48" height="38"/><rect x="50" y="2" width="98" height="38"/><rect x="148" y="2" width="98" height="38"/><rect x="246" y="2" width="98" height="38"/><rect x="344" y="2" width="54" height="38"/>
+    </g></symbol>
+  <symbol id="s-farma" viewBox="0 0 120 80"><path class="fw ln" d="M10 20h100v50H10z"/><path class="ln thick" d="M10 20L2 12M110 20l8-8"/><path class="fa" d="M14 40h92v26H14z" opacity=".8"/></symbol>
+  <symbol id="s-can" viewBox="0 0 80 110"><path class="fw ln" d="M14 20h52v84H14z"/><path class="ln" d="M14 50h52M14 70h52M66 34q14 0 14 18t-14 18"/><rect class="fwater" x="16" y="56" width="48" height="46"/></symbol>
+  <symbol id="s-chaser" viewBox="0 0 200 100"><rect class="fy ln" x="50" y="30" width="130" height="40" rx="10"/><circle class="fw ln" cx="40" cy="50" r="34"/><path class="ln" d="M40 16v68M6 50h68"/></symbol>
+  <symbol id="s-mixer" viewBox="0 0 220 180"><path class="ln" d="M40 170L70 110M180 170L150 110"/><ellipse class="fy ln" cx="110" cy="80" rx="62" ry="56"/><path class="ln" d="M70 50q40 30 80 0M64 90q46 30 92 0"/><path class="fa ln" d="M150 40l40-24 10 18-38 26z"/><circle class="fbp ln" cx="40" cy="170" r="8"/><circle class="fbp ln" cx="180" cy="170" r="8"/></symbol>
+  <symbol id="s-tm" viewBox="0 0 300 150"><rect class="fbp ln" x="10" y="100" width="280" height="14"/><path class="fy ln" d="M30 100V40h50v60z"/><rect class="fbp ln" x="38" y="50" width="34" height="24" rx="3"/><path class="fa ln" d="M100 96l20-70q70-18 150 30l-10 40z"/><path class="ln" d="M140 40l40 56M190 40l30 56"/><circle class="fbp ln thick" cx="60" cy="122" r="18"/><circle class="fbp ln thick" cx="200" cy="122" r="18"/><circle class="fbp ln thick" cx="250" cy="122" r="18"/></symbol>
+  <symbol id="s-cpump" viewBox="0 0 220 150"><rect class="fy ln" x="20" y="50" width="150" height="60" rx="8"/><path class="fa ln" d="M170 60h40v40h-40z"/><path class="ln thick" d="M20 70H0"/><circle class="fbp ln" cx="50" cy="122" r="16"/><circle class="fbp ln" cx="140" cy="122" r="16"/><rect class="fbp ln" x="40" y="62" width="40" height="22" rx="3"/></symbol>
+  <symbol id="s-slump" viewBox="0 0 100 130"><path class="fw ln" d="M30 10h40l20 110H10z"/><path class="ln" d="M20 40H6M80 40h14"/></symbol>
+  <symbol id="s-cube" viewBox="0 0 120 120"><path class="fw ln" d="M20 40l40-20 40 20v50l-40 20-40-20z"/><path class="ln" d="M20 40l40 20 40-20M60 60v50"/></symbol>
+  <symbol id="s-barrow" viewBox="0 0 200 110"><path class="fy ln" d="M20 30h120l-20 46H40z"/><path class="ln thick" d="M140 30l50-10M40 76l-14 24"/><circle class="fbp ln" cx="40" cy="92" r="14"/></symbol>
+  <symbol id="s-gauge" viewBox="0 0 120 140"><circle class="fw ln" cx="60" cy="60" r="52" style="fill:rgba(244,239,230,.25)"/><path class="ln" d="M24 84a44 44 0 1 1 72 0"/><path class="ln thick" d="M60 60l26-22" style="stroke:var(--orange)"/><circle class="fy" cx="60" cy="60" r="7"/><rect class="fy ln" x="50" y="112" width="20" height="24"/></symbol>
+  <symbol id="s-teflon" viewBox="0 0 100 100"><circle class="ln" cx="50" cy="50" r="44" style="fill:#F4EFE6"/><circle class="fbp ln" cx="50" cy="50" r="18"/></symbol>
+  <symbol id="s-torch" viewBox="0 0 200 90"><rect class="fr ln" x="10" y="30" width="70" height="40" rx="12"/><path class="ln thick" d="M80 50h70"/><path class="fy" d="M150 50q30-26 46 0-16 26-46 0z"/><path class="fw" d="M156 50q16-12 26 0-10 12-26 0z" style="fill:#7FD3FF"/></symbol>
+  <symbol id="s-elbow" viewBox="0 0 120 120"><path d="M20 100V60a40 40 0 0 1 40-40h40" style="fill:none;stroke:#4A90D9;stroke-width:22"/><path d="M20 100V60a40 40 0 0 1 40-40h40" style="fill:none;stroke:#F4EFE6;stroke-width:2;stroke-dasharray:4 8"/></symbol>
+  <symbol id="s-roller2" viewBox="0 0 160 200"><rect class="fy ln" x="10" y="10" width="140" height="40" rx="18"/><path class="ln thick" d="M150 30h4v50H80v110"/><rect class="fa ln" x="66" y="150" width="28" height="44" rx="8"/></symbol>
+  <symbol id="s-brush" viewBox="0 0 80 200"><rect class="fa ln" x="28" y="100" width="24" height="96" rx="8"/><rect class="fw ln" x="20" y="80" width="40" height="24" style="fill:#B3A894"/><path class="fy ln" d="M18 80V20q22-16 44 0v60z"/></symbol>
+  <symbol id="s-can2" viewBox="0 0 140 150"><rect class="fw ln" x="16" y="30" width="108" height="112" rx="8" style="fill:#F4EFE6"/><rect x="16" y="60" width="108" height="50" style="fill:var(--orange)"/><ellipse class="ln" cx="70" cy="30" rx="54" ry="12" style="fill:#D2CCC2"/></symbol>
+  <symbol id="s-tile" viewBox="0 0 100 100"><rect x="2" y="2" width="96" height="96" style="fill:#E9E4DA;stroke:#B3A894;stroke-width:3"/></symbol>
+  <symbol id="s-mallet" viewBox="0 0 120 120"><rect x="10" y="10" width="70" height="34" rx="10" style="fill:#3A3A3A;stroke:#F4EFE6;stroke-width:3"/><path class="ln thick" d="M45 44v70"/></symbol>
+  <symbol id="s-squeegee" viewBox="0 0 160 120"><rect x="10" y="80" width="140" height="20" rx="4" style="fill:#3A3A3A;stroke:#F4EFE6;stroke-width:3"/><path class="ln thick" d="M80 80V10"/></symbol>
+  <symbol id="s-gran" viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="1" y="1" width="98" height="98" style="fill:#5A554D;stroke:#D2CCC2;stroke-width:2"/><g fill="#8C8896"><circle cx="20" cy="22" r="3"/><circle cx="60" cy="14" r="2"/><circle cx="82" cy="40" r="3"/><circle cx="36" cy="56" r="2"/><circle cx="66" cy="70" r="3"/><circle cx="18" cy="82" r="2"/><circle cx="88" cy="86" r="2"/><circle cx="48" cy="34" r="2"/></g></symbol>
+  <symbol id="s-marb" viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="1" y="1" width="98" height="98" style="fill:#EDEAE4;stroke:#B3A894;stroke-width:2"/><path d="M4 30q30-14 50 6t42-4M10 80q24-20 44-6t40-10" style="fill:none;stroke:#C4BEB2;stroke-width:2"/></symbol>
+
+  <symbol id="s-rail" viewBox="0 0 300 160"><path class="ln thick" d="M6 10H294M6 150H294M10 10V156M290 10V156M150 10V156"/><path class="ln" d="M38 10V150M66 10V150M94 10V150M122 10V150M178 10V150M206 10V150M234 10V150M262 10V150"/><path class="ln" d="M10 40H290"/></symbol>
+  <symbol id="s-grill" viewBox="0 0 160 200"><rect class="ln thick" x="6" y="6" width="148" height="188" style="fill:none"/><path class="ln" d="M38 6V194M66 6V194M94 6V194M122 6V194M6 70H154M6 132H154"/></symbol>
+  <symbol id="s-gun" viewBox="0 0 200 110"><rect class="fa ln" x="40" y="14" width="120" height="36" rx="10"/><path class="ln thick" d="M160 32h34"/><path class="fy ln" d="M70 50l-12 52h26l10-52z"/><path class="ln" d="M100 50v26l-12 4"/><path class="ln" d="M40 32H8"/></symbol>
+  <symbol id="s-vdm" viewBox="0 0 170 130"><rect class="fa ln" x="10" y="20" width="150" height="86" rx="10"/><circle class="fbp ln" cx="50" cy="63" r="22"/><path class="ln" d="M38 63h24M50 51v24"/><rect class="fy ln" x="92" y="40" width="50" height="14" rx="3"/><rect class="fbp ln" x="92" y="66" width="50" height="22" rx="3"/><circle class="fbp ln" cx="36" cy="116" r="10"/><circle class="fbp ln" cx="134" cy="116" r="10"/></symbol>
+  <symbol id="s-ptrowel" viewBox="0 0 200 170"><ellipse class="fw ln" cx="70" cy="140" rx="64" ry="20"/><path class="lny" d="M20 140h100M70 124v32"/><rect class="fa ln" x="54" y="100" width="32" height="30" rx="5"/><path class="ln thick" d="M80 106L176 20"/><path class="ln thick" d="M160 12l30 24"/></symbol>
+  <symbol id="s-glass" viewBox="0 0 120 160"><rect x="4" y="4" width="112" height="152" style="fill:rgba(62,143,199,.45);stroke:var(--bp-line);stroke-width:3"/><path d="M20 60L60 20M24 96L90 30M60 140L104 96" style="stroke:#fff;stroke-width:3;opacity:.5;fill:none"/></symbol>
+</svg>
+<div class="app">
+  <aside class="side" id="side" aria-label="Chapters">
+    <div class="brand"><p><span>Dhinwa Construction &amp; Engineering</span>Technology Manual</p>
+      <button class="side-close" id="sideClose" type="button" aria-label="Close chapters">&times;</button></div>
+    <div class="find"><label for="q">Find a chapter</label><input id="q" type="search" placeholder="e.g. tiling, slump, door" autocomplete="off"></div>
+    <div class="sg"><h3>Site and structure</h3><ol class="sl"><li><a class="sl-a" href="chapters/safety-chapter-1.html" data-q="safety ppe helmet harness housekeeping fire first aid scaffold ladder"><span class="sl-no">1</span><span>Safety</span></a></li><li><a class="sl-a" href="chapters/ground-development-chapter-2.html" data-q="ground development excavation survey level compaction soil termite filling"><span class="sl-no">2</span><span>Ground Development</span></a></li><li><a class="sl-a" href="chapters/masonry-chapter-3.html" data-q="masonry brick mortar wall bond curing"><span class="sl-no">3</span><span>Masonry</span></a></li><li><a class="sl-a" href="chapters/formwork-chapter-4.html" data-q="formwork shuttering props plywood oil"><span class="sl-no">4</span><span>Formwork</span></a></li><li><a class="sl-a" href="chapters/reinforcement-chapter-5.html" data-q="reinforcement steel bars cover blocks lap bending schedule chairs"><span class="sl-no">5</span><span>Reinforcement</span></a></li><li><a class="sl-a" href="chapters/concreting-chapter-6.html" data-q="concreting concrete slump cube pump vibrator curing pcc footing column beam slab"><span class="sl-no">6</span><span>Concreting</span></a></li></ol></div><div class="sg"><h3>Masonry and preparation</h3><ol class="sl"><li><a class="sl-a" href="chapters/block-work-chapter-7.html" data-q="block work block aac wall mortar"><span class="sl-no">7</span><span>Block Work</span></a></li><li><a class="sl-a" href="chapters/hacking-chapter-8.html" data-q="hacking chasing hacking plaster key"><span class="sl-no">8</span><span>Hacking</span></a></li><li><a class="sl-a" href="chapters/expanded-metal-chapter-9.html" data-q="expanded metal fixing mesh expanded metal joint crack"><span class="sl-no">9</span><span>Expanded Metal Fixing</span></a></li><li><a class="sl-a" href="chapters/corner-beads-chapter-10.html" data-q="corner beads corner beads angle plaster edge"><span class="sl-no">10</span><span>Corner Beads</span></a></li></ol></div><div class="sg"><h3>Services</h3><ol class="sl"><li><a class="sl-a" href="chapters/plumbing-chapter-11.html" data-q="plumbing works pipes drainage cpvc water supply pressure test sanitary"><span class="sl-no">11</span><span>Plumbing Works</span></a></li><li><a class="sl-a" href="chapters/electrical-chapter-12.html" data-q="electrical works conduit wiring db earthing switch"><span class="sl-no">12</span><span>Electrical Works</span></a></li></ol></div><div class="sg"><h3>Finishes</h3><ol class="sl"><li><a class="sl-a" href="chapters/plastering-chapter-13.html" data-q="plastering plaster lime rendering punning cement"><span class="sl-no">13</span><span>Plastering</span></a></li><li><a class="sl-a" href="chapters/gypsum-chapter-14.html" data-q="gypsum works gypsum ceiling partition board"><span class="sl-no">14</span><span>Gypsum Works</span></a></li><li><a class="sl-a" href="chapters/waterproofing-chapter-15.html" data-q="waterproofing waterproof terrace toilet membrane ponding"><span class="sl-no">15</span><span>Waterproofing</span></a></li><li><a class="sl-a" href="chapters/painting-chapter-16.html" data-q="painting paint primer putty emulsion enamel"><span class="sl-no">16</span><span>Painting</span></a></li><li><a class="sl-a" href="chapters/tiling-chapter-17.html" data-q="tiling tile tiles floor wall grout spacer"><span class="sl-no">17</span><span>Tiling</span></a></li><li><a class="sl-a" href="chapters/granite-marble-chapter-18.html" data-q="granite and marble works granite marble stone skirting coping"><span class="sl-no">18</span><span>Granite and Marble Works</span></a></li></ol></div><div class="sg"><h3>Fixtures and special works</h3><ol class="sl"><li><a class="sl-a" href="chapters/metal-works-chapter-19.html" data-q="metal works metal grill railing weld primer rosette"><span class="sl-no">19</span><span>Metal Works</span></a></li><li><a class="sl-a" href="chapters/wood-work-chapter-20.html" data-q="wood work door frame architrave shutter worth glue hinge"><span class="sl-no">20</span><span>Wood Work</span></a></li><li><a class="sl-a" href="chapters/vdf-flooring-chapter-21.html" data-q="vacuum dewatered flooring (vdf) vdf vacuum dewatering floor power trowel slump cube"><span class="sl-no">21</span><span>Vacuum Dewatered Flooring (VDF)</span></a></li><li><a class="sl-a" href="chapters/structural-glazing-acp-chapter-22.html" data-q="structural glazing and acp glass glazing acp sealant mullion transom aluminium"><span class="sl-no">22</span><span>Structural Glazing and ACP</span></a></li></ol></div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+  <div class="col">
+    <div class="mbar"><button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="side">Chapters</button><span class="mbar-t">Dhinwa Site Lessons</span></div>
+    <main>
+      <section class="sheet" aria-labelledby="t1">
+        <div class="hero-tx">
+          <p class="eyebrow">Construction Engineering Technology Manual</p>
+          <h1 id="t1">Dhinwa <em>Site</em> Lessons</h1>
+          <p class="lede">Every activity in the manual as an animated lesson: watch each point drawn on a blueprint, then read the manual text word for word.</p>
+          <div class="cta"><a class="pill pill-y" id="startCh" href="#grp-0">Browse chapters</a><a class="pill pill-o" href="#how">How a lesson works</a></div>
+<div class="tblock" aria-hidden="true"><span>Sheet</span><span><b>Index</b></span><span>Chapters</span><span>22</span><span>Lessons</span><span>122</span><span>Scenes</span><span>835</span></div>
+        </div>
+        <div class="hero-art">
+          <svg id="hero" viewBox="0 0 640 400" role="img" aria-label="Blueprint drawing of a building going up: foundation, columns, slabs, block walls, glazing and a crane">
+            <g data-h="fade"><path d="M150 360L330 40L330 300z" fill="#FBA519"/><path d="M330 40L520 360L330 300z" fill="#CB8629"/><path d="M150 360L330 300L520 360z" fill="#F7A70C"/></g>
+            <path class="lnd" d="M10 360H630" data-h="draw"/>
+            <rect x="60" y="360" width="440" height="30" fill="url(#p-soil)" data-h="fade"/>
+            <rect class="fa ln" x="80" y="344" width="400" height="16" data-h="grow-x"/>
+            <g data-h="grow-y"><rect class="fw ln" x="96" y="140" width="18" height="204"/><rect class="fw ln" x="271" y="140" width="18" height="204"/><rect class="fw ln" x="446" y="140" width="18" height="204"/></g>
+            <rect class="fw ln" x="84" y="236" width="392" height="14" data-h="grow-x"/>
+            <rect class="fw ln" x="84" y="126" width="392" height="14" data-h="grow-x"/>
+            <g data-h="up">
+              <use href="#s-bwall" x="114" y="250" width="157" height="94"/>
+            </g>
+            <g data-h="fade"><rect x="296" y="258" width="142" height="80" style="fill:rgba(62,143,199,.45);stroke:var(--bp-line);stroke-width:2"/><path d="M367 258V338M296 298H438" style="stroke:#D3CDC3;stroke-width:5;fill:none"/></g>
+            <g data-h="fade"><rect x="121" y="150" width="142" height="80" style="fill:rgba(62,143,199,.45);stroke:var(--bp-line);stroke-width:2"/><rect x="296" y="150" width="142" height="80" style="fill:rgba(62,143,199,.45);stroke:var(--bp-line);stroke-width:2"/><path d="M192 150V230M367 150V230" style="stroke:#D3CDC3;stroke-width:5;fill:none"/></g>
+            <g data-h="draw-g"><path class="ln thick" d="M560 360V40M520 40H630M560 80L520 40M560 70L600 40"/><path class="ln" d="M610 40V140"/><rect class="fa ln" x="540" y="330" width="40" height="30"/></g>
+            <g data-h="swing"><path class="ln" d="M610 140V160"/><rect class="fy ln" x="592" y="160" width="36" height="16" rx="3"/></g>
+            <use href="#s-worker" x="490" y="270" width="36" height="90" data-h="up"/>
+            <path class="dim" d="M70 126V344" data-h="draw"/><text x="40" y="240" style="fill:#1A1612;font:700 13px var(--display)" data-h="fade">G+1</text>
+          </svg>
+        </div>
+      </section>
+
+      <ol class="how" id="how" aria-label="How a lesson works">
+        <li><span class="how-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4l13 8-13 8z" fill="#F9C306"/></svg></span><span><b>Watch the scenes</b><span>One animated scene for every point in the manual. Jump to any point from the bar or the sidebar.</span></span></li>
+        <li><span class="how-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h10l4 4v12H5z M8 11h8M8 15h8M8 7h5" fill="none" stroke="#F4EFE6" stroke-width="2"/></svg></span><span><b>Read the manual text</b><span>Word for word below the player. The point playing now is highlighted.</span></span></li>
+        <li><span class="how-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" fill="none" stroke="#E6EFF7" stroke-width="2.4" stroke-linecap="round"/></svg></span><span><b>Phone or desktop</b><span>Play full screen, change the speed, or turn on narration. On phones the lesson list opens from the menu.</span></span></li>
+      </ol>
+
+      <div class="chapters" id="chapters">
+        <section class="grp" id="grp-0"><div class="grp-h"><h2>Site and structure</h2><span>Chapters 1 to 6</span></div><ol class="cards"><li class="cw" data-q="safety ppe helmet harness housekeeping fire first aid scaffold ladder"><a class="ch" href="chapters/safety-chapter-1.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-helmet" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">1.0 Activity</span><span class="ch-nm">Safety</span><span class="ch-mt">13 lessons · 46 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li><li class="cw" data-q="ground development excavation survey level compaction soil termite filling"><a class="ch" href="chapters/ground-development-chapter-2.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-excav" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">2.0 Activity</span><span class="ch-nm">Ground Development</span><span class="ch-mt">6 lessons · 56 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li><li class="cw" data-q="masonry brick mortar wall bond curing"><a class="ch" href="chapters/masonry-chapter-3.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-trowel" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">3.0 Activity</span><span class="ch-nm">Masonry</span><span class="ch-mt">5 lessons · 28 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li><li class="cw" data-q="formwork shuttering props plywood oil"><a class="ch" href="chapters/formwork-chapter-4.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-prop" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">4.0 Activity</span><span class="ch-nm">Formwork</span><span class="ch-mt">5 lessons · 33 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li><li class="cw" data-q="reinforcement steel bars cover blocks lap bending schedule chairs"><a class="ch" href="chapters/reinforcement-chapter-5.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-chair" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">5.0 Activity</span><span class="ch-nm">Reinforcement</span><span class="ch-mt">6 lessons · 52 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li><li class="cw" data-q="concreting concrete slump cube pump vibrator curing pcc footing column beam slab"><a class="ch" href="chapters/concreting-chapter-6.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-tm" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">6.0 Activity</span><span class="ch-nm">Concreting</span><span class="ch-mt">11 lessons · 84 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li></ol></section><section class="grp" id="grp-6"><div class="grp-h"><h2>Masonry and preparation</h2><span>Chapters 7 to 10</span></div><ol class="cards"><li class="cw" data-q="block work block aac wall mortar"><a class="ch" href="chapters/block-work-chapter-7.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-block" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">7.0 Activity</span><span class="ch-nm">Block Work</span><span class="ch-mt">6 lessons · 52 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li><li class="cw" data-q="hacking chasing hacking plaster key"><a class="ch" href="chapters/hacking-chapter-8.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-chaser" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">8.0 Activity</span><span class="ch-nm">Hacking</span><span class="ch-mt">3 lessons · 11 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li><li class="cw" data-q="expanded metal fixing mesh expanded metal joint crack"><a class="ch" href="chapters/expanded-metal-chapter-9.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-net" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">9.0 Activity</span><span class="ch-nm">Expanded Metal Fixing</span><span class="ch-mt">3 lessons · 12 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li><li class="cw" data-q="corner beads corner beads angle plaster edge"><a class="ch" href="chapters/corner-beads-chapter-10.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-square" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">10.0 Activity</span><span class="ch-nm">Corner Beads</span><span class="ch-mt">3 lessons · 11 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li></ol></section><section class="grp" id="grp-10"><div class="grp-h"><h2>Services</h2><span>Chapters 11 to 12</span></div><ol class="cards"><li class="cw" data-q="plumbing works pipes drainage cpvc water supply pressure test sanitary"><a class="ch" href="chapters/plumbing-chapter-11.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-elbow" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">11.0 Activity</span><span class="ch-nm">Plumbing Works</span><span class="ch-mt">8 lessons · 75 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li><li class="cw" data-q="electrical works conduit wiring db earthing switch"><a class="ch" href="chapters/electrical-chapter-12.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-bulb" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">12.0 Activity</span><span class="ch-nm">Electrical Works</span><span class="ch-mt">7 lessons · 47 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li></ol></section><section class="grp" id="grp-12"><div class="grp-h"><h2>Finishes</h2><span>Chapters 13 to 18</span></div><ol class="cards"><li class="cw" data-q="plastering plaster lime rendering punning cement"><a class="ch" href="chapters/plastering-chapter-13.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-trowel" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">13.0 Activity</span><span class="ch-nm">Plastering</span><span class="ch-mt">5 lessons · 31 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li><li class="cw" data-q="gypsum works gypsum ceiling partition board"><a class="ch" href="chapters/gypsum-chapter-14.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-hframe" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">14.0 Activity</span><span class="ch-nm">Gypsum Works</span><span class="ch-mt">4 lessons · 31 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li><li class="cw" data-q="waterproofing waterproof terrace toilet membrane ponding"><a class="ch" href="chapters/waterproofing-chapter-15.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-spray" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">15.0 Activity</span><span class="ch-nm">Waterproofing</span><span class="ch-mt">5 lessons · 34 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li><li class="cw" data-q="painting paint primer putty emulsion enamel"><a class="ch" href="chapters/painting-chapter-16.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-roller2" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">16.0 Activity</span><span class="ch-nm">Painting</span><span class="ch-mt">4 lessons · 23 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li><li class="cw" data-q="tiling tile tiles floor wall grout spacer"><a class="ch" href="chapters/tiling-chapter-17.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-tile" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">17.0 Activity</span><span class="ch-nm">Tiling</span><span class="ch-mt">6 lessons · 39 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li><li class="cw" data-q="granite and marble works granite marble stone skirting coping"><a class="ch" href="chapters/granite-marble-chapter-18.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-gran" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">18.0 Activity</span><span class="ch-nm">Granite and Marble Works</span><span class="ch-mt">5 lessons · 47 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li></ol></section><section class="grp" id="grp-18"><div class="grp-h"><h2>Fixtures and special works</h2><span>Chapters 19 to 22</span></div><ol class="cards"><li class="cw" data-q="metal works metal grill railing weld primer rosette"><a class="ch" href="chapters/metal-works-chapter-19.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-rail" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">19.0 Activity</span><span class="ch-nm">Metal Works</span><span class="ch-mt">2 lessons · 18 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li><li class="cw" data-q="wood work door frame architrave shutter worth glue hinge"><a class="ch" href="chapters/wood-work-chapter-20.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-door" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">20.0 Activity</span><span class="ch-nm">Wood Work</span><span class="ch-mt">4 lessons · 24 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li><li class="cw" data-q="vacuum dewatered flooring (vdf) vdf vacuum dewatering floor power trowel slump cube"><a class="ch" href="chapters/vdf-flooring-chapter-21.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-ptrowel" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">21.0 Activity</span><span class="ch-nm">Vacuum Dewatered Flooring (VDF)</span><span class="ch-mt">5 lessons · 35 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li><li class="cw" data-q="structural glazing and acp glass glazing acp sealant mullion transom aluminium"><a class="ch" href="chapters/structural-glazing-acp-chapter-22.html"><span class="ch-ic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#s-glass" x="18" y="18" width="84" height="84"/></svg></span><span class="ch-tx"><span class="ch-no">22.0 Activity</span><span class="ch-nm">Structural Glazing and ACP</span><span class="ch-mt">6 lessons · 46 scenes</span></span><span class="ch-go" aria-hidden="true">→</span></a></li></ol></section>
+        <p class="empty" id="empty" hidden>No chapter matches that search. Try a shorter word, such as “tile” or “concrete”.</p>
+      </div>
+      <footer>Source: Dhinwa Construction Engineering Technology Manual, chapters 1 to 22.</footer>
+    </main>
+  </div>
+</div>
+<script>
+/* Index page: search filter, mobile menu and the hero drawing. Reads the markup above; it never writes HTML. */
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const q=$('#q'),cards=$$('.cw'),links=$$('.sl-a'),groups=$$('.grp'),empty=$('#empty');
+function filter(){
+  const v=q.value.trim().toLowerCase();let shown=0;
+  cards.forEach(c=>{const ok=!v||c.dataset.q.includes(v)||c.textContent.toLowerCase().includes(v);c.hidden=!ok;if(ok)shown++;});
+  links.forEach(a=>{a.parentElement.hidden=!!v&&!a.dataset.q.includes(v);});
+  groups.forEach(g=>{g.hidden=!$$('.cw',g).some(c=>!c.hidden);});
+  empty.hidden=shown>0;
+}
+q.addEventListener('input',filter);
+const side=$('#side'),scrim=$('#scrim'),menuBtn=$('#menuBtn');
+function closeMenu(){side.classList.remove('show');scrim.classList.remove('show');menuBtn.setAttribute('aria-expanded','false');}
+menuBtn.onclick=()=>{const s=side.classList.toggle('show');scrim.classList.toggle('show',s);menuBtn.setAttribute('aria-expanded',s);if(s)q.focus();};
+scrim.onclick=closeMenu;$('#sideClose').onclick=closeMenu;
+links.forEach(a=>a.addEventListener('click',closeMenu));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();if(e.key==='/'&&document.activeElement!==q){e.preventDefault();q.focus();}});
+/* hero: the building draws itself once; with reduced motion or no GSAP it simply stays drawn */
+if(window.gsap&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+  const tl=gsap.timeline({delay:.2});let t=0;
+  $$('#hero [data-h]').forEach(el=>{
+    const a=el.dataset.h;
+    if(a==='draw'||a==='draw-g'){const ps=a==='draw'?[el]:$$('path',el);ps.forEach(p=>{let L=600;try{L=Math.ceil(p.getTotalLength());}catch(e){}tl.fromTo(p,{strokeDasharray:L,strokeDashoffset:L},{strokeDashoffset:0,duration:.8,ease:'power2.inOut'},t);});if(a==='draw-g')tl.from($$('rect',el),{opacity:0,duration:.4},t+.4);}
+    else if(a==='grow-x')tl.from(el,{scaleX:0,transformOrigin:'0% 50%',duration:.6,ease:'power2.out'},t);
+    else if(a==='grow-y')tl.from(el,{scaleY:0,transformOrigin:'50% 100%',duration:.7,ease:'power2.out'},t);
+    else if(a==='up')tl.from(el,{opacity:0,y:30,duration:.6,ease:'power3.out'},t);
+    else if(a==='swing'){tl.from(el,{opacity:0,duration:.3},t);gsap.to(el,{rotation:4,transformOrigin:'50% 0%',duration:1.6,yoyo:true,repeat:-1,ease:'sine.inOut',delay:t+.6});}
+    else tl.from(el,{opacity:0,duration:.5},t);
+    t+=.32;
+  });
+}
+</script>
+
+</body>
+</html>

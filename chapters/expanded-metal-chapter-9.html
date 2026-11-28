@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chapter 9: Expanded Metal Fixing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,500;9..40,700;9..40,800&family=Work+Sans:wght@400;500;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="../assets/gsap.min.js"></script>
+<style>
+:root{
+  --bg:#F7F6F2; --panel:#FFFFFF; --panel-2:#F4F2EC; --ink:#1A1612; --muted:#5E574D; --line:#E6E1D6;
+  --side:#1A1612; --side-2:#2A241D; --side-ink:#FFF8E6; --side-muted:#B5AC9C; --side-line:#3A3229;
+  --bp:#1F1A15; --bp-2:#171310; --bp-line:#F4EFE6; --bp-dim:#A89C88; --bp-grid:rgba(244,239,230,.07);
+  --yellow:#F9C306; --orange:#E89519; --amber:#F7A70C; --red:#E8573F; --green:#3DBB7E; --water:#3E8FC7;
+  --on-yellow:#1A1612;
+  --display:"DM Sans","Work Sans","Open Sans",sans-serif;
+  --sans:"Work Sans","DM Sans","Open Sans",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#120F0C; --panel:#1C1814; --panel-2:#241F1A; --ink:#F4EFE6; --muted:#B0A696; --line:#332C24;
+  --side:#0D0B09; --side-2:#1F1A15; --side-line:#2C251E; color-scheme:dark;}}
+:root[data-theme="dark"]{--bg:#120F0C; --panel:#1C1814; --panel-2:#241F1A; --ink:#F4EFE6; --muted:#B0A696; --line:#332C24;
+  --side:#0D0B09; --side-2:#1F1A15; --side-line:#2C251E; color-scheme:dark;}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16.5px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+button{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--display);margin:0}
+
+/* ---------- layout ---------- */
+.app{display:grid;grid-template-columns:clamp(280px,25vw,340px) minmax(0,1fr);min-height:100vh;min-height:100dvh}
+.side{position:sticky;top:0;height:100vh;height:100dvh;overflow-y:auto;background:var(--side);color:var(--side-ink);padding:22px 0 40px}
+.side-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:0 22px 18px;border-bottom:1px solid var(--side-line)}
+.side-top h2{font:700 15px/1.35 var(--display);color:var(--side-ink)}
+.side-top h2 span{display:block;color:var(--yellow);font-size:13px;margin-bottom:4px}
+.side-close{display:none;flex:none;width:36px;height:36px;border:1px solid var(--side-line);background:none;color:var(--side-ink);font-size:24px;line-height:1;cursor:pointer}
+.ls{border-bottom:1px solid var(--side-line)}
+.ls-btn{width:100%;display:grid;grid-template-columns:36px 1fr;gap:10px;align-items:start;padding:16px 22px;border:0;background:none;text-align:left;cursor:pointer}
+.ls-btn:hover{background:var(--side-2)}
+.ls-no{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font:800 14px var(--display);background:var(--side-2);color:var(--side-muted)}
+.ls-t{font:700 15px/1.3 var(--display)}
+.ls-t small{display:block;margin-top:3px;font:500 13px/1.35 var(--sans);color:var(--side-muted)}
+.ls.on .ls-no{background:var(--yellow);color:var(--on-yellow)}
+.ls.done .ls-no{background:var(--green);color:#fff}
+.pts{list-style:none;margin:0;padding:0 14px 14px 68px;display:none}
+.ls.on .pts{display:block}
+.pt{width:100%;border:0;background:none;text-align:left;cursor:pointer;padding:7px 10px;border-radius:8px;font:400 13.5px/1.4 var(--sans);color:var(--side-muted);display:grid;grid-template-columns:18px 1fr;gap:6px}
+.pt::before{content:"";width:8px;height:8px;margin-top:6px;border-radius:50%;border:2px solid var(--side-muted)}
+.pt:hover{color:var(--side-ink)}
+.pt.seen{color:var(--side-ink)}
+.pt.seen::before{background:var(--side-muted)}
+.pt.now{color:var(--side-ink);background:var(--side-2);font-weight:600}
+.pt.now::before{border-color:var(--yellow);background:var(--yellow)}
+.scrim{display:none}
+.col{min-width:0;display:flex;flex-direction:column}
+.mbar{display:none}
+main{width:100%;max-width:1280px;margin:0 auto;padding:clamp(20px,3vw,36px) clamp(16px,3vw,44px) 56px}
+
+/* ---------- lesson header ---------- */
+.heads hgroup{margin-bottom:clamp(14px,2vw,22px)}
+.heads hgroup[hidden]{display:none}
+.l-code{margin:0 0 6px;font:700 15px/1 var(--display);color:var(--orange)}
+.heads h1{font-weight:800;font-size:clamp(26px,3.2vw,42px);line-height:1.08;letter-spacing:-.025em}
+.l-sub{margin:8px 0 0;font:500 clamp(15px,1.3vw,17px)/1.4 var(--sans);color:var(--muted)}
+
+/* ---------- player ---------- */
+.player{width:100%;max-width:max(300px,calc((100vh - 70px - 40px) * 16 / 9));max-width:max(300px,calc((100dvh - 70px - 40px) * 16 / 9))}
+.stage{position:relative;background:var(--bp);border-radius:16px;overflow:hidden;scroll-margin-top:12px;box-shadow:0 30px 60px -36px rgba(20,14,8,.6)}
+.lsvg{display:block;width:100%;height:auto;aspect-ratio:16/9}
+.lsvg[hidden]{display:none}
+.tblock{position:absolute;right:14px;bottom:76px;display:grid;grid-template-columns:auto auto;border:1.5px solid var(--bp-dim);font:500 11.5px/1.2 var(--display);color:var(--bp-line);background:rgba(26,22,18,.85)}
+.tblock span{padding:5px 9px;border-right:1.5px solid var(--bp-dim);border-bottom:1.5px solid var(--bp-dim)}
+.tblock span:nth-child(2n){border-right:0}
+.tblock span:nth-last-child(-n+2){border-bottom:0}
+.tblock b{font-weight:700;color:var(--yellow)}
+.start{position:absolute;inset:0 0 62px;display:grid;place-items:center;border:0;background:rgba(26,22,18,.35);cursor:pointer}
+.start[hidden]{display:none}
+.start span{display:flex;align-items:center;gap:10px;padding:16px 26px;border-radius:999px;background:var(--yellow);color:var(--on-yellow);font:700 16px/1 var(--display);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.start svg{width:18px;height:18px}
+.endcard{position:absolute;inset:0 0 62px;display:grid;place-items:center;background:rgba(26,22,18,.9)}
+.endcard[hidden]{display:none}
+.endbox{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;color:var(--bp-line);padding:20px}
+.endbox .k{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#fff;font:800 28px var(--display)}
+.endbox strong{font:700 22px/1.2 var(--display)}
+.pill{border:0;border-radius:999px;padding:12px 20px;font:700 15px/1.3 var(--display);cursor:pointer;max-width:min(440px,80vw)}
+.pill-y{background:var(--yellow);color:var(--on-yellow)}
+.pill-o{background:transparent;color:var(--bp-line);box-shadow:inset 0 0 0 2px var(--bp-dim)}
+.pill[hidden]{display:none}
+.controls{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bp-2);color:var(--bp-line)}
+.cg{display:flex;align-items:center;gap:6px;flex:none}
+.ib{width:40px;height:40px;flex:none;display:grid;place-items:center;border:0;border-radius:50%;background:rgba(244,239,230,.1);color:var(--bp-line);cursor:pointer}
+.ib svg{width:17px;height:17px}
+.ib.main{background:var(--yellow);color:var(--on-yellow)}
+.ib:disabled{opacity:.3;cursor:default}
+.ib .i-pause{display:none}.ib.playing .i-play{display:none}.ib.playing .i-pause{display:block}
+.segs{flex:1;min-width:60px;display:flex;gap:4px;align-items:center}
+.seg{flex:1;height:8px;padding:0;border:0;border-radius:4px;background:rgba(244,239,230,.18);cursor:pointer;position:relative;overflow:hidden}
+.seg[hidden]{display:none}
+.seg i{position:absolute;inset:0;background:var(--yellow);transform:scaleX(0);transform-origin:0 50%}
+.seg.done i{transform:none;background:var(--amber)}
+.tm{font:600 13px var(--display);white-space:nowrap;color:var(--bp-dim)}
+.sp{background:rgba(244,239,230,.1);color:var(--bp-line);border:0;border-radius:8px;padding:8px 6px;font:600 13px var(--display)}
+.sp option{color:#1A1612}
+.sp.nl{display:inline-block!important}
+.tg{border:0;border-radius:8px;background:rgba(244,239,230,.1);color:var(--bp-line);padding:9px 11px;font:700 12.5px var(--display);cursor:pointer}
+.tg[aria-pressed="true"]{background:var(--yellow);color:var(--on-yellow)}
+.stage:fullscreen,.stage.fs{display:flex;flex-direction:column;justify-content:center;border-radius:0}
+.stage:-webkit-full-screen{display:flex;flex-direction:column;justify-content:center;border-radius:0}
+.stage:fullscreen .lsvg,.stage.fs .lsvg{max-height:calc(100dvh - 62px);width:auto;max-width:100%;margin:0 auto}
+.stage:-webkit-full-screen .lsvg{max-height:calc(100vh - 62px);width:auto;max-width:100%;margin:0 auto}
+.stage.fs{position:fixed;inset:0;z-index:60}
+.rot{display:none;margin:10px 0 0;font-size:13.5px;color:var(--muted)}
+
+/* ---------- manual text ---------- */
+.manual{margin-top:22px;background:var(--panel);border-radius:16px;padding:clamp(18px,2.4vw,28px)}
+.manual h2{font:700 17px/1.3 var(--display);margin:0 0 4px}
+.manual-note{margin:0 0 16px;font-size:14px;color:var(--muted)}
+.mtext{list-style:none;margin:0;padding:0;display:grid;gap:4px;counter-reset:pt}
+.mtext[hidden]{display:none}
+.mtext>li{counter-increment:pt;display:grid;grid-template-columns:34px 1fr;gap:12px;padding:12px 14px;border-radius:12px;cursor:pointer;color:var(--muted);transition:background .25s,color .25s}
+.mtext>li::before{content:counter(pt);width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font:700 13px var(--display);background:var(--panel-2);color:var(--muted)}
+.mtext>li:hover{background:var(--panel-2)}
+.mtext>li.now{background:var(--panel-2);color:var(--ink);box-shadow:inset 4px 0 0 var(--yellow)}
+.mtext>li.now::before{background:var(--yellow);color:var(--on-yellow)}
+.mtext b{color:var(--ink);font-weight:600}
+.mtext ul{margin:6px 0 0;padding-left:18px}
+.mtext .mh{grid-column:1/-1;margin:14px 0 2px;padding:0 14px;font:700 14px/1.3 var(--display);color:var(--orange);counter-increment:none;cursor:default}
+.mtext .mh::before{display:none}
+.mtext .mh:hover{background:none}
+
+/* ---------- blueprint drawing ---------- */
+.bg{fill:var(--bp)}
+.ln{fill:none;stroke:var(--bp-line);stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round}
+.thick{stroke-width:6}
+.lnd{fill:none;stroke:var(--bp-dim);stroke-width:2.5;stroke-linecap:round}
+.lno{fill:none;stroke:var(--orange);stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.lny{fill:none;stroke:var(--yellow);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.lnw{fill:none;stroke:var(--bp-line);stroke-width:3;stroke-linecap:round}
+.fy{fill:var(--yellow)}.fo{fill:var(--orange)}.fa{fill:var(--amber)}.fr{fill:var(--red)}.fg{fill:var(--green)}
+.fw{fill:rgba(244,239,230,.14)}.fbp{fill:var(--bp)}.fbp2{fill:var(--bp-2)}.fwater{fill:var(--water);opacity:.55}
+.nor{fill:none;stroke:var(--red);stroke-width:9;stroke-linecap:round}
+.ckw{fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.ckd{fill:none;stroke:var(--on-yellow);stroke-width:7;stroke-linecap:round}
+.link{fill:none;stroke:var(--orange);stroke-width:4;stroke-linecap:round;stroke-dasharray:3 10}
+.rope{fill:none;stroke:var(--orange);stroke-width:5;stroke-linecap:round}
+.dim{fill:none;stroke:var(--yellow);stroke-width:2.5}
+.zone{fill:rgba(244,239,230,.05);stroke:var(--bp-dim);stroke-width:2.5;stroke-dasharray:10 8}
+.crack{fill:none;stroke:var(--red);stroke-width:4;stroke-linejoin:round}
+.hl{fill:none;stroke:var(--yellow);stroke-width:9;stroke-linecap:round;opacity:.9}
+.tape{fill:none;stroke:var(--yellow);stroke-width:12;stroke-dasharray:18 14}
+.wave{fill:none;stroke:var(--yellow);stroke-width:5;stroke-linecap:round}
+.dark{fill:#0D0B09;opacity:.72}
+.glow{fill:var(--yellow);opacity:.3}
+.sh-bar{fill:var(--yellow)}
+.tsh{fill:var(--bp-line);font:700 27px var(--display)}
+.t{fill:var(--bp-line);font:500 19px var(--sans)}
+.tb{fill:var(--bp-line);font:700 22px var(--display)}
+.ty{fill:var(--yellow);font:700 22px var(--display)}
+.td{fill:var(--bp-dim);font:500 16px var(--sans)}
+.tbig{fill:var(--bp-line);font:800 44px var(--display)}
+.tzero{fill:var(--yellow);font:800 230px var(--display)}
+.tq{fill:var(--yellow);font:800 120px var(--display)}
+.chip{fill:var(--bp-2);stroke:var(--bp-dim);stroke-width:2}
+.chip-y{fill:var(--yellow)}
+.tchip{fill:var(--bp-line);font:700 18px var(--display)}
+.tchip-d{fill:var(--on-yellow);font:700 18px var(--display)}
+.card{fill:var(--bp-2);stroke:var(--bp-dim);stroke-width:2}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;z-index:40;left:0;top:0;width:min(360px,88vw);transform:translateX(-102%);transition:transform .28s cubic-bezier(.2,.8,.2,1);box-shadow:8px 0 30px rgba(0,0,0,.35)}
+  .side.show{transform:none}
+  .side-close{display:block}
+  .scrim{display:block;position:fixed;inset:0;z-index:35;background:rgba(15,10,6,.5);opacity:0;pointer-events:none;transition:opacity .25s}
+  .scrim.show{opacity:1;pointer-events:auto}
+  .mbar{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:6;padding:8px clamp(14px,3vw,40px);padding-top:max(8px,env(safe-area-inset-top,0px));background:var(--bg);border-bottom:1px solid var(--line)}
+  .menu-btn{flex:none;border:0;border-radius:999px;background:var(--yellow);color:var(--on-yellow);padding:10px 16px;font:700 14px var(--display);cursor:pointer}
+  .mbar-t{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font:600 14px var(--display);color:var(--muted)}
+  .player{max-width:max(300px,calc((100dvh - 60px - 62px - 40px) * 16 / 9))}
+  .stage{scroll-margin-top:64px}
+  .tm{display:none}
+}
+@media (max-width:600px){
+  main{padding:16px 14px 40px}
+  .player{max-width:none}
+  .stage{margin:0 -14px;border-radius:0}
+  .controls{gap:6px;padding:8px 10px}
+  .ib{width:36px;height:36px}
+  .sp,.cg-x,.tblock{display:none}
+  .tg{padding:8px}
+  .manual{margin:16px -14px 0;border-radius:0}
+  .mtext>li{grid-template-columns:28px 1fr;gap:10px;padding:10px}
+}
+@media (max-width:380px){#nr{display:none}}
+@media (max-width:600px) and (orientation:portrait){.rot{display:block}}
+@media (max-height:500px) and (orientation:landscape){.player{max-width:max(300px,calc((100dvh - 56px - 56px - 16px) * 16 / 9))}main{padding-top:12px}
+  .tblock,.sp,.cg-x{display:none}.controls{gap:6px;padding:7px 10px}.ib{width:34px;height:34px}.tg{padding:7px 9px}.start,.endcard{inset:0 0 50px}}
+@media (min-width:1700px){main{max-width:1440px}}
+
+/* ---------- checklist ---------- */
+.clist{background:var(--panel);border-radius:16px;padding:clamp(18px,2.4vw,28px)}
+.clist[hidden]{display:none}
+.cl-head{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-bottom:18px}
+.cl-count{font:700 15px var(--display)}
+.cl-meter{flex:1;min-width:120px;height:8px;border-radius:4px;background:var(--panel-2);overflow:hidden}
+.cl-meter i{display:block;height:100%;width:0;background:var(--yellow);transition:width .3s}
+.cl-reset{border:0;border-radius:999px;padding:10px 16px;background:var(--panel-2);color:var(--ink);font:700 13.5px var(--display);cursor:pointer}
+.cl-nav{display:flex;gap:6px}
+.cl-nav .ib{background:var(--panel-2);color:var(--ink)}
+.cl-note{margin:0 0 14px;font-size:14px;color:var(--muted)}
+.cl-sec{margin:0 0 10px}
+.cl-sec h3{margin:20px 0 8px;padding:10px 14px;border-radius:10px;background:var(--panel-2);font:700 14.5px var(--display);color:var(--orange)}
+.cl-row{display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)}
+.cl-row .n{font:700 13px var(--display);color:var(--muted)}
+.cl-row .tx{font-size:15.5px;line-height:1.45}
+.cl-row .seg2{display:flex;border-radius:999px;box-shadow:inset 0 0 0 1.5px var(--line);overflow:hidden}
+.cl-row .seg2 button{border:0;background:none;padding:8px 14px;font:700 13px var(--display);cursor:pointer;color:var(--muted)}
+.cl-row .seg2 button[aria-pressed="true"].y{background:var(--green);color:#fff}
+.cl-row .seg2 button[aria-pressed="true"].na{background:var(--muted);color:var(--panel)}
+.cl-row.first .tx{font-weight:600}
+.cl-sign{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px;font-size:14px;color:var(--muted)}
+.manual[hidden],.player[hidden]{display:none}
+@media (max-width:600px){.clist{margin:0 -14px;border-radius:0}.cl-row{grid-template-columns:28px 1fr;}.cl-row .seg2{grid-column:2;justify-self:start}}
+.mtext table{border-collapse:collapse;margin-top:10px;font-size:14px}
+.mtext td,.mtext th{border:1px solid var(--line);padding:6px 10px;text-align:left}
+.mtext th{font-family:var(--display);font-weight:700;color:var(--ink)}
+.tbl-wrap{overflow-x:auto}
+.rb{fill:none;stroke:#C9BBA0;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.rbt{fill:none;stroke:#C9BBA0;stroke-width:4;stroke-linecap:round}
+.wire{fill:none;stroke:var(--orange);stroke-width:3;stroke-linecap:round}
+.mtext>li{grid-template-columns:34px minmax(0,1fr)}
+.mtext>li>span{min-width:0}
+@media (max-width:600px){.mtext>li{grid-template-columns:28px minmax(0,1fr)}}
+/*dhinwa-brand*/
+:root{--bg:#FFFFFF; --panel:#FFFFFF; --panel-2:#F6F4EF; --ink:#1A1612; --muted:#5E574D; --line:#E8E3D9;
+  --side:#FFFFFF; --side-2:#FFF4CC; --side-ink:#1A1612; --side-muted:#6B6358; --side-line:#EDE8DE; --orange:#D9880F; color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#FFFFFF; --panel:#FFFFFF; --panel-2:#F6F4EF; --ink:#1A1612; --muted:#5E574D; --line:#E8E3D9;
+  --side:#FFFFFF; --side-2:#FFF4CC; --side-ink:#1A1612; --side-muted:#6B6358; --side-line:#EDE8DE; --orange:#D9880F; color-scheme:light}}
+:root[data-theme="dark"]{--bg:#FFFFFF; --panel:#FFFFFF; --panel-2:#F6F4EF; --ink:#1A1612; --muted:#5E574D; --line:#E8E3D9;
+  --side:#FFFFFF; --side-2:#FFF4CC; --side-ink:#1A1612; --side-muted:#6B6358; --side-line:#EDE8DE; --orange:#D9880F; color-scheme:light}
+.side{border-right:1px solid var(--side-line)}
+.side-top h2 span{color:#B8700A}
+.ls.on .ls-no,.pt.now::before{background:var(--yellow);border-color:var(--yellow)}
+.pt::before{border-color:#B9B0A1}
+.manual,.clist{box-shadow:inset 0 0 0 1px var(--line)}
+.stage{box-shadow:0 24px 50px -30px rgba(26,22,18,.45)}
+.ib{border-radius:4px;background:var(--yellow);color:var(--on-yellow)}
+.ib:hover:not(:disabled){filter:brightness(1.07)}
+.ib.main{background:var(--yellow);color:var(--on-yellow);box-shadow:inset 0 0 0 2px #1A1612}
+.sp{background:var(--yellow);color:var(--on-yellow);border-radius:4px;font-weight:700}
+.tg{background:var(--yellow);color:var(--on-yellow);border-radius:4px}
+.tg[aria-pressed="true"]{background:#FFFFFF;color:#1A1612}
+.start span,.pill{border-radius:4px}
+.cl-reset{border-radius:4px;background:var(--yellow);color:var(--on-yellow)}
+.cl-nav .ib{background:var(--yellow);color:var(--on-yellow)}
+.cl-row .seg2{border-radius:4px}
+.cl-sec h3{border-radius:4px;background:#1A1612;color:var(--yellow)}
+.menu-btn{border-radius:4px;background:var(--yellow);color:var(--on-yellow);border-color:var(--yellow)}
+.side-close{border-radius:4px}
+/*end-dhinwa-brand*/
+.side-nav{display:grid;gap:6px;padding:12px 22px;border-bottom:1px solid var(--side-line)}
+.side-nav a{display:block;text-align:center;font:600 13px/1.25 var(--display);color:var(--side-ink);text-decoration:none;padding:8px 10px;border-radius:4px;background:var(--side-2)}
+.side-nav a:hover{background:var(--yellow);color:var(--on-yellow)}
+.side-nav a.home{background:var(--yellow);color:var(--on-yellow)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <pattern id="p-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="rgba(244,239,230,.07)" stroke-width="1.5"/></pattern>
+    <pattern id="p-net" width="16" height="16" patternUnits="userSpaceOnUse"><path d="M0 0L16 16M16 0L0 16" stroke="#A89C88" stroke-width="1.6"/></pattern>
+    <pattern id="p-soil" width="22" height="22" patternUnits="userSpaceOnUse"><rect width="22" height="22" fill="#2E2720"/><path d="M0 22L22 0M-6 6l12-12M16 28l12-12" stroke="#A89C88" stroke-width="1.4" opacity=".55"/><circle cx="6" cy="15" r="1.6" fill="#A89C88"/></pattern>
+    <pattern id="p-hatch" width="14" height="14" patternUnits="userSpaceOnUse"><path d="M0 14L14 0" stroke="#A89C88" stroke-width="1.5"/></pattern>
+    <marker id="m-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#E89519"/></marker>
+  </defs>
+  <symbol id="s-worker" viewBox="0 0 80 200">
+    <path class="fo ln" d="M22 74h36a8 8 0 0 1 8 8v50H14V82a8 8 0 0 1 8-8z"/>
+    <path class="lnw" d="M15 100h50M15 116h50"/>
+    <path class="ln" d="M16 84 8 128M64 84l8 44"/>
+    <path class="ln thick" d="M30 134v54M50 134v54"/>
+    <path class="ln thick" d="M22 192h14M44 192h14"/>
+    <circle class="fbp ln" cx="40" cy="54" r="15"/>
+    <path class="fy ln" d="M20 44a20 19 0 0 1 40 0v2H20z"/>
+    <path class="fy ln" d="M14 44h52v6H14z"/>
+  </symbol>
+  <symbol id="s-worker-bare" viewBox="0 0 80 200">
+    <path class="fo ln" d="M22 74h36a8 8 0 0 1 8 8v50H14V82a8 8 0 0 1 8-8z"/>
+    <path class="lnw" d="M15 100h50M15 116h50"/>
+    <path class="ln" d="M16 84 8 128M64 84l8 44"/>
+    <path class="ln thick" d="M30 134v54M50 134v54"/>
+    <path class="ln thick" d="M22 192h14M44 192h14"/>
+    <circle class="fbp ln" cx="40" cy="54" r="15"/>
+  </symbol>
+  <symbol id="s-helmet" viewBox="0 0 120 80">
+    <path class="fy ln" d="M16 60a44 42 0 0 1 88 0z"/><path class="fy ln" d="M6 60h108v9H6z"/><path class="ln" d="M60 20v40M40 26l6 34M80 26l-6 34"/>
+  </symbol>
+  <symbol id="s-goggles" viewBox="0 0 140 60">
+    <path class="ln thick" d="M3 30h20M117 30h20"/><rect class="fw ln" x="22" y="10" width="44" height="40" rx="16"/><rect class="fw ln" x="74" y="10" width="44" height="40" rx="16"/><path class="ln" d="M66 28h8"/>
+  </symbol>
+  <symbol id="s-ear" viewBox="0 0 120 110">
+    <path class="ln thick" d="M22 62a38 46 0 0 1 76 0"/><rect class="fy ln" x="6" y="54" width="30" height="48" rx="13"/><rect class="fy ln" x="84" y="54" width="30" height="48" rx="13"/>
+  </symbol>
+  <symbol id="s-resp" viewBox="0 0 120 100">
+    <path class="ln" d="M22 34 4 20M98 34l18-14"/><path class="fw ln" d="M22 34q38-34 76 0l-8 40q-30 26-60 0z"/><circle class="fo ln" cx="26" cy="68" r="16"/><circle class="fo ln" cx="94" cy="68" r="16"/>
+  </symbol>
+  <symbol id="s-harness" viewBox="0 0 100 170">
+    <path class="lno" d="M26 6l24 74 24-74M18 92h64M30 92l-12 70M70 92l12 70"/><circle class="ln" cx="50" cy="82" r="9"/>
+  </symbol>
+  <symbol id="s-net" viewBox="0 0 240 120">
+    <rect x="3" y="3" width="234" height="114" rx="6" fill="url(#p-net)" stroke="#F4EFE6" stroke-width="3.5"/>
+  </symbol>
+  <symbol id="s-jacket" viewBox="0 0 110 130">
+    <path class="fo ln" d="M24 18l18-12h26l18 12v104H24z"/><path class="ln" d="M42 6l13 30 13-30"/><path class="lny" d="M26 64h58M26 88h58"/>
+  </symbol>
+  <symbol id="s-specs" viewBox="0 0 120 50">
+    <circle class="ln" cx="30" cy="26" r="18"/><circle class="ln" cx="90" cy="26" r="18"/><path class="ln" d="M48 24q12-8 24 0M12 22 2 16M108 22l10-6"/>
+  </symbol>
+  <symbol id="s-ladder" viewBox="0 0 70 240">
+    <path class="ln thick" d="M10 2v236M60 2v236"/><path class="ln" d="M10 24h50M10 56h50M10 88h50M10 120h50M10 152h50M10 184h50M10 216h50"/>
+  </symbol>
+  <symbol id="s-scaffold" viewBox="0 0 220 280">
+    <path class="ln thick" d="M10 0v280M110 0v280M210 0v280M4 90h212M4 180h212"/><path class="ln" d="M10 280l100-100M110 180l100-90"/>
+    <rect class="fa ln" x="4" y="78" width="212" height="12"/><rect class="fa ln" x="4" y="168" width="212" height="12"/>
+  </symbol>
+  <symbol id="s-plug" viewBox="0 0 90 140">
+    <path class="ln" d="M45 100v38"/><rect class="fy ln" x="14" y="40" width="62" height="62" rx="12"/><path class="ln thick" d="M32 40V12M58 40V12"/>
+  </symbol>
+  <symbol id="s-bulb" viewBox="0 0 70 110">
+    <circle class="fw ln" cx="35" cy="40" r="28"/><path class="ln" d="M24 68h22v20H24zM27 96h16"/>
+  </symbol>
+  <symbol id="s-ext" viewBox="0 0 70 160">
+    <path class="ln" d="M28 40V26h14v14M42 28h18l6 12M28 28q-24 8-20 40"/><rect class="fr ln" x="14" y="40" width="42" height="114" rx="14"/><rect class="fw" x="20" y="80" width="30" height="34" rx="4"/>
+  </symbol>
+  <symbol id="s-aid" viewBox="0 0 120 96">
+    <path class="ln" d="M42 22V10h36v12"/><rect class="fw ln" x="6" y="22" width="108" height="68" rx="10"/><path class="fr" d="M52 38h16v14h14v16H68v14H52V68H38V52h14z"/>
+  </symbol>
+  <symbol id="s-bug" viewBox="0 0 90 70">
+    <ellipse class="ln" cx="28" cy="22" rx="16" ry="9"/><ellipse class="ln" cx="62" cy="22" rx="16" ry="9"/><path class="ln" d="M32 46 16 60M58 46l16 14M32 36l-18 4M58 36l18 4"/><ellipse class="fw ln" cx="45" cy="40" rx="13" ry="20"/>
+  </symbol>
+  <symbol id="s-hook" viewBox="0 0 80 200">
+    <path class="ln" d="M40 0v104"/><rect class="fy ln" x="24" y="104" width="32" height="26" rx="5"/><path class="ln thick" d="M40 130v18a20 20 0 1 1-20 20"/>
+  </symbol>
+  <symbol id="s-meter" viewBox="0 0 90 140">
+    <rect class="fy ln" x="8" y="8" width="74" height="124" rx="14"/><rect class="fbp ln" x="18" y="22" width="54" height="40" rx="6"/><circle class="ln" cx="30" cy="96" r="7"/><circle class="ln" cx="60" cy="96" r="7"/>
+  </symbol>
+  <symbol id="s-clip" viewBox="0 0 120 150">
+    <rect class="fw ln" x="8" y="14" width="104" height="132" rx="10"/><rect class="fy ln" x="38" y="4" width="44" height="20" rx="6"/>
+    <rect class="ln" x="22" y="44" width="14" height="14" rx="3"/><rect class="ln" x="22" y="74" width="14" height="14" rx="3"/><rect class="ln" x="22" y="104" width="14" height="14" rx="3"/>
+    <path class="lnd" d="M46 51h50M46 81h50M46 111h50"/>
+  </symbol>
+  <symbol id="s-bottle" viewBox="0 0 80 130">
+    <path class="fw ln" d="M30 6h20v24l16 20v74H14V50l16-20z"/><path class="fo ln" d="M40 66l16 16-16 16-16-16z"/>
+  </symbol>
+  <symbol id="s-glove" viewBox="0 0 80 110">
+    <path class="fo ln" d="M20 104V58L10 34q-3-8 4-10t9 6l7 16V16q0-8 7-8t7 8v26V10q0-8 7-8t7 8v32V16q0-7 7-7t6 7v54q0 34-26 34z"/>
+  </symbol>
+  <symbol id="s-shav" viewBox="0 0 160 70">
+    <path class="lny" d="M8 60q12-34 30-12t30-4 30-12 34 14"/><path class="lny" d="M22 46q14-24 26-4M78 40q12-20 26-2M118 50q10-16 22-2"/>
+  </symbol>
+  <symbol id="s-cloud" viewBox="0 0 160 130">
+    <path class="fw ln" d="M42 74a26 26 0 0 1 8-50 34 34 0 0 1 64 8 22 22 0 0 1 8 42z"/><path class="lnw" d="M52 90l-8 22M82 90l-8 22M112 90l-8 22"/>
+  </symbol>
+  <symbol id="s-cal" viewBox="0 0 110 110">
+    <rect class="fw ln" x="6" y="16" width="98" height="88" rx="10"/><path class="fr" d="M8 26a8 8 0 0 1 8-8h78a8 8 0 0 1 8 8v12H8z"/><path class="ln" d="M30 6v20M80 6v20"/>
+  </symbol>
+  <symbol id="s-no" viewBox="0 0 100 100"><circle class="nor" cx="50" cy="50" r="42"/><path class="nor" d="M21 21l58 58"/></symbol>
+  <symbol id="s-ok" viewBox="0 0 60 60"><circle class="fg" cx="30" cy="30" r="28"/><path class="ckw" d="M17 31l9 9 17-19"/></symbol>
+  <symbol id="s-bad" viewBox="0 0 60 60"><circle class="fr" cx="30" cy="30" r="28"/><path class="ckw" d="M20 20l20 20M40 20 20 40"/></symbol>
+  <symbol id="s-warn" viewBox="0 0 100 90"><path class="fy ln" d="M50 6l44 78H6z"/><path class="ckd" d="M50 32v24M50 68v3"/></symbol>
+  <symbol id="s-eye" viewBox="0 0 120 70"><path class="fw ln" d="M6 35q54-56 108 0-54 56-108 0z"/><circle class="fy ln" cx="60" cy="35" r="14"/></symbol>
+  <symbol id="s-book" viewBox="0 0 160 110">
+    <path class="fw ln" d="M80 20q-34-16-72-8v88q38-8 72 8 34-16 72-8V12q-38-8-72 8z"/><path class="ln" d="M80 20v88"/><path class="lnd" d="M22 36h40M22 54h40M22 72h40M98 36h40M98 54h40M98 72h40"/>
+  </symbol>
+  <symbol id="s-mag" viewBox="0 0 100 100"><path class="ln thick" d="M60 60l32 32"/><circle class="fw ln" cx="40" cy="40" r="28"/></symbol>
+  <symbol id="s-machine" viewBox="0 0 180 140">
+    <rect class="fy ln" x="10" y="30" width="150" height="80" rx="10"/><rect class="fbp ln" x="26" y="46" width="50" height="30" rx="4"/><path class="ln" d="M100 50h44M100 66h44M100 82h44"/>
+    <circle class="fbp ln" cx="44" cy="118" r="16"/><circle class="fbp ln" cx="126" cy="118" r="16"/>
+  </symbol>
+  <symbol id="s-bin" viewBox="0 0 90 120"><path class="fy ln" d="M10 24h70l-8 90H18z"/><path class="ln" d="M4 24h82M34 24V12h22v12M32 44l4 54M45 44v54M58 44l-4 54"/></symbol>
+  <symbol id="s-tractor" viewBox="0 0 260 130"><rect class="fa ln" x="130" y="30" width="120" height="58" rx="4"/><path class="fy ln" d="M10 88V40h50l20-26h30v74z"/><rect class="fbp ln" x="66" y="22" width="34" height="26" rx="3"/><path class="ln" d="M110 74h20"/><circle class="fbp ln thick" cx="38" cy="96" r="26"/><circle class="fbp ln" cx="100" cy="106" r="14"/><circle class="fbp ln" cx="170" cy="106" r="16"/><circle class="fbp ln" cx="220" cy="106" r="16"/></symbol>
+  <symbol id="s-door" viewBox="0 0 120 220"><path class="ln thick" d="M6 216V6h108v210"/><rect class="fa ln" x="18" y="18" width="84" height="198" rx="3"/><circle class="ln" cx="88" cy="118" r="5"/></symbol>
+  <symbol id="s-lock" viewBox="0 0 70 90"><path class="ln thick" d="M18 40V26a17 17 0 0 1 34 0v14"/><rect class="fy ln" x="8" y="40" width="54" height="44" rx="8"/><circle class="ln" cx="35" cy="60" r="5"/><path class="ln" d="M35 65v8"/></symbol>
+  <symbol id="s-cig" viewBox="0 0 160 70"><rect class="fw ln" x="10" y="30" width="110" height="18" rx="3"/><rect class="fo ln" x="120" y="30" width="26" height="18" rx="3"/><path class="lnd" d="M30 22q-8-10 0-18M50 24q-8-10 0-18"/></symbol>
+  <symbol id="s-boot" viewBox="0 0 110 120"><path class="fy ln" d="M22 6h40v70l36 14q8 4 8 12v12H10V6z"/><path class="ln" d="M10 98h96"/></symbol>
+  <symbol id="s-stretcher" viewBox="0 0 260 80"><rect class="fw ln" x="30" y="24" width="200" height="26" rx="6"/><path class="ln thick" d="M6 37h24M230 37h24M60 50v18M200 50v18"/><path class="fr" d="M118 30h12v8h8v10h-8v0h-12v0h-8V38h8z"/></symbol>
+  <symbol id="s-flood" viewBox="0 0 120 90"><rect class="fy ln" x="10" y="10" width="100" height="54" rx="8"/><rect class="fw ln" x="22" y="20" width="76" height="34" rx="4"/><path class="ln" d="M60 64v20M40 86h40"/></symbol>
+  <symbol id="s-drum" viewBox="0 0 80 110"><rect class="fr ln" x="8" y="8" width="64" height="96" rx="8"/><path class="ln" d="M8 38h64M8 72h64"/></symbol>
+  <symbol id="s-paint" viewBox="0 0 90 100"><path class="fo ln" d="M10 26h70v66a6 6 0 0 1-6 6H16a6 6 0 0 1-6-6z"/><path class="ln" d="M10 26q35-30 70 0"/><path class="fy" d="M24 50h42v22H24z"/></symbol>
+  <symbol id="s-bag" viewBox="0 0 120 36"><rect class="fw ln" x="4" y="4" width="112" height="28" rx="10"/><path class="lnd" d="M30 18h60"/></symbol>
+  <symbol id="s-hframe" viewBox="0 0 120 140"><path class="ln thick" d="M14 4v132M106 4v132"/><path class="ln" d="M14 40h92M14 96h92M14 40l92 56"/></symbol>
+  <symbol id="s-phone" viewBox="0 0 40 40"><path class="fy" d="M10 4l8 8-4 6q4 8 12 12l6-4 8 8-6 6Q10 38 4 10z"/></symbol>
+  <symbol id="s-exit" viewBox="0 0 120 60"><rect class="fg" x="2" y="2" width="116" height="56" rx="6"/><text x="60" y="40" text-anchor="middle" style="fill:#fff;font:800 26px var(--display)">EXIT</text></symbol>
+  <symbol id="s-amb" viewBox="0 0 200 120"><path class="fw ln" d="M10 90V30h110l40 30h30v30z"/><path class="fbp ln" d="M126 38h22l24 20h-46z"/><path class="fr" d="M48 42h14v14h14v14H62v14H48V70H34V56h14z"/><circle class="fbp ln" cx="50" cy="96" r="16"/><circle class="fbp ln" cx="150" cy="96" r="16"/></symbol>
+  <symbol id="s-sign" viewBox="0 0 160 220"><path class="ln thick" d="M80 120v96"/><rect class="fy ln" x="6" y="6" width="148" height="114" rx="8"/></symbol>
+  <symbol id="s-grinder" viewBox="0 0 200 110"><rect class="fy ln" x="60" y="40" width="120" height="34" rx="12"/><circle class="fw ln" cx="44" cy="57" r="38"/><path class="ln" d="M44 19v76M6 57h76"/></symbol>
+  <symbol id="s-saw" viewBox="0 0 120 120"><circle class="fw ln" cx="60" cy="60" r="44"/><path class="ln" d="M60 8l8 14M104 36l-14 4M112 70l-14-4M96 106l-10-12M60 112l-2-14M20 104l10-12M8 66l14-4M16 30l14 8M38 10l6 14M84 12l-6 14"/><circle class="fbp ln" cx="60" cy="60" r="10"/></symbol>
+  <symbol id="s-theo" viewBox="0 0 120 220"><path class="ln" d="M60 110L18 214M60 110l42 104M60 110v104"/><rect class="fy ln" x="38" y="30" width="44" height="58" rx="8"/><rect class="fbp ln" x="30" y="40" width="60" height="18" rx="9"/><circle class="ln" cx="60" cy="49" r="5"/><rect class="ln" x="34" y="88" width="52" height="20" rx="4"/></symbol>
+  <symbol id="s-dumpy" viewBox="0 0 140 220"><path class="ln" d="M70 96L26 214M70 96l44 118M70 96v118"/><rect class="fy ln" x="16" y="52" width="108" height="30" rx="12"/><rect class="fbp ln" x="2" y="56" width="18" height="22" rx="4"/><rect class="ln" x="44" y="82" width="52" height="14" rx="3"/></symbol>
+  <symbol id="s-staff" viewBox="0 0 40 300"><rect class="fw ln" x="6" y="4" width="28" height="292" rx="3"/><path class="fr" d="M10 20h12v10H10zM10 60h12v10H10zM10 100h12v10H10zM10 140h12v10H10zM10 180h12v10H10zM10 220h12v10H10zM10 260h12v10H10z"/></symbol>
+  <symbol id="s-peg" viewBox="0 0 30 110"><path class="fa ln" d="M6 4h18v80l-9 22-9-22z"/><path class="fr" d="M6 4h18v14H6z"/></symbol>
+  <symbol id="s-pillar" viewBox="0 0 120 140"><path class="fw ln" d="M20 40h80v96H20z"/><path class="fy ln" d="M10 28h100v14H10z"/><circle class="fr" cx="60" cy="20" r="8"/></symbol>
+  <symbol id="s-excav" viewBox="0 0 300 200"><rect class="fbp ln" x="40" y="150" width="170" height="34" rx="17"/><circle class="ln" cx="62" cy="167" r="9"/><circle class="ln" cx="188" cy="167" r="9"/><rect class="fy ln" x="50" y="100" width="150" height="50" rx="6"/><rect class="fbp ln" x="140" y="62" width="56" height="40" rx="6"/><path class="fy ln" d="M196 110l50-70 14 6-44 70z"/><path class="fy ln" d="M246 40l40 60-12 8-40-58z"/><path class="fa ln" d="M274 108l20 6-6 30h-34z"/></symbol>
+  <symbol id="s-pump" viewBox="0 0 160 110"><rect class="fy ln" x="20" y="30" width="100" height="62" rx="10"/><circle class="fbp ln" cx="70" cy="61" r="20"/><path class="ln thick" d="M120 50h36"/><path class="ln" d="M30 92v14M110 92v14"/></symbol>
+  <symbol id="s-roller" viewBox="0 0 240 150"><rect class="fy ln" x="70" y="30" width="140" height="62" rx="10"/><rect class="fbp ln" x="150" y="8" width="50" height="34" rx="6"/><circle class="fw ln thick" cx="46" cy="104" r="40"/><circle class="fbp ln" cx="186" cy="118" r="26"/><path class="ln" d="M46 64V32h30"/></symbol>
+  <symbol id="s-jack" viewBox="0 0 90 220"><path class="ln thick" d="M14 20h62"/><rect class="fy ln" x="28" y="26" width="34" height="110" rx="8"/><path class="ln thick" d="M45 136v70"/><path class="fw ln" d="M37 206h16l-8 12z"/></symbol>
+  <symbol id="s-spray" viewBox="0 0 120 200"><rect class="fy ln" x="20" y="60" width="70" height="120" rx="20"/><path class="ln" d="M55 60V30h-12M55 20v10"/><path class="ln thick" d="M90 90q24 0 24 30v30"/><path class="ln" d="M114 150l-4 30"/></symbol>
+  <symbol id="s-cone" viewBox="0 0 100 130"><rect class="fw ln" x="20" y="6" width="60" height="50" rx="6"/><path class="fy ln" d="M20 56h60l-24 44h-12z"/><rect class="fbp ln" x="8" y="100" width="84" height="24" rx="3"/></symbol>
+  <symbol id="s-toolbox" viewBox="0 0 160 120"><path class="ln thick" d="M56 34V16h48v18"/><rect class="fy ln" x="10" y="34" width="140" height="80" rx="10"/><path class="ln" d="M10 64h140M70 56h20v16H70z"/></symbol>
+  <symbol id="s-stamp" viewBox="0 0 160 70"><rect x="4" y="4" width="152" height="62" rx="8" fill="none" stroke="#3DBB7E" stroke-width="5"/></symbol>
+  <symbol id="s-stone" viewBox="0 0 120 60"><rect class="fw ln" x="3" y="3" width="114" height="54" rx="4"/><path class="lnd" d="M14 16l8 4M40 12l6 6M70 18l10-4M96 14l8 6M20 40l10 4M56 44l8-4M88 40l10 6"/></symbol>
+  <symbol id="s-trowel" viewBox="0 0 140 80"><path class="fw ln" d="M6 70L70 20h20L60 70z"/><path class="ln" d="M80 20V8h40"/><rect class="fa ln" x="110" y="2" width="28" height="12" rx="5"/></symbol>
+  <symbol id="s-hammer" viewBox="0 0 120 120"><rect class="fy ln" x="10" y="10" width="70" height="30" rx="6"/><path class="ln thick" d="M45 40v76"/></symbol>
+  <symbol id="s-nail" viewBox="0 0 30 120"><path class="ln" d="M4 6h22M15 6v100l-4 10"/></symbol>
+  <symbol id="s-sieve" viewBox="0 0 160 70"><ellipse class="ln thick" cx="80" cy="30" rx="74" ry="22"/><ellipse cx="80" cy="30" rx="66" ry="17" fill="url(#p-net)"/><path class="ln" d="M6 30v12q74 40 148 0V30"/></symbol>
+  <symbol id="s-mbox" viewBox="0 0 200 90"><path class="fw ln" d="M6 10h188l-16 74H22z"/><path class="fa" d="M20 30h160l-10 46H30z" opacity=".8"/></symbol>
+  <symbol id="s-square" viewBox="0 0 120 120"><path class="fy ln" d="M6 6h22v86h86v22H6z"/></symbol>
+  <symbol id="s-prop" viewBox="0 0 40 240"><rect class="fy ln" x="6" y="4" width="28" height="10" rx="2"/><path class="ln thick" d="M20 14v110"/><rect class="fw ln" x="12" y="120" width="16" height="104"/><rect class="fa ln" x="10" y="116" width="20" height="10" rx="3"/><rect class="fy ln" x="4" y="224" width="32" height="10" rx="2"/></symbol>
+  <symbol id="s-oil" viewBox="0 0 120 120"><rect class="fy ln" x="16" y="40" width="70" height="72" rx="8"/><path class="ln thick" d="M86 60l28-30"/><path class="ln" d="M36 40V24h30v16"/><path class="fo" d="M110 36q6 14 0 20-6-6 0-20z"/></symbol>
+  <symbol id="s-foreman" viewBox="0 0 80 200"><path class="fy ln" d="M22 74h36a8 8 0 0 1 8 8v50H14V82a8 8 0 0 1 8-8z"/><path class="lnw" d="M15 100h50M15 116h50"/><path class="ln" d="M16 84 8 128M64 84l8 44"/><path class="ln thick" d="M30 134v54M50 134v54"/><path class="ln thick" d="M22 192h14M44 192h14"/><circle class="fbp ln" cx="40" cy="54" r="15"/><path class="ln" d="M20 44a20 19 0 0 1 40 0v2H20z" style="fill:#F4EFE6"/><path class="ln" d="M14 44h52v6H14z" style="fill:#F4EFE6"/></symbol>
+  <symbol id="s-wb" viewBox="0 0 260 120"><rect class="fw ln" x="10" y="80" width="240" height="20"/><rect class="fy ln" x="190" y="20" width="60" height="50" rx="6"/><rect class="fbp ln" x="200" y="30" width="40" height="18" rx="3"/><path class="ln" d="M220 70v10"/></symbol>
+  <symbol id="s-cover" viewBox="0 0 60 50"><rect class="fw ln" x="4" y="10" width="52" height="36" rx="4" style="fill:rgba(244,239,230,.45)"/><path class="ln" d="M22 10V2M38 10V2"/></symbol>
+  <symbol id="s-chair" viewBox="0 0 100 80"><path class="ln thick" d="M6 74h18l14-60h24l14 60h18" style="stroke:#C9BBA0"/></symbol>
+  <symbol id="s-cutter" viewBox="0 0 200 80"><path class="ln thick" d="M10 20l120 30M10 60l120-30"/><path class="fy ln" d="M130 30l50-10v40l-50-10z"/></symbol>
+  <symbol id="s-block" viewBox="0 0 120 60"><rect class="fw ln" x="3" y="3" width="114" height="54" rx="3" style="fill:rgba(205,195,180,.35)"/><rect class="fbp ln" x="16" y="14" width="36" height="32" rx="3"/><rect class="fbp ln" x="68" y="14" width="36" height="32" rx="3"/></symbol>
+  <symbol id="s-bwall" viewBox="0 0 400 240" preserveAspectRatio="none">
+    <g fill="rgba(205,195,180,.35)" stroke="#F4EFE6" stroke-width="3">
+      <rect x="2" y="200" width="98" height="38"/><rect x="100" y="200" width="98" height="38"/><rect x="198" y="200" width="98" height="38"/><rect x="296" y="200" width="102" height="38"/>
+      <rect x="2" y="160" width="48" height="40"/><rect x="50" y="160" width="98" height="40"/><rect x="148" y="160" width="98" height="40"/><rect x="246" y="160" width="98" height="40"/><rect x="344" y="160" width="54" height="40"/>
+      <rect x="2" y="120" width="98" height="40"/><rect x="100" y="120" width="98" height="40"/><rect x="198" y="120" width="98" height="40"/><rect x="296" y="120" width="102" height="40"/>
+      <rect x="2" y="80" width="48" height="40"/><rect x="50" y="80" width="98" height="40"/><rect x="148" y="80" width="98" height="40"/><rect x="246" y="80" width="98" height="40"/><rect x="344" y="80" width="54" height="40"/>
+      <rect x="2" y="40" width="98" height="40"/><rect x="100" y="40" width="98" height="40"/><rect x="198" y="40" width="98" height="40"/><rect x="296" y="40" width="102" height="40"/>
+      <rect x="2" y="2" width="48" height="38"/><rect x="50" y="2" width="98" height="38"/><rect x="148" y="2" width="98" height="38"/><rect x="246" y="2" width="98" height="38"/><rect x="344" y="2" width="54" height="38"/>
+    </g></symbol>
+  <symbol id="s-farma" viewBox="0 0 120 80"><path class="fw ln" d="M10 20h100v50H10z"/><path class="ln thick" d="M10 20L2 12M110 20l8-8"/><path class="fa" d="M14 40h92v26H14z" opacity=".8"/></symbol>
+  <symbol id="s-can" viewBox="0 0 80 110"><path class="fw ln" d="M14 20h52v84H14z"/><path class="ln" d="M14 50h52M14 70h52M66 34q14 0 14 18t-14 18"/><rect class="fwater" x="16" y="56" width="48" height="46"/></symbol>
+  <symbol id="s-chaser" viewBox="0 0 200 100"><rect class="fy ln" x="50" y="30" width="130" height="40" rx="10"/><circle class="fw ln" cx="40" cy="50" r="34"/><path class="ln" d="M40 16v68M6 50h68"/></symbol>
+  <symbol id="s-mixer" viewBox="0 0 220 180"><path class="ln" d="M40 170L70 110M180 170L150 110"/><ellipse class="fy ln" cx="110" cy="80" rx="62" ry="56"/><path class="ln" d="M70 50q40 30 80 0M64 90q46 30 92 0"/><path class="fa ln" d="M150 40l40-24 10 18-38 26z"/><circle class="fbp ln" cx="40" cy="170" r="8"/><circle class="fbp ln" cx="180" cy="170" r="8"/></symbol>
+  <symbol id="s-tm" viewBox="0 0 300 150"><rect class="fbp ln" x="10" y="100" width="280" height="14"/><path class="fy ln" d="M30 100V40h50v60z"/><rect class="fbp ln" x="38" y="50" width="34" height="24" rx="3"/><path class="fa ln" d="M100 96l20-70q70-18 150 30l-10 40z"/><path class="ln" d="M140 40l40 56M190 40l30 56"/><circle class="fbp ln thick" cx="60" cy="122" r="18"/><circle class="fbp ln thick" cx="200" cy="122" r="18"/><circle class="fbp ln thick" cx="250" cy="122" r="18"/></symbol>
+  <symbol id="s-cpump" viewBox="0 0 220 150"><rect class="fy ln" x="20" y="50" width="150" height="60" rx="8"/><path class="fa ln" d="M170 60h40v40h-40z"/><path class="ln thick" d="M20 70H0"/><circle class="fbp ln" cx="50" cy="122" r="16"/><circle class="fbp ln" cx="140" cy="122" r="16"/><rect class="fbp ln" x="40" y="62" width="40" height="22" rx="3"/></symbol>
+  <symbol id="s-slump" viewBox="0 0 100 130"><path class="fw ln" d="M30 10h40l20 110H10z"/><path class="ln" d="M20 40H6M80 40h14"/></symbol>
+  <symbol id="s-cube" viewBox="0 0 120 120"><path class="fw ln" d="M20 40l40-20 40 20v50l-40 20-40-20z"/><path class="ln" d="M20 40l40 20 40-20M60 60v50"/></symbol>
+  <symbol id="s-barrow" viewBox="0 0 200 110"><path class="fy ln" d="M20 30h120l-20 46H40z"/><path class="ln thick" d="M140 30l50-10M40 76l-14 24"/><circle class="fbp ln" cx="40" cy="92" r="14"/></symbol>
+</svg>
+
+<div class="app">
+  <aside class="side" id="side" aria-label="Lessons">
+    <div class="side-top">
+      <h2><span>9.0 Activity</span>Expanded Metal Fixing</h2>
+      <button class="side-close" id="sideClose" type="button" aria-label="Close lessons">&times;</button>
+    </div>
+    <nav class="side-nav" aria-label="Chapters"><a class="home" href="../index.html">All chapters</a><a href="hacking-chapter-8.html">← Ch 8 Hacking</a><a href="corner-beads-chapter-10.html">Ch 10 Corner Beads →</a></nav>
+
+    <div class="ls" data-l="0">
+      <button class="ls-btn" type="button"><span class="ls-no">1</span><span class="ls-t">9.1 Knowledge of Activity<small>Expanded metal fixing</small></span></button>
+      <ol class="pts">
+        <li><button class="pt" type="button">Nail rhombus mesh rolls…</button></li>
+        <li><button class="pt" type="button">Plastering mesh fixed rigidly…</button></li>
+        <li><button class="pt" type="button">GI expanded wise metal mesh… 1½” nails</button></li>
+        <li><button class="pt" type="button">Cement mortar of 1:3… imprint</button></li>
+        <li><button class="pt" type="button">Metal meshes of 300/ 500mm…</button></li>
+      </ol>
+    </div>
+
+    <div class="ls" data-l="1">
+      <button class="ls-btn" type="button"><span class="ls-no">2</span><span class="ls-t">9.2 Tools to be used by Tradesmen<small>Basic tools of the mason gang</small></span></button>
+      <ol class="pts">
+        <li><button class="pt" type="button">Required tools must be available at site…</button></li>
+        <li><button class="pt" type="button">Basic tools of the mason gang</button></li>
+      </ol>
+    </div>
+
+    <div class="ls" data-l="2">
+      <button class="ls-btn" type="button"><span class="ls-no">3</span><span class="ls-t">9.3 Inspection Methodology<small>for Quality Assurance</small></span></button>
+      <ol class="pts">
+        <li><button class="pt" type="button">Stretched and nailed, sufficient overlap</button></li>
+        <li><button class="pt" type="button">No protruding surfaces/ edges</button></li>
+        <li><button class="pt" type="button">Right width of plastering mesh…</button></li>
+        <li><button class="pt" type="button">Proper curing</button></li>
+        <li><button class="pt" type="button">Inspection after a week…</button></li>
+      </ol>
+    </div>
+
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <div class="col">
+    <div class="mbar">
+      <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="side">Lessons</button>
+      <span class="mbar-t" id="mbarT">Expanded Metal Fixing</span>
+    </div>
+
+    <main>
+      <div class="heads">
+        <hgroup data-l="0"><p class="l-code">9.1</p><h1>Knowledge of Activity</h1><p class="l-sub">Lesson 1 of 3, 5 points</p></hgroup>
+        <hgroup data-l="1" hidden><p class="l-code">9.2</p><h1>Tools to be used by Tradesmen</h1><p class="l-sub">Lesson 2 of 3, 2 points</p></hgroup>
+        <hgroup data-l="2" hidden><p class="l-code">9.3</p><h1>Inspection Methodology for Quality Assurance</h1><p class="l-sub">Lesson 3 of 3, 5 points</p></hgroup>
+      </div>
+
+      <section class="player" id="player" aria-label="Lesson video">
+        <div class="stage" id="stage">
+          <svg class="lsvg" data-l="0" viewBox="0 0 960 540" role="img" aria-label="Animated drawing for expanded metal fixing">
+            <rect class="bg" width="960" height="540"/><rect width="960" height="540" fill="url(#p-grid)"/>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Rhombus mesh over the junctions</text></g>
+              <rect class="fw ln" x="120" y="120" width="100" height="340" style="fill:rgba(244,239,230,.3)" data-a="grow-y"/>
+              <use href="#s-bwall" x="220" y="220" width="400" height="240" data-a="fade" data-at=".3"/>
+              <rect class="fw ln" x="120" y="120" width="500" height="100" style="fill:rgba(244,239,230,.3)" data-a="grow-x" data-at=".3"/>
+              <rect x="180" y="200" width="80" height="260" fill="url(#p-net)" stroke="#F4EFE6" stroke-width="2" data-a="grow-y" data-at="1"/>
+              <rect x="220" y="180" width="400" height="80" fill="url(#p-net)" stroke="#F4EFE6" stroke-width="2" data-a="grow-x" data-at="1.4"/>
+              <g data-a="pop" data-at="2" class="fy"><circle cx="196" cy="240" r="5"/><circle cx="244" cy="300" r="5"/><circle cx="196" cy="380" r="5"/><circle cx="300" cy="196" r="5"/><circle cx="420" cy="244" r="5"/><circle cx="540" cy="196" r="5"/></g>
+              <text class="tb" x="660" y="300" data-a="fade" data-at="2.4">Steel nails / wooden</text><text class="tb" x="660" y="330" data-a="fade" data-at="2.5">plug and nails</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Fixed rigidly, strip plastered first</text></g>
+              <rect class="fw ln" x="120" y="120" width="500" height="100" style="fill:rgba(244,239,230,.3)" data-a="grow-x"/>
+              <use href="#s-bwall" x="120" y="220" width="500" height="240" data-a="fade" data-at=".2"/>
+              <rect x="120" y="180" width="500" height="80" fill="url(#p-net)" stroke="#F4EFE6" stroke-width="2" data-a="grow-x" data-at=".6"/>
+              <rect x="120" y="180" width="500" height="80" style="fill:rgba(220,210,190,.75)" data-a="grow-x" data-at="1.4"/>
+              <use href="#s-cal" x="700" y="180" width="90" height="90" data-a="pop" data-at="2"/>
+              <text class="tb" x="745" y="310" text-anchor="middle" data-a="fade" data-at="2.2">min. 3 days</text>
+              <text class="td" x="745" y="338" text-anchor="middle" data-a="fade" data-at="2.3">before the entire wall</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">1½” lay wise nails</text></g>
+              <rect class="fw ln" x="120" y="140" width="320" height="120" style="fill:rgba(244,239,230,.3)" data-a="grow-x"/>
+              <text class="td" x="280" y="130" text-anchor="middle" data-a="fade" data-at=".2">RCC beam: drill a hole first</text>
+              <use href="#s-bwall" x="120" y="260" width="320" height="200" data-a="fade" data-at=".2"/>
+              <rect x="120" y="220" width="320" height="80" fill="url(#p-net)" stroke="#F4EFE6" stroke-width="2" data-a="grow-x" data-at=".6"/>
+              <use href="#s-nail" x="180" y="196" width="18" height="70" data-a="down" data-at="1.2"/><use href="#s-nail" x="300" y="246" width="18" height="70" data-a="down" data-at="1.4"/><use href="#s-nail" x="400" y="196" width="18" height="70" data-a="down" data-at="1.6"/>
+              <text class="td" x="280" y="490" text-anchor="middle" data-a="fade" data-at="1.8">Block masonry: nailed directly</text>
+              <g data-a="pop" data-at="2.2"><rect class="card" x="540" y="190" width="320" height="140" rx="14"/><text class="tb" x="564" y="232">Nails staggered</text><text class="tb" x="564" y="262">and folded</text><text class="td" x="564" y="296">to secure the mesh</text></g>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Cement mortar 1:3 over the mesh</text></g>
+              <rect class="fw ln" x="120" y="200" width="440" height="160" style="fill:rgba(205,195,180,.35)" data-a="fade" data-at=".1"/>
+              <rect x="120" y="200" width="440" height="160" fill="url(#p-net)" data-a="fade" data-at=".3"/>
+              <rect class="fw" x="120" y="200" width="440" height="160" style="fill:rgba(220,210,190,.85)" data-a="grow-x" data-at=".8"/>
+              <path d="M150 230l20 20M190 230l20 20M230 230l20 20M270 230l20 20M310 230l20 20M350 230l20 20M390 230l20 20M430 230l20 20M470 230l20 20M150 300l20 20M190 300l20 20M230 300l20 20M270 300l20 20M310 300l20 20M350 300l20 20M390 300l20 20M430 300l20 20M470 300l20 20" style="stroke:#8A7A5E;stroke-width:3" data-a="fade" data-at="1.8"/>
+              <text class="ty" x="340" y="400" text-anchor="middle" data-a="fade" data-at="2.2">Imprint for bond with plaster</text>
+              <text class="tb" x="620" y="260" data-a="fade" data-at="2.4">Not thicker than the</text><text class="tb" x="620" y="290" data-a="fade" data-at="2.5">plastered wall</text>
+              <text class="td" x="620" y="324" data-a="fade" data-at="2.6">cured three days</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">300/ 500mm mesh</text></g>
+              <rect class="fw ln" x="100" y="110" width="440" height="60" style="fill:rgba(244,239,230,.3)" data-a="grow-x"/>
+              <use href="#s-bwall" x="100" y="210" width="440" height="250" data-a="fade" data-at=".2"/>
+              <rect class="fw ln" x="100" y="170" width="440" height="40" style="fill:rgba(244,239,230,.55)" data-a="grow-x" data-at=".6"/>
+              <text class="td" x="320" y="196" text-anchor="middle" data-a="fade" data-at=".8">Adjustor course</text>
+              <rect x="100" y="130" width="300" height="120" fill="url(#p-net)" stroke="#F4EFE6" stroke-width="2" data-a="grow-x" data-at="1.2"/>
+              <rect x="360" y="130" width="180" height="120" fill="url(#p-net)" stroke="var(--yellow)" stroke-width="3" data-a="grow-x" data-at="1.6"/>
+              <text class="ty" x="380" y="280" data-a="fade" data-at="2">overlap</text>
+              <g data-a="pop" data-at="2.2"><rect class="card" x="580" y="200" width="330" height="170" rx="14"/><text class="td" x="604" y="236">Block heights vary</text><text class="tbig" x="604" y="292">185-200mm</text><text class="td" x="604" y="330">choose 300/ 500mm</text></g>
+            </g>
+          </svg>
+
+          <svg class="lsvg" data-l="1" viewBox="0 0 960 540" role="img" aria-label="Animated drawing for tools of the mason gang" hidden>
+            <rect class="bg" width="960" height="540"/><rect width="960" height="540" fill="url(#p-grid)"/>
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Tools available at site</text></g>
+              <use href="#s-toolbox" x="300" y="170" width="260" height="195" data-a="down" data-at=".3"/>
+              <use href="#s-ok" x="580" y="160" width="70" height="70" data-a="pop" data-at="1.2"/>
+              <text class="tb" x="480" y="430" text-anchor="middle" data-a="fade" data-at="1.6">To ensure correct work</text>
+            </g>
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Basic tools of the mason gang</text></g>
+              <g data-a="up" data-at=".3"><use href="#s-hammer" x="80" y="170" width="120" height="120"/><text class="tchip" x="140" y="330" text-anchor="middle">Masons hammer</text></g>
+              <g data-a="up" data-at=".6"><use href="#s-trowel" x="240" y="200" width="140" height="80"/><text class="tchip" x="310" y="330" text-anchor="middle">Masons Trowels</text></g>
+              <g data-a="up" data-at=".9"><use href="#s-sieve" x="410" y="200" width="160" height="70"/><text class="tchip" x="490" y="330" text-anchor="middle">Sand sieve</text></g>
+              <g data-a="up" data-at="1.2"><use href="#s-goggles" x="590" y="210" width="130" height="56"/><text class="tchip" x="655" y="330" text-anchor="middle">Safety goggles</text></g>
+              <g data-a="up" data-at="1.5"><rect class="fy ln" x="800" y="200" width="70" height="70" rx="14"/><circle class="fbp ln" cx="835" cy="235" r="16"/><text class="tchip" x="835" y="330" text-anchor="middle">Measuring tape</text></g>
+            </g>
+          </svg>
+
+          <svg class="lsvg" data-l="2" viewBox="0 0 960 540" role="img" aria-label="Animated drawing for inspection of expanded metal fixing" hidden>
+            <rect class="bg" width="960" height="540"/><rect width="960" height="540" fill="url(#p-grid)"/>
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Stretched, nailed, overlapped</text></g>
+              <rect x="100" y="200" width="320" height="120" fill="url(#p-net)" stroke="#F4EFE6" stroke-width="2" data-a="grow-x" data-at=".2"/>
+              <rect x="380" y="200" width="320" height="120" fill="url(#p-net)" stroke="#F4EFE6" stroke-width="2" data-a="grow-x" data-at=".8"/>
+              <rect x="380" y="200" width="40" height="120" class="fy" opacity=".35" data-a="pop" data-at="1.4"/>
+              <g data-a="pop" data-at="1.8" class="fy"><circle cx="140" cy="230" r="5"/><circle cx="240" cy="290" r="5"/><circle cx="340" cy="230" r="5"/><circle cx="460" cy="290" r="5"/><circle cx="560" cy="230" r="5"/><circle cx="660" cy="290" r="5"/></g>
+              <text class="tb" x="400" y="380" text-anchor="middle" data-a="fade" data-at="2.2">Sufficient overlap</text>
+            </g>
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Precise plastering</text></g>
+              <rect class="fw ln" x="120" y="160" width="160" height="280" style="fill:rgba(220,210,190,.6)" data-a="up" data-at=".2"/>
+              <path class="fw ln" d="M280 160h40v80h20v40h-20v160h-40z" style="fill:rgba(220,210,190,.6)" data-a="up" data-at=".4"/>
+              <use href="#s-bad" x="350" y="230" width="40" height="40" data-a="pop" data-at=".9"/>
+              <rect class="fw ln" x="520" y="160" width="240" height="280" style="fill:rgba(220,210,190,.6)" data-a="up" data-at="1.4"/>
+              <use href="#s-ok" x="780" y="280" width="44" height="44" data-a="pop" data-at="1.9"/>
+              <text class="tb" x="480" y="480" text-anchor="middle" data-a="fade" data-at="2.2">No protruding surfaces/ edges</text>
+            </g>
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Right width of mesh</text></g>
+              <rect class="fw ln" x="100" y="110" width="440" height="60" style="fill:rgba(244,239,230,.3)" data-a="grow-x"/>
+              <rect class="fw ln" x="100" y="170" width="440" height="50" style="fill:rgba(244,239,230,.55)" data-a="grow-x" data-at=".3"/>
+              <use href="#s-bwall" x="100" y="220" width="440" height="240" data-a="fade" data-at=".3"/>
+              <rect x="100" y="130" width="440" height="130" fill="url(#p-net)" stroke="var(--yellow)" stroke-width="3" data-a="grow-y" data-at="1"/>
+              <path class="dim" d="M570 130V260M558 130h24M558 260h24" data-a="draw" data-at="1.6"/>
+              <text class="tb" x="600" y="200" data-a="fade" data-at="2">depending on the height</text><text class="td" x="600" y="228" data-a="fade" data-at="2.1">of the adjustor course</text>
+            </g>
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Proper curing</text></g>
+              <rect class="fw ln" x="120" y="180" width="440" height="100" style="fill:rgba(220,210,190,.75)" data-a="grow-x"/>
+              <g data-a="fade" data-at=".8" class="fwater"><circle cx="180" cy="160" r="6"/><circle cx="260" cy="150" r="6"/><circle cx="340" cy="160" r="6"/><circle cx="420" cy="150" r="6"/><circle cx="500" cy="160" r="6"/></g>
+              <use href="#s-cal" x="640" y="170" width="90" height="90" data-a="pop" data-at="1.4"/>
+              <use href="#s-ok" x="710" y="150" width="40" height="40" data-a="pop" data-at="1.8"/>
+            </g>
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Inspect after a week</text></g>
+              <rect class="fw ln" x="120" y="150" width="440" height="280" style="fill:rgba(220,210,190,.6)" data-a="fade"/>
+              <path class="lnd" d="M120 260H560" style="stroke-dasharray:8 8" data-a="draw" data-at=".4"/>
+              <use href="#s-mag" x="280" y="190" width="130" height="130" data-a="float" data-at="1"/>
+              <use href="#s-cal" x="640" y="170" width="90" height="90" data-a="pop" data-at="1.6"/>
+              <text class="tb" x="685" y="300" text-anchor="middle" data-a="fade" data-at="2">No cracks at</text><text class="tb" x="685" y="330" text-anchor="middle" data-a="fade" data-at="2.1">joints/ plaster</text>
+            </g>
+          </svg>
+          <span hidden><b id="tbSheet"></b><b id="tbScene"></b></span>
+
+          <button class="start" id="start" type="button">
+            <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg>Play lesson</span>
+          </button>
+
+          <div class="endcard" id="endc" hidden>
+            <div class="endbox">
+              <span class="k">✓</span>
+              <strong>Lesson complete</strong>
+              <button class="pill pill-y" id="endNext" type="button">Next lesson: <span id="endNextT"></span></button>
+              <button class="pill pill-o" id="again" type="button">Watch again</button>
+            </div>
+          </div>
+
+          <div class="controls">
+            <div class="cg">
+              <button class="ib" id="prevL" type="button" aria-label="Previous lesson"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2.5v14H6zM20 5v14L9.5 12z" fill="currentColor"/></svg></button>
+              <button class="ib main" id="pp" type="button" aria-label="Play">
+                <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg>
+                <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z" fill="currentColor"/></svg>
+              </button>
+              <button class="ib" id="nextL" type="button" aria-label="Next lesson"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 5H18v14h-2.5zM4 5v14l10.5-7z" fill="currentColor"/></svg></button>
+            </div>
+            <button class="ib cg-x" id="rp" type="button" aria-label="Replay lesson"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z" fill="currentColor"/></svg></button>
+            <div class="segs" id="segs" role="group" aria-label="Jump to a point">
+              <button class="seg" type="button" aria-label="Point 1"><i></i></button><button class="seg" type="button" aria-label="Point 2"><i></i></button>
+              <button class="seg" type="button" aria-label="Point 3"><i></i></button><button class="seg" type="button" aria-label="Point 4"><i></i></button>
+              <button class="seg" type="button" aria-label="Point 5"><i></i></button><button class="seg" type="button" aria-label="Point 6"><i></i></button>
+              <button class="seg" type="button" aria-label="Point 7"><i></i></button><button class="seg" type="button" aria-label="Point 8"><i></i></button>
+              <button class="seg" type="button" aria-label="Point 9"><i></i></button><button class="seg" type="button" aria-label="Point 10"><i></i></button>
+              <button class="seg" type="button" aria-label="Point 11"><i></i></button><button class="seg" type="button" aria-label="Point 12"><i></i></button>
+              <button class="seg" type="button" aria-label="Point 13"><i></i></button><button class="seg" type="button" aria-label="Point 14"><i></i></button>
+              <button class="seg" type="button" aria-label="Point 15"><i></i></button>
+            </div>
+            <span class="tm" id="tm">0:00 / 0:00</span>
+            <select class="sp" id="sp" aria-label="Speed"><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option></select>
+            <button class="tg" id="nr" type="button" aria-pressed="false">Narrate</button>
+            <select class="sp nl" id="nl" aria-label="Narration language"><option value="en" selected>English</option><option value="hi">हिंदी</option></select>
+            <button class="ib" id="fs" type="button" aria-label="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
+          </div>
+        </div>
+        <p class="rot">For a bigger picture, tap full screen or turn your phone sideways.</p>
+      </section>
+
+      <section class="manual" id="manual" aria-labelledby="manualTitle">
+        <h2 id="manualTitle">Manual text</h2>
+        <p class="manual-note">Word for word from the Dhinwa Construction Engineering Technology Manual. The point playing now is highlighted; tap any point to jump to it.</p>
+        <ol class="mtext" data-l="0">
+          <li>Nail rhombus mesh rolls over the blockwork and concrete junctions with steel nails/wooden plug and nails.</li>
+          <li>Plastering mesh should be fixed rigidly before plastering on the junction between concrete and masonry surface. This strip has to be plastered and cured for minimum of 3 days before the entire wall is plastered.</li>
+          <li>The GI expanded wise metal mesh shall be fixed over the junction with 1½” lay wise nails. The nails shall be driven into the RCC beams / columns after drilling a hole and over brick / block masonry directly. The nails shall be staggered and folded to secure the mesh reinforcement.</li>
+          <li>Cement mortar of 1:3 proportion shall be laid over the mesh to a thickness not exceeding plastered wall thickness and imprint shall be made over it to create bond with the plastering to be done. This will be cured for three days prior to commencing plastering.</li>
+          <li>Metal meshes of 300/ 500mm are fixed with sufficient overlap. The difference in the height of blocks that varies from 185-200mm, leading to varying heights of adjustor courses. Hence it is recommended to employ a 300/ 500mm wire mesh which ever is suitable.</li>
+        </ol>
+        <ol class="mtext" data-l="1" hidden>
+          <li>Required tools must be available at site to ensure correct work.</li>
+          <li><span><b>Basic tools of the mason gang are:</b><ul><li>Masons hammer</li><li>Masons Trowels</li><li>Sand sieve</li><li>Safety goggles</li><li>Measuring tape</li></ul></span></li>
+        </ol>
+        <ol class="mtext" data-l="2" hidden>
+          <li>Ensure metal meshes are properly stretched and nailed, with sufficient overlap.</li>
+          <li>Plastering on these surfaces to be done precisely with no protruding surfaces/ edges.</li>
+          <li>Ensure right width of plastering mesh has been used depending on the height of the adjustor course.</li>
+          <li>Establish if proper curing has been done</li>
+          <li>Inspection to be done after a week to ensure no cracks at joints/ plaster.</li>
+        </ol>
+      </section>
+    </main>
+  </div>
+</div>
+<script>
+/* Lessons 1 to 5 player. Reads the markup and data-a attributes above; it never writes HTML. */
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const heads=$$('.heads hgroup'), lessons=$$('.ls'), segs=$$('#segs .seg'), N=lessons.length;
+const svgOf=i=>$(`.lsvg[data-l="${i}"]`), textOf=i=>$(`.mtext[data-l="${i}"]`), listOf=i=>$(`.clist[data-l="${i}"]`);
+const SHEETS=['9.1','9.2','9.3','Form'];
+const ui={stage:$('#stage'),start:$('#start'),endc:$('#endc'),endNext:$('#endNext'),endNextT:$('#endNextT'),again:$('#again'),pp:$('#pp'),rp:$('#rp'),
+  prevL:$('#prevL'),nextL:$('#nextL'),tm:$('#tm'),sp:$('#sp'),nr:$('#nr'),nl:$('#nl'),fs:$('#fs'),tbSheet:$('#tbSheet'),tbScene:$('#tbScene'),mbarT:$('#mbarT')};
+let cur=-1, tl=null, starts=[], durs=[], point=-1, narrate=false, fresh=true, playing=false, lang='en';
+const HI=[["ब्लॉकवर्क और कंक्रीट के जोड़ों पर रॉम्बस जाली के रोल स्टील कीलों से, या लकड़ी के प्लग और कीलों से ठोकें।", "कंक्रीट और मेसनरी सतह के जोड़ पर प्लास्टर से पहले प्लास्टरिंग जाली मज़बूती से लगाई जानी चाहिए। पूरी दीवार के प्लास्टर से पहले इस पट्टी पर प्लास्टर करके कम से कम 3 दिन क्योरिंग करनी है।", "जीआई एक्सपैंडेड मेटल जाली को जोड़ पर डेढ़ इंच की कीलों से लगाया जाएगा। आरसीसी बीम या कॉलम में छेद करके कीलें ठोकी जाएँगी, और ईंट या ब्लॉक मेसनरी पर सीधे। जाली को कसने के लिए कीलें आगे-पीछे लगाकर मोड़ी जाएँगी।", "जाली के ऊपर 1:3 अनुपात का सीमेंट मसाला प्लास्टर की गई दीवार की मोटाई से ज़्यादा नहीं, इतनी मोटाई में लगाया जाएगा, और होने वाले प्लास्टर से बॉन्ड बनाने के लिए उस पर निशान बनाए जाएँगे। प्लास्टर शुरू करने से पहले इसकी तीन दिन क्योरिंग होगी।", "300 या 500 मिमी की मेटल जाली पर्याप्त ओवरलैप के साथ लगाई जाती है। ब्लॉकों की ऊँचाई में 185 से 200 मिमी तक का अंतर होता है, जिससे एडजस्टर कोर्स की ऊँचाई बदलती है। इसलिए जो भी उपयुक्त हो, 300 या 500 मिमी की वायर जाली इस्तेमाल करने की सलाह दी जाती है।"], ["सही काम सुनिश्चित करने के लिए साइट पर ज़रूरी औज़ार उपलब्ध होने चाहिए।", "मिस्त्री गैंग के मूल औज़ार हैं: मिस्त्री का हथौड़ा, मिस्त्री की ट्रॉवेल, रेत की छलनी, सेफ़्टी गॉगल्स, और मेज़रिंग टेप।"], ["सुनिश्चित करें कि मेटल जाली ठीक से तनी हुई और कीलों से लगी हो, पर्याप्त ओवरलैप के साथ।", "इन सतहों पर प्लास्टर सटीकता से किया जाए, कोई सतह या किनारा बाहर न निकले।", "सुनिश्चित करें कि एडजस्टर कोर्स की ऊँचाई के अनुसार प्लास्टरिंग जाली की सही चौड़ाई इस्तेमाल हुई है।", "पक्का करें कि ठीक से क्योरिंग हुई है।", "एक हफ़्ते बाद निरीक्षण करें, ताकि जोड़ों या प्लास्टर में दरारें न हों।"]];
+const pointsOf=i=>textOf(i)?$$(':scope > li:not(.mh)',textOf(i)):[];
+
+/* ---------- one animation per data-a token ---------- */
+function len(el){try{return Math.ceil(el.getTotalLength());}catch(e){return 600;}}
+function anim(t,el,a,at,d){
+  const o={transformOrigin:'50% 50%'};
+  switch(a){
+    case 'fade':t.from(el,{opacity:0,duration:d||.5},at);break;
+    case 'up':t.from(el,{opacity:0,y:40,duration:d||.6,ease:'power3.out'},at);break;
+    case 'down':t.from(el,{opacity:0,y:-120,duration:d||.8,ease:'bounce.out'},at);break;
+    case 'left':t.from(el,{opacity:0,x:-70,duration:d||.6,ease:'power3.out'},at);break;
+    case 'right':t.from(el,{opacity:0,x:90,duration:d||.7,ease:'power3.out'},at);break;
+    case 'pop':t.from(el,{...o,opacity:0,scale:0,duration:d||.5,ease:'back.out(2)'},at);break;
+    case 'draw':{const L=len(el);t.fromTo(el,{strokeDasharray:L,strokeDashoffset:L},{strokeDashoffset:0,duration:d||1,ease:'power2.inOut'},at);break;}
+    case 'grow-x':t.from(el,{scaleX:0,transformOrigin:'0% 50%',duration:d||.8,ease:'power2.out'},at);break;
+    case 'grow-y':t.from(el,{scaleY:0,transformOrigin:'50% 100%',duration:d||.8,ease:'power2.out'},at);break;
+    case 'pulse':t.from(el,{...o,opacity:0,scale:0,duration:.45,ease:'back.out(2)'},at);t.to(el,{...o,scale:1.12,duration:.4,yoyo:true,repeat:5,ease:'sine.inOut'},at+.5);break;
+    case 'ring':t.fromTo(el,{...o,scale:.6,opacity:.9},{scale:1.35,opacity:0,duration:1.4,repeat:2,ease:'power1.out'},at);break;
+    case 'wave':t.from(el,{opacity:0,duration:.2},at);t.to(el,{opacity:.15,duration:.35,yoyo:true,repeat:7},at+.2);break;
+    case 'float':t.from(el,{opacity:0,duration:.3},at);t.to(el,{y:-16,duration:.6,yoyo:true,repeat:5,ease:'sine.inOut'},at+.3);break;
+    case 'swing':t.from(el,{opacity:0,duration:.3},at);t.fromTo(el,{rotation:-6,transformOrigin:'50% 0%'},{rotation:6,duration:.9,yoyo:true,repeat:5,ease:'sine.inOut'},at);break;
+    case 'deflect':t.fromTo(el,{y:-160,opacity:1},{y:0,duration:.5,ease:'power2.in'},at);t.to(el,{x:150,y:-70,rotation:70,opacity:0,duration:.7,ease:'power2.out'},at+.5);break;
+    case 'lower':t.from(el,{y:-220,opacity:0,duration:1.5,ease:'power2.out'},at);break;
+    case 'out':t.to(el,{opacity:0,duration:d||.5},at);break;
+    case 'sweep':t.to(el,{x:280,opacity:0,duration:d||1,ease:'power2.in'},at);break;
+    case 'glow':t.from(el,{...o,opacity:0,scale:.3,duration:.8},at);t.to(el,{opacity:.5,duration:.6,yoyo:true,repeat:4},at+.8);break;
+    case 'waves':t.to(el,{x:-60,duration:1.6,yoyo:true,repeat:5,ease:'sine.inOut'},at);break;
+  }
+}
+
+/* ---------- build a lesson timeline ---------- */
+function build(i){
+  if(tl)tl.revert();
+  const svg=svgOf(i),scenes=$$('.scene',svg),pts=pointsOf(i);
+  tl=gsap.timeline({paused:true,onUpdate:tick,onComplete:()=>{playing=false;stopNarr();setPP(false);lessons[i].classList.add('done');showEnd(true);}});
+  gsap.set(scenes,{autoAlpha:0});starts=[];durs=[];let t0=0;
+  scenes.forEach((sc,k)=>{
+    const words=(pts[k]?pts[k].textContent:'').trim().split(/\s+/).length;
+    const dur=Math.min(17,Math.max(6,words*.42+2.5));starts.push(t0);durs.push(dur);
+    if(k>0)tl.to(sc,{autoAlpha:1,duration:.4},t0);
+    $$('[data-a]',sc).forEach(el=>{const as=el.dataset.a.split(' '),ats=(el.dataset.at||'0').split(' '),d=+el.dataset.d||0;
+      as.forEach((a,n)=>anim(tl,el,a,t0+.25+(+ats[n]||+ats[0]||0),reduce?.01:d));});
+    tl.call(gate,[k],k<scenes.length-1?t0+dur-.42:t0+dur-.02);
+    if(k<scenes.length-1)tl.to(sc,{autoAlpha:0,duration:.4},t0+dur-.4);
+    else tl.to({},{duration:.01},t0+dur);
+    t0+=dur;
+  });
+  const total=t0;
+  segs.forEach((s,k)=>{s.hidden=k>=scenes.length;if(k<scenes.length)s.style.flexGrow=durs[k];});
+  gsap.set(scenes[0],{autoAlpha:1});
+  /* poster: the first point fully drawn until Play is pressed */
+  point=-1;fresh=true;tl.seek(Math.max(0,durs[0]-.5));tick();
+}
+function setLesson(i,{play=false}={}){
+  if(i<0||i>=N)return;cur=i;
+  if(tl){tl.revert();tl=null;}
+  const list=listOf(i);
+  $$('.lsvg').forEach(s=>s.toggleAttribute('hidden',s!==svgOf(i)));
+  $$('.mtext').forEach(t=>t.hidden=t!==textOf(i));
+  $$('.clist').forEach(c=>c.hidden=c!==list);
+  heads.forEach((h,k)=>h.hidden=k!==i);
+  $('#player').hidden=!!list;$('#manual').hidden=!!list;
+  lessons.forEach((l,k)=>l.classList.toggle('on',k===i));
+  ui.prevL.disabled=i===0;ui.nextL.disabled=i===N-1;
+  ui.endNext.hidden=i===N-1;ui.endNextT.textContent=i<N-1?heads[i+1].querySelector('h1').textContent:'';
+  ui.tbSheet.textContent=SHEETS[i]||'';ui.mbarT.textContent=heads[i].querySelector('h1').textContent;
+  showEnd(false);ui.start.hidden=false;playing=false;stopNarr();setPP(false);
+  if(list)showList(i,list);else build(i);
+  try{history.replaceState(null,'','#lesson-'+(i+1));}catch(e){}
+  if(play&&!list)begin();
+  window.scrollTo(0,0);
+}
+
+/* ---------- checklists ---------- */
+function showList(i,list){
+  const KEY='dh-ch9-cl-'+i,rows=$$('.cl-row[data-k]',list);let ans={};
+  try{ans=JSON.parse(localStorage.getItem(KEY))||{};}catch(e){}
+  const count=()=>{const c=Object.values(ans).filter(Boolean).length;$('.cl-count',list).textContent=`${c} of ${rows.length} checked`;
+    $('.cl-meter i',list).style.width=(c/rows.length*100)+'%';if(c===rows.length)lessons[i].classList.add('done');};
+  rows.forEach(r=>{const k=r.dataset.k,[y,na]=$$('button',r);r.querySelector('.seg2').setAttribute('aria-label',r.querySelector('.tx').textContent);
+    const paint=()=>{y.setAttribute('aria-pressed',ans[k]==='y');na.setAttribute('aria-pressed',ans[k]==='na');};paint();
+    const set=v=>{ans[k]=ans[k]===v?undefined:v;paint();try{localStorage.setItem(KEY,JSON.stringify(ans));}catch(e){}count();};
+    y.onclick=()=>set('y');na.onclick=()=>set('na');});
+  $('.cl-reset',list).onclick=()=>{ans={};try{localStorage.removeItem(KEY);}catch(e){}rows.forEach(r=>$$('button',r).forEach(b=>b.setAttribute('aria-pressed','false')));count();};
+  $('.cl-prev',list).disabled=i===0;$('.cl-next',list).disabled=i===N-1;
+  $('.cl-prev',list).onclick=()=>setLesson(i-1);$('.cl-next',list).onclick=()=>setLesson(i+1);
+  $$('.pt',lessons[i]).forEach(b=>{b.classList.remove('now','seen');});
+  count();
+}
+
+/* ---------- progress ---------- */
+const fmt=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
+function tick(){if(!tl||listOf(cur))return;const t=tl.time();let k=0;starts.forEach((s,n)=>{if(t>=s-.001)k=n;});
+  segs.forEach((s,n)=>{s.classList.toggle('done',n<k);if(n===k)gsap.set(s.firstElementChild,{scaleX:Math.min(1,(t-starts[k])/durs[k])});else if(n>k)gsap.set(s.firstElementChild,{scaleX:0});});
+  ui.tm.textContent=fmt(t)+' / '+fmt(tl.duration());
+  if(k!==point){point=k;const pts=pointsOf(cur);
+    pts.forEach((p,n)=>p.classList.toggle('now',n===k));
+    $$('.pt',lessons[cur]).forEach((b,n)=>{b.classList.toggle('now',n===k);b.classList.toggle('seen',n<k);});
+    ui.tbScene.textContent=`${k+1} of ${starts.length}`;
+    const li=pts[k];
+    if(narrate&&playing&&li)speakScene(k);
+  }}
+
+/* ---------- controls ---------- */
+function setPP(on){ui.pp.classList.toggle('playing',on);ui.pp.setAttribute('aria-label',on?'Pause':'Play');}
+function showEnd(on){ui.endc.hidden=!on;if(on&&!reduce)gsap.fromTo(ui.endc.firstElementChild,{opacity:0,y:16,scale:.96},{opacity:1,y:0,scale:1,duration:.45,ease:'back.out(1.6)'});}
+function inView(){const r=ui.stage.getBoundingClientRect(),bar=$('.mbar'),top=(bar&&getComputedStyle(bar).display!=='none'?bar.offsetHeight:0)+8;
+  if(r.top<top-2||r.bottom>innerHeight+2)window.scrollBy({top:r.top-top,behavior:reduce?'auto':'smooth'});}
+function begin(){ui.start.hidden=true;showEnd(false);inView();playing=true;setPP(true);
+  if(fresh||tl.progress()>=1){fresh=false;point=-1;stopNarr();tl.restart();}
+  else if(NS.wait){resumeNarr();}
+  else{tl.play();if(narrate)resumeNarr();}}
+function jump(k){if(!tl||k>=starts.length)return;fresh=false;ui.start.hidden=true;showEnd(false);stopNarr();playing=true;point=-1;tl.seek(starts[k]+.01);tl.play();setPP(true);tick();inView();}
+ui.start.onclick=begin;
+ui.pp.onclick=()=>{if(!tl)return;if(!playing||tl.progress()>=1)begin();else{playing=false;tl.pause();pauseNarr();setPP(false);}};
+ui.rp.onclick=()=>{fresh=false;ui.start.hidden=true;showEnd(false);stopNarr();playing=true;point=-1;tl.restart();setPP(true);};
+ui.again.onclick=ui.rp.onclick;
+ui.endNext.onclick=()=>setLesson(cur+1,{play:true});
+ui.prevL.onclick=()=>setLesson(cur-1,{play:playing});
+ui.nextL.onclick=()=>setLesson(cur+1,{play:playing});
+segs.forEach((s,k)=>s.onclick=()=>jump(k));
+ui.sp.onchange=e=>{tl&&tl.timeScale(+e.target.value);if(narrate&&playing&&!NS.done)restartChunk();};
+if(!window.speechSynthesis)ui.nr.hidden=true;
+ui.nr.onclick=()=>{narrate=!narrate;ui.nr.setAttribute('aria-pressed',narrate);
+  if(!narrate){const w=NS.wait;stopNarr();if(w&&playing)tl.play();}
+  else if(playing&&point>=0)speakScene(point);};
+ui.nl.onchange=e=>{lang=e.target.value;try{localStorage.setItem('dh-narr-lang',lang);}catch(x){}
+  if(narrate&&playing&&point>=0&&!NS.done)speakScene(point);};
+try{const v=localStorage.getItem('dh-narr-lang');if(v==='hi'||v==='en'){lang=v;ui.nl.value=v;}}catch(x){}
+if(!window.speechSynthesis)ui.nl.hidden=true;
+
+/* ---------- narration engine: event-based sync with the visual timeline ----------
+   A point (scene) moves on only when BOTH its visuals reached the end-of-scene gate AND
+   its narration has been fully spoken. Pause/resume holds both; resume restarts speech
+   from the last spoken word (boundary events) so nothing is skipped or repeated twice. */
+const NS={gen:0,k:-1,chunks:[],ci:0,off:0,bnd:0,done:true,wait:false,paused:false,dog:0};
+const SS=window.speechSynthesis;
+function voiceFor(l){const vs=SS?SS.getVoices():[];const want=l==='hi'?['hi-IN','hi']:['en-IN','en-GB','en-US','en'];
+  for(const w of want){const v=vs.find(v=>v.lang&&v.lang.replace('_','-').toLowerCase().startsWith(w.toLowerCase()));if(v)return v;}return null;}
+if(SS&&SS.addEventListener)SS.addEventListener('voiceschanged',()=>{});
+function narrText(k){const pts=pointsOf(cur);if(lang==='hi'&&HI[cur]&&HI[cur][k])return HI[cur][k];
+  return pts[k]?liText(pts[k]):'';}
+function liText(li){const c=li.cloneNode(true);
+  c.querySelectorAll('li,td,th').forEach(e=>e.append(document.createTextNode(', ')));
+  c.querySelectorAll('tr,p,div').forEach(e=>e.append(document.createTextNode('. ')));
+  c.querySelectorAll('br').forEach(e=>e.replaceWith(document.createTextNode(' ')));
+  return c.textContent.replace(/[✓✔]/g,' ').replace(/\s+/g,' ').replace(/\s*,\s*(?=[,.])/g,'').replace(/\.\s*\./g,'.').replace(/:\s*,/g,':').replace(/[\s,]+$/,'').trim();}
+function chunk(t){const out=[];t.split(/(?<=[.;:!?।])\s+/).forEach(s=>{
+  while(s.length>200){let c=s.lastIndexOf(', ',200);if(c<60)c=s.lastIndexOf(' ',200);if(c<1)c=200;out.push(s.slice(0,c+1).trim());s=s.slice(c+1);}
+  if(s.trim())out.push(s.trim());});return out;}
+function clearDog(){if(NS.dog){clearTimeout(NS.dog);NS.dog=0;}}
+function stopNarr(){NS.gen++;clearDog();NS.done=true;NS.wait=false;NS.paused=false;NS.k=-1;if(SS)SS.cancel();}
+function speakScene(k){if(!SS)return;NS.gen++;clearDog();SS.cancel();
+  NS.k=k;NS.chunks=chunk(narrText(k));NS.ci=0;NS.off=0;NS.bnd=0;NS.done=false;NS.paused=false;NS.wait=false;
+  if(SS.paused)SS.resume();speakChunk();}
+function speakChunk(){
+  if(NS.ci>=NS.chunks.length){NS.done=true;clearDog();narrDone();return;}
+  const g=++NS.gen,txt=NS.chunks[NS.ci].slice(NS.off);
+  if(!txt.trim()){NS.ci++;NS.off=0;NS.bnd=0;speakChunk();return;}
+  const u=new SpeechSynthesisUtterance(txt),v=voiceFor(lang);
+  u.lang=lang==='hi'?'hi-IN':'en-IN';if(v)u.voice=v;u.rate=Math.min(2,Math.max(.5,+ui.sp.value||1));
+  let started=false;const base=NS.off;NS.bnd=base;
+  const next=()=>{if(g!==NS.gen||NS.paused)return;clearDog();NS.ci++;NS.off=0;NS.bnd=0;speakChunk();};
+  u.onstart=()=>{if(g!==NS.gen)return;started=true;clearDog();
+    NS.dog=setTimeout(()=>{if(g===NS.gen&&!NS.paused){SS.cancel();next();}},(txt.length*170/u.rate)+6000);};
+  u.onboundary=e=>{if(g===NS.gen&&e.name!=='sentence'&&e.charIndex>=0)NS.bnd=base+e.charIndex;};
+  u.onend=next;
+  u.onerror=e=>{if(g!==NS.gen||NS.paused)return;if(e.error==='interrupted'||e.error==='canceled')return;next();};
+  NS.dog=setTimeout(()=>{if(g===NS.gen&&!started&&!NS.paused){SS.cancel();next();}},5000);
+  SS.speak(u);}
+function restartChunk(){if(NS.done)return;NS.gen++;clearDog();SS.cancel();NS.off=NS.bnd;speakChunk();}
+function pauseNarr(){if(!SS||NS.done)return;NS.paused=true;NS.gen++;clearDog();NS.off=NS.bnd;SS.cancel();}
+function resumeNarr(){if(!SS)return;
+  if(NS.k!==point&&point>=0&&narrate){speakScene(point);return;}
+  if(NS.done){if(NS.wait)narrDone();return;}
+  NS.paused=false;speakChunk();}
+function narrDone(){if(NS.wait&&playing){NS.wait=false;tl.play();}}
+function gate(k){if(!narrate||!SS)return;
+  if(NS.k!==k){speakScene(k);}
+  if(!NS.done){NS.wait=true;tl.pause();}}
+lessons.forEach((l,i)=>pointsOf(i).forEach((li,k)=>li.addEventListener('click',()=>{if(i===cur)jump(k);})));
+lessons.forEach((l,i)=>{
+  l.querySelector('.ls-btn').onclick=()=>{if(i!==cur)setLesson(i);closeMenu();};
+  $$('.pt',l).forEach((b,k)=>b.onclick=()=>{if(i!==cur)setLesson(i);const list=listOf(i);
+    if(list){const sec=$$('.cl-sec',list)[k];if(sec)sec.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});}else jump(k);closeMenu();});
+});
+
+/* full screen */
+function exitFs(){ui.stage.classList.remove('fs');const fe=document.fullscreenElement||document.webkitFullscreenElement;if(fe)(document.exitFullscreen||document.webkitExitFullscreen).call(document);}
+ui.fs.onclick=async()=>{const fe=document.fullscreenElement||document.webkitFullscreenElement;
+  if(fe||ui.stage.classList.contains('fs')){exitFs();return;}
+  const req=ui.stage.requestFullscreen||ui.stage.webkitRequestFullscreen;
+  if(req){try{await req.call(ui.stage);try{await screen.orientation.lock('landscape');}catch(e){}}catch(e){ui.stage.classList.add('fs');}}else ui.stage.classList.add('fs');};
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement){try{screen.orientation.unlock();}catch(e){}}});
+
+/* menu and keys */
+const side=$('#side'),scrim=$('#scrim'),menuBtn=$('#menuBtn');
+function closeMenu(){side.classList.remove('show');scrim.classList.remove('show');menuBtn.setAttribute('aria-expanded','false');}
+menuBtn.onclick=()=>{const s=side.classList.toggle('show');scrim.classList.toggle('show',s);menuBtn.setAttribute('aria-expanded',s);};
+scrim.onclick=closeMenu;$('#sideClose').onclick=closeMenu;
+document.addEventListener('keydown',e=>{
+  if(e.key===' '&&e.target===document.body){e.preventDefault();ui.pp.click();}
+  if(e.key==='ArrowRight'&&e.target===document.body&&point<starts.length-1)jump(point+1);
+  if(e.key==='ArrowLeft'&&e.target===document.body&&point>0)jump(point-1);
+  if(e.key==='Escape'){closeMenu();ui.stage.classList.remove('fs');}});
+
+/* start on the lesson in the address, or lesson 1 */
+const m=location.hash.match(/lesson-(\d+)/);
+(document.fonts?document.fonts.ready:Promise.resolve()).then(()=>setLesson(m?Math.min(N-1,Math.max(0,+m[1]-1)):0));
+</script>
+</body>
+</html>

@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chapter 6: Concreting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,500;9..40,700;9..40,800&family=Work+Sans:wght@400;500;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="../assets/gsap.min.js"></script>
+<style>
+:root{
+  --bg:#F7F6F2; --panel:#FFFFFF; --panel-2:#F4F2EC; --ink:#1A1612; --muted:#5E574D; --line:#E6E1D6;
+  --side:#1A1612; --side-2:#2A241D; --side-ink:#FFF8E6; --side-muted:#B5AC9C; --side-line:#3A3229;
+  --bp:#1F1A15; --bp-2:#171310; --bp-line:#F4EFE6; --bp-dim:#A89C88; --bp-grid:rgba(244,239,230,.07);
+  --yellow:#F9C306; --orange:#E89519; --amber:#F7A70C; --red:#E8573F; --green:#3DBB7E; --water:#3E8FC7;
+  --on-yellow:#1A1612;
+  --display:"DM Sans","Work Sans","Open Sans",sans-serif;
+  --sans:"Work Sans","DM Sans","Open Sans",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#120F0C; --panel:#1C1814; --panel-2:#241F1A; --ink:#F4EFE6; --muted:#B0A696; --line:#332C24;
+  --side:#0D0B09; --side-2:#1F1A15; --side-line:#2C251E; color-scheme:dark;}}
+:root[data-theme="dark"]{--bg:#120F0C; --panel:#1C1814; --panel-2:#241F1A; --ink:#F4EFE6; --muted:#B0A696; --line:#332C24;
+  --side:#0D0B09; --side-2:#1F1A15; --side-line:#2C251E; color-scheme:dark;}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16.5px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+button{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--display);margin:0}
+
+/* ---------- layout ---------- */
+.app{display:grid;grid-template-columns:clamp(280px,25vw,340px) minmax(0,1fr);min-height:100vh;min-height:100dvh}
+.side{position:sticky;top:0;height:100vh;height:100dvh;overflow-y:auto;background:var(--side);color:var(--side-ink);padding:22px 0 40px}
+.side-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:0 22px 18px;border-bottom:1px solid var(--side-line)}
+.side-top h2{font:700 15px/1.35 var(--display);color:var(--side-ink)}
+.side-top h2 span{display:block;color:var(--yellow);font-size:13px;margin-bottom:4px}
+.side-close{display:none;flex:none;width:36px;height:36px;border:1px solid var(--side-line);background:none;color:var(--side-ink);font-size:24px;line-height:1;cursor:pointer}
+.ls{border-bottom:1px solid var(--side-line)}
+.ls-btn{width:100%;display:grid;grid-template-columns:36px 1fr;gap:10px;align-items:start;padding:16px 22px;border:0;background:none;text-align:left;cursor:pointer}
+.ls-btn:hover{background:var(--side-2)}
+.ls-no{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font:800 14px var(--display);background:var(--side-2);color:var(--side-muted)}
+.ls-t{font:700 15px/1.3 var(--display)}
+.ls-t small{display:block;margin-top:3px;font:500 13px/1.35 var(--sans);color:var(--side-muted)}
+.ls.on .ls-no{background:var(--yellow);color:var(--on-yellow)}
+.ls.done .ls-no{background:var(--green);color:#fff}
+.pts{list-style:none;margin:0;padding:0 14px 14px 68px;display:none}
+.ls.on .pts{display:block}
+.pt{width:100%;border:0;background:none;text-align:left;cursor:pointer;padding:7px 10px;border-radius:8px;font:400 13.5px/1.4 var(--sans);color:var(--side-muted);display:grid;grid-template-columns:18px 1fr;gap:6px}
+.pt::before{content:"";width:8px;height:8px;margin-top:6px;border-radius:50%;border:2px solid var(--side-muted)}
+.pt:hover{color:var(--side-ink)}
+.pt.seen{color:var(--side-ink)}
+.pt.seen::before{background:var(--side-muted)}
+.pt.now{color:var(--side-ink);background:var(--side-2);font-weight:600}
+.pt.now::before{border-color:var(--yellow);background:var(--yellow)}
+.scrim{display:none}
+.col{min-width:0;display:flex;flex-direction:column}
+.mbar{display:none}
+main{width:100%;max-width:1280px;margin:0 auto;padding:clamp(20px,3vw,36px) clamp(16px,3vw,44px) 56px}
+
+/* ---------- lesson header ---------- */
+.heads hgroup{margin-bottom:clamp(14px,2vw,22px)}
+.heads hgroup[hidden]{display:none}
+.l-code{margin:0 0 6px;font:700 15px/1 var(--display);color:var(--orange)}
+.heads h1{font-weight:800;font-size:clamp(26px,3.2vw,42px);line-height:1.08;letter-spacing:-.025em}
+.l-sub{margin:8px 0 0;font:500 clamp(15px,1.3vw,17px)/1.4 var(--sans);color:var(--muted)}
+
+/* ---------- player ---------- */
+.player{width:100%;max-width:max(300px,calc((100vh - 70px - 40px) * 16 / 9));max-width:max(300px,calc((100dvh - 70px - 40px) * 16 / 9))}
+.stage{position:relative;background:var(--bp);border-radius:16px;overflow:hidden;scroll-margin-top:12px;box-shadow:0 30px 60px -36px rgba(20,14,8,.6)}
+.lsvg{display:block;width:100%;height:auto;aspect-ratio:16/9}
+.lsvg[hidden]{display:none}
+.tblock{position:absolute;right:14px;bottom:76px;display:grid;grid-template-columns:auto auto;border:1.5px solid var(--bp-dim);font:500 11.5px/1.2 var(--display);color:var(--bp-line);background:rgba(26,22,18,.85)}
+.tblock span{padding:5px 9px;border-right:1.5px solid var(--bp-dim);border-bottom:1.5px solid var(--bp-dim)}
+.tblock span:nth-child(2n){border-right:0}
+.tblock span:nth-last-child(-n+2){border-bottom:0}
+.tblock b{font-weight:700;color:var(--yellow)}
+.start{position:absolute;inset:0 0 62px;display:grid;place-items:center;border:0;background:rgba(26,22,18,.35);cursor:pointer}
+.start[hidden]{display:none}
+.start span{display:flex;align-items:center;gap:10px;padding:16px 26px;border-radius:999px;background:var(--yellow);color:var(--on-yellow);font:700 16px/1 var(--display);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.start svg{width:18px;height:18px}
+.endcard{position:absolute;inset:0 0 62px;display:grid;place-items:center;background:rgba(26,22,18,.9)}
+.endcard[hidden]{display:none}
+.endbox{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;color:var(--bp-line);padding:20px}
+.endbox .k{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#fff;font:800 28px var(--display)}
+.endbox strong{font:700 22px/1.2 var(--display)}
+.pill{border:0;border-radius:999px;padding:12px 20px;font:700 15px/1.3 var(--display);cursor:pointer;max-width:min(440px,80vw)}
+.pill-y{background:var(--yellow);color:var(--on-yellow)}
+.pill-o{background:transparent;color:var(--bp-line);box-shadow:inset 0 0 0 2px var(--bp-dim)}
+.pill[hidden]{display:none}
+.controls{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bp-2);color:var(--bp-line)}
+.cg{display:flex;align-items:center;gap:6px;flex:none}
+.ib{width:40px;height:40px;flex:none;display:grid;place-items:center;border:0;border-radius:50%;background:rgba(244,239,230,.1);color:var(--bp-line);cursor:pointer}
+.ib svg{width:17px;height:17px}
+.ib.main{background:var(--yellow);color:var(--on-yellow)}
+.ib:disabled{opacity:.3;cursor:default}
+.ib .i-pause{display:none}.ib.playing .i-play{display:none}.ib.playing .i-pause{display:block}
+.segs{flex:1;min-width:60px;display:flex;gap:4px;align-items:center}
+.seg{flex:1;height:8px;padding:0;border:0;border-radius:4px;background:rgba(244,239,230,.18);cursor:pointer;position:relative;overflow:hidden}
+.seg[hidden]{display:none}
+.seg i{position:absolute;inset:0;background:var(--yellow);transform:scaleX(0);transform-origin:0 50%}
+.seg.done i{transform:none;background:var(--amber)}
+.tm{font:600 13px var(--display);white-space:nowrap;color:var(--bp-dim)}
+.sp{background:rgba(244,239,230,.1);color:var(--bp-line);border:0;border-radius:8px;padding:8px 6px;font:600 13px var(--display)}
+.sp option{color:#1A1612}
+.sp.nl{display:inline-block!important}
+.tg{border:0;border-radius:8px;background:rgba(244,239,230,.1);color:var(--bp-line);padding:9px 11px;font:700 12.5px var(--display);cursor:pointer}
+.tg[aria-pressed="true"]{background:var(--yellow);color:var(--on-yellow)}
+.stage:fullscreen,.stage.fs{display:flex;flex-direction:column;justify-content:center;border-radius:0}
+.stage:-webkit-full-screen{display:flex;flex-direction:column;justify-content:center;border-radius:0}
+.stage:fullscreen .lsvg,.stage.fs .lsvg{max-height:calc(100dvh - 62px);width:auto;max-width:100%;margin:0 auto}
+.stage:-webkit-full-screen .lsvg{max-height:calc(100vh - 62px);width:auto;max-width:100%;margin:0 auto}
+.stage.fs{position:fixed;inset:0;z-index:60}
+.rot{display:none;margin:10px 0 0;font-size:13.5px;color:var(--muted)}
+
+/* ---------- manual text ---------- */
+.manual{margin-top:22px;background:var(--panel);border-radius:16px;padding:clamp(18px,2.4vw,28px)}
+.manual h2{font:700 17px/1.3 var(--display);margin:0 0 4px}
+.manual-note{margin:0 0 16px;font-size:14px;color:var(--muted)}
+.mtext{list-style:none;margin:0;padding:0;display:grid;gap:4px;counter-reset:pt}
+.mtext[hidden]{display:none}
+.mtext>li{counter-increment:pt;display:grid;grid-template-columns:34px 1fr;gap:12px;padding:12px 14px;border-radius:12px;cursor:pointer;color:var(--muted);transition:background .25s,color .25s}
+.mtext>li::before{content:counter(pt);width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font:700 13px var(--display);background:var(--panel-2);color:var(--muted)}
+.mtext>li:hover{background:var(--panel-2)}
+.mtext>li.now{background:var(--panel-2);color:var(--ink);box-shadow:inset 4px 0 0 var(--yellow)}
+.mtext>li.now::before{background:var(--yellow);color:var(--on-yellow)}
+.mtext b{color:var(--ink);font-weight:600}
+.mtext ul{margin:6px 0 0;padding-left:18px}
+.mtext .mh{grid-column:1/-1;margin:14px 0 2px;padding:0 14px;font:700 14px/1.3 var(--display);color:var(--orange);counter-increment:none;cursor:default}
+.mtext .mh::before{display:none}
+.mtext .mh:hover{background:none}
+
+/* ---------- blueprint drawing ---------- */
+.bg{fill:var(--bp)}
+.ln{fill:none;stroke:var(--bp-line);stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round}
+.thick{stroke-width:6}
+.lnd{fill:none;stroke:var(--bp-dim);stroke-width:2.5;stroke-linecap:round}
+.lno{fill:none;stroke:var(--orange);stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.lny{fill:none;stroke:var(--yellow);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.lnw{fill:none;stroke:var(--bp-line);stroke-width:3;stroke-linecap:round}
+.fy{fill:var(--yellow)}.fo{fill:var(--orange)}.fa{fill:var(--amber)}.fr{fill:var(--red)}.fg{fill:var(--green)}
+.fw{fill:rgba(244,239,230,.14)}.fbp{fill:var(--bp)}.fbp2{fill:var(--bp-2)}.fwater{fill:var(--water);opacity:.55}
+.nor{fill:none;stroke:var(--red);stroke-width:9;stroke-linecap:round}
+.ckw{fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.ckd{fill:none;stroke:var(--on-yellow);stroke-width:7;stroke-linecap:round}
+.link{fill:none;stroke:var(--orange);stroke-width:4;stroke-linecap:round;stroke-dasharray:3 10}
+.rope{fill:none;stroke:var(--orange);stroke-width:5;stroke-linecap:round}
+.dim{fill:none;stroke:var(--yellow);stroke-width:2.5}
+.zone{fill:rgba(244,239,230,.05);stroke:var(--bp-dim);stroke-width:2.5;stroke-dasharray:10 8}
+.crack{fill:none;stroke:var(--red);stroke-width:4;stroke-linejoin:round}
+.hl{fill:none;stroke:var(--yellow);stroke-width:9;stroke-linecap:round;opacity:.9}
+.tape{fill:none;stroke:var(--yellow);stroke-width:12;stroke-dasharray:18 14}
+.wave{fill:none;stroke:var(--yellow);stroke-width:5;stroke-linecap:round}
+.dark{fill:#0D0B09;opacity:.72}
+.glow{fill:var(--yellow);opacity:.3}
+.sh-bar{fill:var(--yellow)}
+.tsh{fill:var(--bp-line);font:700 27px var(--display)}
+.t{fill:var(--bp-line);font:500 19px var(--sans)}
+.tb{fill:var(--bp-line);font:700 22px var(--display)}
+.ty{fill:var(--yellow);font:700 22px var(--display)}
+.td{fill:var(--bp-dim);font:500 16px var(--sans)}
+.tbig{fill:var(--bp-line);font:800 44px var(--display)}
+.tzero{fill:var(--yellow);font:800 230px var(--display)}
+.tq{fill:var(--yellow);font:800 120px var(--display)}
+.chip{fill:var(--bp-2);stroke:var(--bp-dim);stroke-width:2}
+.chip-y{fill:var(--yellow)}
+.tchip{fill:var(--bp-line);font:700 18px var(--display)}
+.tchip-d{fill:var(--on-yellow);font:700 18px var(--display)}
+.card{fill:var(--bp-2);stroke:var(--bp-dim);stroke-width:2}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;z-index:40;left:0;top:0;width:min(360px,88vw);transform:translateX(-102%);transition:transform .28s cubic-bezier(.2,.8,.2,1);box-shadow:8px 0 30px rgba(0,0,0,.35)}
+  .side.show{transform:none}
+  .side-close{display:block}
+  .scrim{display:block;position:fixed;inset:0;z-index:35;background:rgba(15,10,6,.5);opacity:0;pointer-events:none;transition:opacity .25s}
+  .scrim.show{opacity:1;pointer-events:auto}
+  .mbar{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:6;padding:8px clamp(14px,3vw,40px);padding-top:max(8px,env(safe-area-inset-top,0px));background:var(--bg);border-bottom:1px solid var(--line)}
+  .menu-btn{flex:none;border:0;border-radius:999px;background:var(--yellow);color:var(--on-yellow);padding:10px 16px;font:700 14px var(--display);cursor:pointer}
+  .mbar-t{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font:600 14px var(--display);color:var(--muted)}
+  .player{max-width:max(300px,calc((100dvh - 60px - 62px - 40px) * 16 / 9))}
+  .stage{scroll-margin-top:64px}
+  .tm{display:none}
+}
+@media (max-width:600px){
+  main{padding:16px 14px 40px}
+  .player{max-width:none}
+  .stage{margin:0 -14px;border-radius:0}
+  .controls{gap:6px;padding:8px 10px}
+  .ib{width:36px;height:36px}
+  .sp,.cg-x,.tblock{display:none}
+  .tg{padding:8px}
+  .manual{margin:16px -14px 0;border-radius:0}
+  .mtext>li{grid-template-columns:28px 1fr;gap:10px;padding:10px}
+}
+@media (max-width:380px){#nr{display:none}}
+@media (max-width:600px) and (orientation:portrait){.rot{display:block}}
+@media (max-height:500px) and (orientation:landscape){.player{max-width:max(300px,calc((100dvh - 56px - 56px - 16px) * 16 / 9))}main{padding-top:12px}
+  .tblock,.sp,.cg-x{display:none}.controls{gap:6px;padding:7px 10px}.ib{width:34px;height:34px}.tg{padding:7px 9px}.start,.endcard{inset:0 0 50px}}
+@media (min-width:1700px){main{max-width:1440px}}
+
+/* ---------- checklist ---------- */
+.clist{background:var(--panel);border-radius:16px;padding:clamp(18px,2.4vw,28px)}
+.clist[hidden]{display:none}
+.cl-head{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-bottom:18px}
+.cl-count{font:700 15px var(--display)}
+.cl-meter{flex:1;min-width:120px;height:8px;border-radius:4px;background:var(--panel-2);overflow:hidden}
+.cl-meter i{display:block;height:100%;width:0;background:var(--yellow);transition:width .3s}
+.cl-reset{border:0;border-radius:999px;padding:10px 16px;background:var(--panel-2);color:var(--ink);font:700 13.5px var(--display);cursor:pointer}
+.cl-nav{display:flex;gap:6px}
+.cl-nav .ib{background:var(--panel-2);color:var(--ink)}
+.cl-note{margin:0 0 14px;font-size:14px;color:var(--muted)}
+.cl-sec{margin:0 0 10px}
+.cl-sec h3{margin:20px 0 8px;padding:10px 14px;border-radius:10px;background:var(--panel-2);font:700 14.5px var(--display);color:var(--orange)}
+.cl-row{display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)}
+.cl-row .n{font:700 13px var(--display);color:var(--muted)}
+.cl-row .tx{font-size:15.5px;line-height:1.45}
+.cl-row .seg2{display:flex;border-radius:999px;box-shadow:inset 0 0 0 1.5px var(--line);overflow:hidden}
+.cl-row .seg2 button{border:0;background:none;padding:8px 14px;font:700 13px var(--display);cursor:pointer;color:var(--muted)}
+.cl-row .seg2 button[aria-pressed="true"].y{background:var(--green);color:#fff}
+.cl-row .seg2 button[aria-pressed="true"].na{background:var(--muted);color:var(--panel)}
+.cl-row.first .tx{font-weight:600}
+.cl-sign{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px;font-size:14px;color:var(--muted)}
+.manual[hidden],.player[hidden]{display:none}
+@media (max-width:600px){.clist{margin:0 -14px;border-radius:0}.cl-row{grid-template-columns:28px 1fr;}.cl-row .seg2{grid-column:2;justify-self:start}}
+.mtext table{border-collapse:collapse;margin-top:10px;font-size:14px}
+.mtext td,.mtext th{border:1px solid var(--line);padding:6px 10px;text-align:left}
+.mtext th{font-family:var(--display);font-weight:700;color:var(--ink)}
+.tbl-wrap{overflow-x:auto}
+.rb{fill:none;stroke:#C9BBA0;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.rbt{fill:none;stroke:#C9BBA0;stroke-width:4;stroke-linecap:round}
+.wire{fill:none;stroke:var(--orange);stroke-width:3;stroke-linecap:round}
+.mtext>li{grid-template-columns:34px minmax(0,1fr)}
+.mtext>li>span{min-width:0}
+@media (max-width:600px){.mtext>li{grid-template-columns:28px minmax(0,1fr)}}
+/*dhinwa-brand*/
+:root{--bg:#FFFFFF; --panel:#FFFFFF; --panel-2:#F6F4EF; --ink:#1A1612; --muted:#5E574D; --line:#E8E3D9;
+  --side:#FFFFFF; --side-2:#FFF4CC; --side-ink:#1A1612; --side-muted:#6B6358; --side-line:#EDE8DE; --orange:#D9880F; color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#FFFFFF; --panel:#FFFFFF; --panel-2:#F6F4EF; --ink:#1A1612; --muted:#5E574D; --line:#E8E3D9;
+  --side:#FFFFFF; --side-2:#FFF4CC; --side-ink:#1A1612; --side-muted:#6B6358; --side-line:#EDE8DE; --orange:#D9880F; color-scheme:light}}
+:root[data-theme="dark"]{--bg:#FFFFFF; --panel:#FFFFFF; --panel-2:#F6F4EF; --ink:#1A1612; --muted:#5E574D; --line:#E8E3D9;
+  --side:#FFFFFF; --side-2:#FFF4CC; --side-ink:#1A1612; --side-muted:#6B6358; --side-line:#EDE8DE; --orange:#D9880F; color-scheme:light}
+.side{border-right:1px solid var(--side-line)}
+.side-top h2 span{color:#B8700A}
+.ls.on .ls-no,.pt.now::before{background:var(--yellow);border-color:var(--yellow)}
+.pt::before{border-color:#B9B0A1}
+.manual,.clist{box-shadow:inset 0 0 0 1px var(--line)}
+.stage{box-shadow:0 24px 50px -30px rgba(26,22,18,.45)}
+.ib{border-radius:4px;background:var(--yellow);color:var(--on-yellow)}
+.ib:hover:not(:disabled){filter:brightness(1.07)}
+.ib.main{background:var(--yellow);color:var(--on-yellow);box-shadow:inset 0 0 0 2px #1A1612}
+.sp{background:var(--yellow);color:var(--on-yellow);border-radius:4px;font-weight:700}
+.tg{background:var(--yellow);color:var(--on-yellow);border-radius:4px}
+.tg[aria-pressed="true"]{background:#FFFFFF;color:#1A1612}
+.start span,.pill{border-radius:4px}
+.cl-reset{border-radius:4px;background:var(--yellow);color:var(--on-yellow)}
+.cl-nav .ib{background:var(--yellow);color:var(--on-yellow)}
+.cl-row .seg2{border-radius:4px}
+.cl-sec h3{border-radius:4px;background:#1A1612;color:var(--yellow)}
+.menu-btn{border-radius:4px;background:var(--yellow);color:var(--on-yellow);border-color:var(--yellow)}
+.side-close{border-radius:4px}
+/*end-dhinwa-brand*/
+.side-nav{display:grid;gap:6px;padding:12px 22px;border-bottom:1px solid var(--side-line)}
+.side-nav a{display:block;text-align:center;font:600 13px/1.25 var(--display);color:var(--side-ink);text-decoration:none;padding:8px 10px;border-radius:4px;background:var(--side-2)}
+.side-nav a:hover{background:var(--yellow);color:var(--on-yellow)}
+.side-nav a.home{background:var(--yellow);color:var(--on-yellow)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <pattern id="p-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="rgba(244,239,230,.07)" stroke-width="1.5"/></pattern>
+    <pattern id="p-net" width="16" height="16" patternUnits="userSpaceOnUse"><path d="M0 0L16 16M16 0L0 16" stroke="#A89C88" stroke-width="1.6"/></pattern>
+    <pattern id="p-soil" width="22" height="22" patternUnits="userSpaceOnUse"><rect width="22" height="22" fill="#2E2720"/><path d="M0 22L22 0M-6 6l12-12M16 28l12-12" stroke="#A89C88" stroke-width="1.4" opacity=".55"/><circle cx="6" cy="15" r="1.6" fill="#A89C88"/></pattern>
+    <pattern id="p-hatch" width="14" height="14" patternUnits="userSpaceOnUse"><path d="M0 14L14 0" stroke="#A89C88" stroke-width="1.5"/></pattern>
+    <marker id="m-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#E89519"/></marker>
+  </defs>
+  <symbol id="s-worker" viewBox="0 0 80 200">
+    <path class="fo ln" d="M22 74h36a8 8 0 0 1 8 8v50H14V82a8 8 0 0 1 8-8z"/>
+    <path class="lnw" d="M15 100h50M15 116h50"/>
+    <path class="ln" d="M16 84 8 128M64 84l8 44"/>
+    <path class="ln thick" d="M30 134v54M50 134v54"/>
+    <path class="ln thick" d="M22 192h14M44 192h14"/>
+    <circle class="fbp ln" cx="40" cy="54" r="15"/>
+    <path class="fy ln" d="M20 44a20 19 0 0 1 40 0v2H20z"/>
+    <path class="fy ln" d="M14 44h52v6H14z"/>
+  </symbol>
+  <symbol id="s-worker-bare" viewBox="0 0 80 200">
+    <path class="fo ln" d="M22 74h36a8 8 0 0 1 8 8v50H14V82a8 8 0 0 1 8-8z"/>
+    <path class="lnw" d="M15 100h50M15 116h50"/>
+    <path class="ln" d="M16 84 8 128M64 84l8 44"/>
+    <path class="ln thick" d="M30 134v54M50 134v54"/>
+    <path class="ln thick" d="M22 192h14M44 192h14"/>
+    <circle class="fbp ln" cx="40" cy="54" r="15"/>
+  </symbol>
+  <symbol id="s-helmet" viewBox="0 0 120 80">
+    <path class="fy ln" d="M16 60a44 42 0 0 1 88 0z"/><path class="fy ln" d="M6 60h108v9H6z"/><path class="ln" d="M60 20v40M40 26l6 34M80 26l-6 34"/>
+  </symbol>
+  <symbol id="s-goggles" viewBox="0 0 140 60">
+    <path class="ln thick" d="M3 30h20M117 30h20"/><rect class="fw ln" x="22" y="10" width="44" height="40" rx="16"/><rect class="fw ln" x="74" y="10" width="44" height="40" rx="16"/><path class="ln" d="M66 28h8"/>
+  </symbol>
+  <symbol id="s-ear" viewBox="0 0 120 110">
+    <path class="ln thick" d="M22 62a38 46 0 0 1 76 0"/><rect class="fy ln" x="6" y="54" width="30" height="48" rx="13"/><rect class="fy ln" x="84" y="54" width="30" height="48" rx="13"/>
+  </symbol>
+  <symbol id="s-resp" viewBox="0 0 120 100">
+    <path class="ln" d="M22 34 4 20M98 34l18-14"/><path class="fw ln" d="M22 34q38-34 76 0l-8 40q-30 26-60 0z"/><circle class="fo ln" cx="26" cy="68" r="16"/><circle class="fo ln" cx="94" cy="68" r="16"/>
+  </symbol>
+  <symbol id="s-harness" viewBox="0 0 100 170">
+    <path class="lno" d="M26 6l24 74 24-74M18 92h64M30 92l-12 70M70 92l12 70"/><circle class="ln" cx="50" cy="82" r="9"/>
+  </symbol>
+  <symbol id="s-net" viewBox="0 0 240 120">
+    <rect x="3" y="3" width="234" height="114" rx="6" fill="url(#p-net)" stroke="#F4EFE6" stroke-width="3.5"/>
+  </symbol>
+  <symbol id="s-jacket" viewBox="0 0 110 130">
+    <path class="fo ln" d="M24 18l18-12h26l18 12v104H24z"/><path class="ln" d="M42 6l13 30 13-30"/><path class="lny" d="M26 64h58M26 88h58"/>
+  </symbol>
+  <symbol id="s-specs" viewBox="0 0 120 50">
+    <circle class="ln" cx="30" cy="26" r="18"/><circle class="ln" cx="90" cy="26" r="18"/><path class="ln" d="M48 24q12-8 24 0M12 22 2 16M108 22l10-6"/>
+  </symbol>
+  <symbol id="s-ladder" viewBox="0 0 70 240">
+    <path class="ln thick" d="M10 2v236M60 2v236"/><path class="ln" d="M10 24h50M10 56h50M10 88h50M10 120h50M10 152h50M10 184h50M10 216h50"/>
+  </symbol>
+  <symbol id="s-scaffold" viewBox="0 0 220 280">
+    <path class="ln thick" d="M10 0v280M110 0v280M210 0v280M4 90h212M4 180h212"/><path class="ln" d="M10 280l100-100M110 180l100-90"/>
+    <rect class="fa ln" x="4" y="78" width="212" height="12"/><rect class="fa ln" x="4" y="168" width="212" height="12"/>
+  </symbol>
+  <symbol id="s-plug" viewBox="0 0 90 140">
+    <path class="ln" d="M45 100v38"/><rect class="fy ln" x="14" y="40" width="62" height="62" rx="12"/><path class="ln thick" d="M32 40V12M58 40V12"/>
+  </symbol>
+  <symbol id="s-bulb" viewBox="0 0 70 110">
+    <circle class="fw ln" cx="35" cy="40" r="28"/><path class="ln" d="M24 68h22v20H24zM27 96h16"/>
+  </symbol>
+  <symbol id="s-ext" viewBox="0 0 70 160">
+    <path class="ln" d="M28 40V26h14v14M42 28h18l6 12M28 28q-24 8-20 40"/><rect class="fr ln" x="14" y="40" width="42" height="114" rx="14"/><rect class="fw" x="20" y="80" width="30" height="34" rx="4"/>
+  </symbol>
+  <symbol id="s-aid" viewBox="0 0 120 96">
+    <path class="ln" d="M42 22V10h36v12"/><rect class="fw ln" x="6" y="22" width="108" height="68" rx="10"/><path class="fr" d="M52 38h16v14h14v16H68v14H52V68H38V52h14z"/>
+  </symbol>
+  <symbol id="s-bug" viewBox="0 0 90 70">
+    <ellipse class="ln" cx="28" cy="22" rx="16" ry="9"/><ellipse class="ln" cx="62" cy="22" rx="16" ry="9"/><path class="ln" d="M32 46 16 60M58 46l16 14M32 36l-18 4M58 36l18 4"/><ellipse class="fw ln" cx="45" cy="40" rx="13" ry="20"/>
+  </symbol>
+  <symbol id="s-hook" viewBox="0 0 80 200">
+    <path class="ln" d="M40 0v104"/><rect class="fy ln" x="24" y="104" width="32" height="26" rx="5"/><path class="ln thick" d="M40 130v18a20 20 0 1 1-20 20"/>
+  </symbol>
+  <symbol id="s-meter" viewBox="0 0 90 140">
+    <rect class="fy ln" x="8" y="8" width="74" height="124" rx="14"/><rect class="fbp ln" x="18" y="22" width="54" height="40" rx="6"/><circle class="ln" cx="30" cy="96" r="7"/><circle class="ln" cx="60" cy="96" r="7"/>
+  </symbol>
+  <symbol id="s-clip" viewBox="0 0 120 150">
+    <rect class="fw ln" x="8" y="14" width="104" height="132" rx="10"/><rect class="fy ln" x="38" y="4" width="44" height="20" rx="6"/>
+    <rect class="ln" x="22" y="44" width="14" height="14" rx="3"/><rect class="ln" x="22" y="74" width="14" height="14" rx="3"/><rect class="ln" x="22" y="104" width="14" height="14" rx="3"/>
+    <path class="lnd" d="M46 51h50M46 81h50M46 111h50"/>
+  </symbol>
+  <symbol id="s-bottle" viewBox="0 0 80 130">
+    <path class="fw ln" d="M30 6h20v24l16 20v74H14V50l16-20z"/><path class="fo ln" d="M40 66l16 16-16 16-16-16z"/>
+  </symbol>
+  <symbol id="s-glove" viewBox="0 0 80 110">
+    <path class="fo ln" d="M20 104V58L10 34q-3-8 4-10t9 6l7 16V16q0-8 7-8t7 8v26V10q0-8 7-8t7 8v32V16q0-7 7-7t6 7v54q0 34-26 34z"/>
+  </symbol>
+  <symbol id="s-shav" viewBox="0 0 160 70">
+    <path class="lny" d="M8 60q12-34 30-12t30-4 30-12 34 14"/><path class="lny" d="M22 46q14-24 26-4M78 40q12-20 26-2M118 50q10-16 22-2"/>
+  </symbol>
+  <symbol id="s-cloud" viewBox="0 0 160 130">
+    <path class="fw ln" d="M42 74a26 26 0 0 1 8-50 34 34 0 0 1 64 8 22 22 0 0 1 8 42z"/><path class="lnw" d="M52 90l-8 22M82 90l-8 22M112 90l-8 22"/>
+  </symbol>
+  <symbol id="s-cal" viewBox="0 0 110 110">
+    <rect class="fw ln" x="6" y="16" width="98" height="88" rx="10"/><path class="fr" d="M8 26a8 8 0 0 1 8-8h78a8 8 0 0 1 8 8v12H8z"/><path class="ln" d="M30 6v20M80 6v20"/>
+  </symbol>
+  <symbol id="s-no" viewBox="0 0 100 100"><circle class="nor" cx="50" cy="50" r="42"/><path class="nor" d="M21 21l58 58"/></symbol>
+  <symbol id="s-ok" viewBox="0 0 60 60"><circle class="fg" cx="30" cy="30" r="28"/><path class="ckw" d="M17 31l9 9 17-19"/></symbol>
+  <symbol id="s-bad" viewBox="0 0 60 60"><circle class="fr" cx="30" cy="30" r="28"/><path class="ckw" d="M20 20l20 20M40 20 20 40"/></symbol>
+  <symbol id="s-warn" viewBox="0 0 100 90"><path class="fy ln" d="M50 6l44 78H6z"/><path class="ckd" d="M50 32v24M50 68v3"/></symbol>
+  <symbol id="s-eye" viewBox="0 0 120 70"><path class="fw ln" d="M6 35q54-56 108 0-54 56-108 0z"/><circle class="fy ln" cx="60" cy="35" r="14"/></symbol>
+  <symbol id="s-book" viewBox="0 0 160 110">
+    <path class="fw ln" d="M80 20q-34-16-72-8v88q38-8 72 8 34-16 72-8V12q-38-8-72 8z"/><path class="ln" d="M80 20v88"/><path class="lnd" d="M22 36h40M22 54h40M22 72h40M98 36h40M98 54h40M98 72h40"/>
+  </symbol>
+  <symbol id="s-mag" viewBox="0 0 100 100"><path class="ln thick" d="M60 60l32 32"/><circle class="fw ln" cx="40" cy="40" r="28"/></symbol>
+  <symbol id="s-machine" viewBox="0 0 180 140">
+    <rect class="fy ln" x="10" y="30" width="150" height="80" rx="10"/><rect class="fbp ln" x="26" y="46" width="50" height="30" rx="4"/><path class="ln" d="M100 50h44M100 66h44M100 82h44"/>
+    <circle class="fbp ln" cx="44" cy="118" r="16"/><circle class="fbp ln" cx="126" cy="118" r="16"/>
+  </symbol>
+  <symbol id="s-bin" viewBox="0 0 90 120"><path class="fy ln" d="M10 24h70l-8 90H18z"/><path class="ln" d="M4 24h82M34 24V12h22v12M32 44l4 54M45 44v54M58 44l-4 54"/></symbol>
+  <symbol id="s-tractor" viewBox="0 0 260 130"><rect class="fa ln" x="130" y="30" width="120" height="58" rx="4"/><path class="fy ln" d="M10 88V40h50l20-26h30v74z"/><rect class="fbp ln" x="66" y="22" width="34" height="26" rx="3"/><path class="ln" d="M110 74h20"/><circle class="fbp ln thick" cx="38" cy="96" r="26"/><circle class="fbp ln" cx="100" cy="106" r="14"/><circle class="fbp ln" cx="170" cy="106" r="16"/><circle class="fbp ln" cx="220" cy="106" r="16"/></symbol>
+  <symbol id="s-door" viewBox="0 0 120 220"><path class="ln thick" d="M6 216V6h108v210"/><rect class="fa ln" x="18" y="18" width="84" height="198" rx="3"/><circle class="ln" cx="88" cy="118" r="5"/></symbol>
+  <symbol id="s-lock" viewBox="0 0 70 90"><path class="ln thick" d="M18 40V26a17 17 0 0 1 34 0v14"/><rect class="fy ln" x="8" y="40" width="54" height="44" rx="8"/><circle class="ln" cx="35" cy="60" r="5"/><path class="ln" d="M35 65v8"/></symbol>
+  <symbol id="s-cig" viewBox="0 0 160 70"><rect class="fw ln" x="10" y="30" width="110" height="18" rx="3"/><rect class="fo ln" x="120" y="30" width="26" height="18" rx="3"/><path class="lnd" d="M30 22q-8-10 0-18M50 24q-8-10 0-18"/></symbol>
+  <symbol id="s-boot" viewBox="0 0 110 120"><path class="fy ln" d="M22 6h40v70l36 14q8 4 8 12v12H10V6z"/><path class="ln" d="M10 98h96"/></symbol>
+  <symbol id="s-stretcher" viewBox="0 0 260 80"><rect class="fw ln" x="30" y="24" width="200" height="26" rx="6"/><path class="ln thick" d="M6 37h24M230 37h24M60 50v18M200 50v18"/><path class="fr" d="M118 30h12v8h8v10h-8v0h-12v0h-8V38h8z"/></symbol>
+  <symbol id="s-flood" viewBox="0 0 120 90"><rect class="fy ln" x="10" y="10" width="100" height="54" rx="8"/><rect class="fw ln" x="22" y="20" width="76" height="34" rx="4"/><path class="ln" d="M60 64v20M40 86h40"/></symbol>
+  <symbol id="s-drum" viewBox="0 0 80 110"><rect class="fr ln" x="8" y="8" width="64" height="96" rx="8"/><path class="ln" d="M8 38h64M8 72h64"/></symbol>
+  <symbol id="s-paint" viewBox="0 0 90 100"><path class="fo ln" d="M10 26h70v66a6 6 0 0 1-6 6H16a6 6 0 0 1-6-6z"/><path class="ln" d="M10 26q35-30 70 0"/><path class="fy" d="M24 50h42v22H24z"/></symbol>
+  <symbol id="s-bag" viewBox="0 0 120 36"><rect class="fw ln" x="4" y="4" width="112" height="28" rx="10"/><path class="lnd" d="M30 18h60"/></symbol>
+  <symbol id="s-hframe" viewBox="0 0 120 140"><path class="ln thick" d="M14 4v132M106 4v132"/><path class="ln" d="M14 40h92M14 96h92M14 40l92 56"/></symbol>
+  <symbol id="s-phone" viewBox="0 0 40 40"><path class="fy" d="M10 4l8 8-4 6q4 8 12 12l6-4 8 8-6 6Q10 38 4 10z"/></symbol>
+  <symbol id="s-exit" viewBox="0 0 120 60"><rect class="fg" x="2" y="2" width="116" height="56" rx="6"/><text x="60" y="40" text-anchor="middle" style="fill:#fff;font:800 26px var(--display)">EXIT</text></symbol>
+  <symbol id="s-amb" viewBox="0 0 200 120"><path class="fw ln" d="M10 90V30h110l40 30h30v30z"/><path class="fbp ln" d="M126 38h22l24 20h-46z"/><path class="fr" d="M48 42h14v14h14v14H62v14H48V70H34V56h14z"/><circle class="fbp ln" cx="50" cy="96" r="16"/><circle class="fbp ln" cx="150" cy="96" r="16"/></symbol>
+  <symbol id="s-sign" viewBox="0 0 160 220"><path class="ln thick" d="M80 120v96"/><rect class="fy ln" x="6" y="6" width="148" height="114" rx="8"/></symbol>
+  <symbol id="s-grinder" viewBox="0 0 200 110"><rect class="fy ln" x="60" y="40" width="120" height="34" rx="12"/><circle class="fw ln" cx="44" cy="57" r="38"/><path class="ln" d="M44 19v76M6 57h76"/></symbol>
+  <symbol id="s-saw" viewBox="0 0 120 120"><circle class="fw ln" cx="60" cy="60" r="44"/><path class="ln" d="M60 8l8 14M104 36l-14 4M112 70l-14-4M96 106l-10-12M60 112l-2-14M20 104l10-12M8 66l14-4M16 30l14 8M38 10l6 14M84 12l-6 14"/><circle class="fbp ln" cx="60" cy="60" r="10"/></symbol>
+  <symbol id="s-theo" viewBox="0 0 120 220"><path class="ln" d="M60 110L18 214M60 110l42 104M60 110v104"/><rect class="fy ln" x="38" y="30" width="44" height="58" rx="8"/><rect class="fbp ln" x="30" y="40" width="60" height="18" rx="9"/><circle class="ln" cx="60" cy="49" r="5"/><rect class="ln" x="34" y="88" width="52" height="20" rx="4"/></symbol>
+  <symbol id="s-dumpy" viewBox="0 0 140 220"><path class="ln" d="M70 96L26 214M70 96l44 118M70 96v118"/><rect class="fy ln" x="16" y="52" width="108" height="30" rx="12"/><rect class="fbp ln" x="2" y="56" width="18" height="22" rx="4"/><rect class="ln" x="44" y="82" width="52" height="14" rx="3"/></symbol>
+  <symbol id="s-staff" viewBox="0 0 40 300"><rect class="fw ln" x="6" y="4" width="28" height="292" rx="3"/><path class="fr" d="M10 20h12v10H10zM10 60h12v10H10zM10 100h12v10H10zM10 140h12v10H10zM10 180h12v10H10zM10 220h12v10H10zM10 260h12v10H10z"/></symbol>
+  <symbol id="s-peg" viewBox="0 0 30 110"><path class="fa ln" d="M6 4h18v80l-9 22-9-22z"/><path class="fr" d="M6 4h18v14H6z"/></symbol>
+  <symbol id="s-pillar" viewBox="0 0 120 140"><path class="fw ln" d="M20 40h80v96H20z"/><path class="fy ln" d="M10 28h100v14H10z"/><circle class="fr" cx="60" cy="20" r="8"/></symbol>
+  <symbol id="s-excav" viewBox="0 0 300 200"><rect class="fbp ln" x="40" y="150" width="170" height="34" rx="17"/><circle class="ln" cx="62" cy="167" r="9"/><circle class="ln" cx="188" cy="167" r="9"/><rect class="fy ln" x="50" y="100" width="150" height="50" rx="6"/><rect class="fbp ln" x="140" y="62" width="56" height="40" rx="6"/><path class="fy ln" d="M196 110l50-70 14 6-44 70z"/><path class="fy ln" d="M246 40l40 60-12 8-40-58z"/><path class="fa ln" d="M274 108l20 6-6 30h-34z"/></symbol>
+  <symbol id="s-pump" viewBox="0 0 160 110"><rect class="fy ln" x="20" y="30" width="100" height="62" rx="10"/><circle class="fbp ln" cx="70" cy="61" r="20"/><path class="ln thick" d="M120 50h36"/><path class="ln" d="M30 92v14M110 92v14"/></symbol>
+  <symbol id="s-roller" viewBox="0 0 240 150"><rect class="fy ln" x="70" y="30" width="140" height="62" rx="10"/><rect class="fbp ln" x="150" y="8" width="50" height="34" rx="6"/><circle class="fw ln thick" cx="46" cy="104" r="40"/><circle class="fbp ln" cx="186" cy="118" r="26"/><path class="ln" d="M46 64V32h30"/></symbol>
+  <symbol id="s-jack" viewBox="0 0 90 220"><path class="ln thick" d="M14 20h62"/><rect class="fy ln" x="28" y="26" width="34" height="110" rx="8"/><path class="ln thick" d="M45 136v70"/><path class="fw ln" d="M37 206h16l-8 12z"/></symbol>
+  <symbol id="s-spray" viewBox="0 0 120 200"><rect class="fy ln" x="20" y="60" width="70" height="120" rx="20"/><path class="ln" d="M55 60V30h-12M55 20v10"/><path class="ln thick" d="M90 90q24 0 24 30v30"/><path class="ln" d="M114 150l-4 30"/></symbol>
+  <symbol id="s-cone" viewBox="0 0 100 130"><rect class="fw ln" x="20" y="6" width="60" height="50" rx="6"/><path class="fy ln" d="M20 56h60l-24 44h-12z"/><rect class="fbp ln" x="8" y="100" width="84" height="24" rx="3"/></symbol>
+  <symbol id="s-toolbox" viewBox="0 0 160 120"><path class="ln thick" d="M56 34V16h48v18"/><rect class="fy ln" x="10" y="34" width="140" height="80" rx="10"/><path class="ln" d="M10 64h140M70 56h20v16H70z"/></symbol>
+  <symbol id="s-stamp" viewBox="0 0 160 70"><rect x="4" y="4" width="152" height="62" rx="8" fill="none" stroke="#3DBB7E" stroke-width="5"/></symbol>
+  <symbol id="s-stone" viewBox="0 0 120 60"><rect class="fw ln" x="3" y="3" width="114" height="54" rx="4"/><path class="lnd" d="M14 16l8 4M40 12l6 6M70 18l10-4M96 14l8 6M20 40l10 4M56 44l8-4M88 40l10 6"/></symbol>
+  <symbol id="s-trowel" viewBox="0 0 140 80"><path class="fw ln" d="M6 70L70 20h20L60 70z"/><path class="ln" d="M80 20V8h40"/><rect class="fa ln" x="110" y="2" width="28" height="12" rx="5"/></symbol>
+  <symbol id="s-hammer" viewBox="0 0 120 120"><rect class="fy ln" x="10" y="10" width="70" height="30" rx="6"/><path class="ln thick" d="M45 40v76"/></symbol>
+  <symbol id="s-nail" viewBox="0 0 30 120"><path class="ln" d="M4 6h22M15 6v100l-4 10"/></symbol>
+  <symbol id="s-sieve" viewBox="0 0 160 70"><ellipse class="ln thick" cx="80" cy="30" rx="74" ry="22"/><ellipse cx="80" cy="30" rx="66" ry="17" fill="url(#p-net)"/><path class="ln" d="M6 30v12q74 40 148 0V30"/></symbol>
+  <symbol id="s-mbox" viewBox="0 0 200 90"><path class="fw ln" d="M6 10h188l-16 74H22z"/><path class="fa" d="M20 30h160l-10 46H30z" opacity=".8"/></symbol>
+  <symbol id="s-square" viewBox="0 0 120 120"><path class="fy ln" d="M6 6h22v86h86v22H6z"/></symbol>
+  <symbol id="s-prop" viewBox="0 0 40 240"><rect class="fy ln" x="6" y="4" width="28" height="10" rx="2"/><path class="ln thick" d="M20 14v110"/><rect class="fw ln" x="12" y="120" width="16" height="104"/><rect class="fa ln" x="10" y="116" width="20" height="10" rx="3"/><rect class="fy ln" x="4" y="224" width="32" height="10" rx="2"/></symbol>
+  <symbol id="s-oil" viewBox="0 0 120 120"><rect class="fy ln" x="16" y="40" width="70" height="72" rx="8"/><path class="ln thick" d="M86 60l28-30"/><path class="ln" d="M36 40V24h30v16"/><path class="fo" d="M110 36q6 14 0 20-6-6 0-20z"/></symbol>
+  <symbol id="s-foreman" viewBox="0 0 80 200"><path class="fy ln" d="M22 74h36a8 8 0 0 1 8 8v50H14V82a8 8 0 0 1 8-8z"/><path class="lnw" d="M15 100h50M15 116h50"/><path class="ln" d="M16 84 8 128M64 84l8 44"/><path class="ln thick" d="M30 134v54M50 134v54"/><path class="ln thick" d="M22 192h14M44 192h14"/><circle class="fbp ln" cx="40" cy="54" r="15"/><path class="ln" d="M20 44a20 19 0 0 1 40 0v2H20z" style="fill:#F4EFE6"/><path class="ln" d="M14 44h52v6H14z" style="fill:#F4EFE6"/></symbol>
+  <symbol id="s-wb" viewBox="0 0 260 120"><rect class="fw ln" x="10" y="80" width="240" height="20"/><rect class="fy ln" x="190" y="20" width="60" height="50" rx="6"/><rect class="fbp ln" x="200" y="30" width="40" height="18" rx="3"/><path class="ln" d="M220 70v10"/></symbol>
+  <symbol id="s-cover" viewBox="0 0 60 50"><rect class="fw ln" x="4" y="10" width="52" height="36" rx="4" style="fill:rgba(244,239,230,.45)"/><path class="ln" d="M22 10V2M38 10V2"/></symbol>
+  <symbol id="s-chair" viewBox="0 0 100 80"><path class="ln thick" d="M6 74h18l14-60h24l14 60h18" style="stroke:#C9BBA0"/></symbol>
+  <symbol id="s-cutter" viewBox="0 0 200 80"><path class="ln thick" d="M10 20l120 30M10 60l120-30"/><path class="fy ln" d="M130 30l50-10v40l-50-10z"/></symbol>
+  <symbol id="s-block" viewBox="0 0 120 60"><rect class="fw ln" x="3" y="3" width="114" height="54" rx="3" style="fill:rgba(205,195,180,.35)"/><rect class="fbp ln" x="16" y="14" width="36" height="32" rx="3"/><rect class="fbp ln" x="68" y="14" width="36" height="32" rx="3"/></symbol>
+  <symbol id="s-bwall" viewBox="0 0 400 240" preserveAspectRatio="none">
+    <g fill="rgba(205,195,180,.35)" stroke="#F4EFE6" stroke-width="3">
+      <rect x="2" y="200" width="98" height="38"/><rect x="100" y="200" width="98" height="38"/><rect x="198" y="200" width="98" height="38"/><rect x="296" y="200" width="102" height="38"/>
+      <rect x="2" y="160" width="48" height="40"/><rect x="50" y="160" width="98" height="40"/><rect x="148" y="160" width="98" height="40"/><rect x="246" y="160" width="98" height="40"/><rect x="344" y="160" width="54" height="40"/>
+      <rect x="2" y="120" width="98" height="40"/><rect x="100" y="120" width="98" height="40"/><rect x="198" y="120" width="98" height="40"/><rect x="296" y="120" width="102" height="40"/>
+      <rect x="2" y="80" width="48" height="40"/><rect x="50" y="80" width="98" height="40"/><rect x="148" y="80" width="98" height="40"/><rect x="246" y="80" width="98" height="40"/><rect x="344" y="80" width="54" height="40"/>
+      <rect x="2" y="40" width="98" height="40"/><rect x="100" y="40" width="98" height="40"/><rect x="198" y="40" width="98" height="40"/><rect x="296" y="40" width="102" height="40"/>
+      <rect x="2" y="2" width="48" height="38"/><rect x="50" y="2" width="98" height="38"/><rect x="148" y="2" width="98" height="38"/><rect x="246" y="2" width="98" height="38"/><rect x="344" y="2" width="54" height="38"/>
+    </g></symbol>
+  <symbol id="s-farma" viewBox="0 0 120 80"><path class="fw ln" d="M10 20h100v50H10z"/><path class="ln thick" d="M10 20L2 12M110 20l8-8"/><path class="fa" d="M14 40h92v26H14z" opacity=".8"/></symbol>
+  <symbol id="s-can" viewBox="0 0 80 110"><path class="fw ln" d="M14 20h52v84H14z"/><path class="ln" d="M14 50h52M14 70h52M66 34q14 0 14 18t-14 18"/><rect class="fwater" x="16" y="56" width="48" height="46"/></symbol>
+  <symbol id="s-chaser" viewBox="0 0 200 100"><rect class="fy ln" x="50" y="30" width="130" height="40" rx="10"/><circle class="fw ln" cx="40" cy="50" r="34"/><path class="ln" d="M40 16v68M6 50h68"/></symbol>
+  <symbol id="s-mixer" viewBox="0 0 220 180"><path class="ln" d="M40 170L70 110M180 170L150 110"/><ellipse class="fy ln" cx="110" cy="80" rx="62" ry="56"/><path class="ln" d="M70 50q40 30 80 0M64 90q46 30 92 0"/><path class="fa ln" d="M150 40l40-24 10 18-38 26z"/><circle class="fbp ln" cx="40" cy="170" r="8"/><circle class="fbp ln" cx="180" cy="170" r="8"/></symbol>
+  <symbol id="s-tm" viewBox="0 0 300 150"><rect class="fbp ln" x="10" y="100" width="280" height="14"/><path class="fy ln" d="M30 100V40h50v60z"/><rect class="fbp ln" x="38" y="50" width="34" height="24" rx="3"/><path class="fa ln" d="M100 96l20-70q70-18 150 30l-10 40z"/><path class="ln" d="M140 40l40 56M190 40l30 56"/><circle class="fbp ln thick" cx="60" cy="122" r="18"/><circle class="fbp ln thick" cx="200" cy="122" r="18"/><circle class="fbp ln thick" cx="250" cy="122" r="18"/></symbol>
+  <symbol id="s-cpump" viewBox="0 0 220 150"><rect class="fy ln" x="20" y="50" width="150" height="60" rx="8"/><path class="fa ln" d="M170 60h40v40h-40z"/><path class="ln thick" d="M20 70H0"/><circle class="fbp ln" cx="50" cy="122" r="16"/><circle class="fbp ln" cx="140" cy="122" r="16"/><rect class="fbp ln" x="40" y="62" width="40" height="22" rx="3"/></symbol>
+  <symbol id="s-slump" viewBox="0 0 100 130"><path class="fw ln" d="M30 10h40l20 110H10z"/><path class="ln" d="M20 40H6M80 40h14"/></symbol>
+  <symbol id="s-cube" viewBox="0 0 120 120"><path class="fw ln" d="M20 40l40-20 40 20v50l-40 20-40-20z"/><path class="ln" d="M20 40l40 20 40-20M60 60v50"/></symbol>
+  <symbol id="s-barrow" viewBox="0 0 200 110"><path class="fy ln" d="M20 30h120l-20 46H40z"/><path class="ln thick" d="M140 30l50-10M40 76l-14 24"/><circle class="fbp ln" cx="40" cy="92" r="14"/></symbol>
+</svg>
+
+<div class="app">
+  <aside class="side" id="side" aria-label="Lessons">
+    <div class="side-top">
+      <h2><span>6.0 Activity</span>Concreting</h2>
+      <button class="side-close" id="sideClose" type="button" aria-label="Close lessons">&times;</button>
+    </div>
+    <nav class="side-nav" aria-label="Chapters"><a class="home" href="../index.html">All chapters</a><a href="reinforcement-chapter-5.html">← Ch 5 Reinforcement</a><a href="block-work-chapter-7.html">Ch 7 Block Work →</a></nav>
+
+    <div class="ls" data-l="0">
+      <button class="ls-btn" type="button"><span class="ls-no">1</span><span class="ls-t">6.1.1 Cement and Aggregate<small>Ingredients</small></span></button>
+      <ol class="pts">
+        <li><button class="pt" type="button">Grade of cement… IS 456:2000</button></li>
+        <li><button class="pt" type="button">Test certificate… within 1 month</button></li>
+        <li><button class="pt" type="button">Stacks not more than 10 bags…</button></li>
+        <li><button class="pt" type="button">First in first out (FIFO)</button></li>
+        <li><button class="pt" type="button">Tested in-house…</button></li>
+        <li><button class="pt" type="button">Coarse aggregates… 20mm and down</button></li>
+        <li><button class="pt" type="button">Crushed granite, trap, basalt…</button></li>
+        <li><button class="pt" type="button">Fine aggregate… FM 2.6 to 3.2…</button></li>
+        <li><button class="pt" type="button">If dirty, wash sand…</button></li>
+      </ol>
+    </div>
+
+    <div class="ls" data-l="1">
+      <button class="ls-btn" type="button"><span class="ls-no">2</span><span class="ls-t">6.1.1 Water and Admixtures<small>Ingredients</small></span></button>
+      <ol class="pts">
+        <li><button class="pt" type="button">Water: clean, fresh…</button></li>
+        <li><button class="pt" type="button">Potable water…</button></li>
+        <li><button class="pt" type="button">IS 456:2000… limits of solids</button></li>
+        <li><button class="pt" type="button">Admixture… technical clearances…</button></li>
+        <li><button class="pt" type="button">Dosage, point of application…</button></li>
+        <li><button class="pt" type="button">Additives commonly used</button></li>
+        <li><button class="pt" type="button">Expiry date of the chemical…</button></li>
+      </ol>
+    </div>
+
+    <div class="ls" data-l="2">
+      <button class="ls-btn" type="button"><span class="ls-no">3</span><span class="ls-t">6.1.2 In-situ Mixing (1)<small>Mixing of Concrete</small></span></button>
+      <ol class="pts">
+        <li><button class="pt" type="button">Adequate stock of all ingredients…</button></li>
+        <li><button class="pt" type="button">Calibrated farma… weigh batcher</button></li>
+        <li><button class="pt" type="button">25% of required water…</button></li>
+        <li><button class="pt" type="button">20 to 25 litres… water cement ratio…</button></li>
+        <li><button class="pt" type="button">Loading the hopper (sandwiching)…</button></li>
+        <li><button class="pt" type="button">Drum rotated 1 ½ to 2 minutes…</button></li>
+        <li><button class="pt" type="button">If plasticizer is used…</button></li>
+      </ol>
+    </div>
+
+    <div class="ls" data-l="3">
+      <button class="ls-btn" type="button"><span class="ls-no">4</span><span class="ls-t">6.1.2 In-situ Mixing (2)<small>Mixing of Concrete</small></span></button>
+      <ol class="pts">
+        <li><button class="pt" type="button">No grade below M 20 for RCC</button></li>
+        <li><button class="pt" type="button">Placed and compacted within half an hour</button></li>
+        <li><button class="pt" type="button">A supervisor on the mixer</button></li>
+        <li><button class="pt" type="button">Bandlies, wheelbarrows, hoist…</button></li>
+        <li><button class="pt" type="button">Avoid segregation and wastage…</button></li>
+        <li><button class="pt" type="button">Concrete by vision…</button></li>
+      </ol>
+    </div>
+
+    <div class="ls" data-l="4">
+      <button class="ls-btn" type="button"><span class="ls-no">5</span><span class="ls-t">6.1.3 Batching Plant Mix (RMC) (1)<small>Ready-mix concrete</small></span></button>
+      <ol class="pts">
+        <li><button class="pt" type="button">Ready-mix from reputed companies…</button></li>
+        <li><button class="pt" type="button">1 load of 6 cum every 10 to 15 minutes</button></li>
+        <li><button class="pt" type="button">Check the empty transit mixer…</button></li>
+        <li><button class="pt" type="button">Delivery challan and data cycle sheet…</button></li>
+        <li><button class="pt" type="button">Go through the cycle data…</button></li>
+        <li><button class="pt" type="button">Not after 3 hours of mixing</button></li>
+        <li><button class="pt" type="button">Do not recharge the concrete…</button></li>
+        <li><button class="pt" type="button">Slump 100mm to 125mm</button></li>
+        <li><button class="pt" type="button">Place the concrete pump…</button></li>
+        <li><button class="pt" type="button">Horizontal pipe at least 7 metres…</button></li>
+      </ol>
+    </div>
+
+    <div class="ls" data-l="5">
+      <button class="ls-btn" type="button"><span class="ls-no">6</span><span class="ls-t">6.1.3 Batching Plant Mix (RMC) (2)<small>Pumping and pipeline</small></span></button>
+      <ol class="pts">
+        <li><button class="pt" type="button">Reduce the length of pipe…</button></li>
+        <li><button class="pt" type="button">Pipeline independently supported…</button></li>
+        <li><button class="pt" type="button">Vibrations due to pumping…</button></li>
+        <li><button class="pt" type="button">Pump rich slurry (one bag)…</button></li>
+        <li><button class="pt" type="button">Intermittent supply… reverse stroke</button></li>
+        <li><button class="pt" type="button">Flexible end pipe… 135o</button></li>
+        <li><button class="pt" type="button">Constricted areas: bandly and mumty</button></li>
+        <li><button class="pt" type="button">Passing the ball…</button></li>
+        <li><button class="pt" type="button">Professional hands…</button></li>
+        <li><button class="pt" type="button">Leave… clean of concrete dumping</button></li>
+      </ol>
+    </div>
+
+    <div class="ls" data-l="6">
+      <button class="ls-btn" type="button"><span class="ls-no">7</span><span class="ls-t">6.1.4 Placing and Compaction (1)<small>Pouring, bonding, levels, vibration</small></span></button>
+      <ol class="pts">
+        <li><button class="pt" type="button">Chutes: not longer than 4.5m, 45</button></li>
+        <li><button class="pt" type="button">Vibrate until entrapped air released</button></li>
+        <li><button class="pt" type="button">Beams first, then slab</button></li>
+        <li><button class="pt" type="button">Bond new concrete to previously poured</button></li>
+        <li><button class="pt" type="button">Joint more than a month old</button></li>
+        <li><button class="pt" type="button">Beam more than 500mm deep</button></li>
+        <li><button class="pt" type="button">Levels pre-marked</button></li>
+        <li><button class="pt" type="button">Line dori and levelling instrument</button></li>
+        <li><button class="pt" type="button">Needles: 60, 40, 25mm; 10,000 rpm</button></li>
+      </ol>
+    </div>
+
+    <div class="ls" data-l="7">
+      <button class="ls-btn" type="button"><span class="ls-no">8</span><span class="ls-t">6.1.4 Placing and Compaction (2)<small>Finishing, joints, curing</small></span></button>
+      <ol class="pts">
+        <li><button class="pt" type="button">Wooden runner to ram</button></li>
+        <li><button class="pt" type="button">Clean spilled concrete</button></li>
+        <li><button class="pt" type="button">Vertical construction joints</button></li>
+        <li><button class="pt" type="button">Match vibrators, masons to rate</button></li>
+        <li><button class="pt" type="button">Moisten shuttering surfaces</button></li>
+        <li><button class="pt" type="button">Hessain, ponding 25mm, 7 days</button></li>
+        <li><button class="pt" type="button">Do not ignore curing of slab</button></li>
+        <li><button class="pt" type="button">Beam bottoms: high-pressure cleaners</button></li>
+      </ol>
+    </div>
+
+    <div class="ls" data-l="8">
+      <button class="ls-btn" type="button"><span class="ls-no">9</span><span class="ls-t">6.1.5 Columns, 6.1.6 Testing<small>Curing and testing</small></span></button>
+      <ol class="pts">
+        <li><button class="pt" type="button">Shuttering removed next day; hessain</button></li>
+        <li><button class="pt" type="button">Columns and walls: 7 days</button></li>
+        <li><button class="pt" type="button">Starters: 3 days</button></li>
+        <li><button class="pt" type="button">Slump: start, midday, close</button></li>
+        <li><button class="pt" type="button">Suspect load checked</button></li>
+        <li><button class="pt" type="button">Sample at point of discharge</button></li>
+        <li><button class="pt" type="button">3 samples at 7 days, 3 at 28 days</button></li>
+        <li><button class="pt" type="button">Every 100 cum or 10 batches</button></li>
+        <li><button class="pt" type="button">Samples for each element</button></li>
+        <li><button class="pt" type="button">Results discussed with project in-charge</button></li>
+        <li><button class="pt" type="button">Cube failure: identify, NDT</button></li>
+      </ol>
+    </div>
+
+    <div class="ls" data-l="9">
+      <button class="ls-btn" type="button"><span class="ls-no">10</span><span class="ls-t">6.2 Tools to be used by Tradesmen<small>Basic tools of the concreting gang</small></span></button>
+      <ol class="pts">
+        <li><button class="pt" type="button">Required tools must be available…</button></li>
+        <li><button class="pt" type="button">Basic tools of the concreting gang</button></li>
+      </ol>
+    </div>
+
+    <div class="ls" data-l="10">
+      <button class="ls-btn" type="button"><span class="ls-no">11</span><span class="ls-t">6.3 Inspection Methodology<small>with 6.3.1 Tools for quality inspection</small></span></button>
+      <ol class="pts">
+        <li><button class="pt" type="button">1 Personnel</button></li>
+        <li><button class="pt" type="button">2 Before Concreting</button></li>
+        <li><button class="pt" type="button">3 During Concreting</button></li>
+        <li><button class="pt" type="button">4 After Concreting</button></li>
+        <li><button class="pt" type="button">6.3.1 Tools for quality inspection</button></li>
+      </ol>
+    </div>
+
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <div class="col">
+    <div class="mbar">
+      <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="side">Lessons</button>
+      <span class="mbar-t" id="mbarT">Concreting</span>
+    </div>
+
+    <main>
+      <div class="heads">
+        <hgroup data-l="0"><p class="l-code">6.1.1 Knowledge of Activity</p><h1>Ingredients: Cement and Aggregate</h1><p class="l-sub">Lesson 1 of 11, 9 points</p></hgroup>
+        <hgroup data-l="1" hidden><p class="l-code">6.1.1 Knowledge of Activity</p><h1>Ingredients: Water and Admixtures</h1><p class="l-sub">Lesson 2 of 11, 7 points</p></hgroup>
+        <hgroup data-l="2" hidden><p class="l-code">6.1.2 Knowledge of Activity</p><h1>Mixing of Concrete: In-situ Mixing (1)</h1><p class="l-sub">Lesson 3 of 11, 7 points</p></hgroup>
+        <hgroup data-l="3" hidden><p class="l-code">6.1.2 Knowledge of Activity</p><h1>Mixing of Concrete: In-situ Mixing (2)</h1><p class="l-sub">Lesson 4 of 11, 6 points</p></hgroup>
+        <hgroup data-l="4" hidden><p class="l-code">6.1.3 Knowledge of Activity</p><h1>Batching Plant Mix (RMC) (1)</h1><p class="l-sub">Lesson 5 of 11, 10 points</p></hgroup>
+        <hgroup data-l="5" hidden><p class="l-code">6.1.3 Knowledge of Activity</p><h1>Batching Plant Mix (RMC) (2)</h1><p class="l-sub">Lesson 6 of 11, 10 points</p></hgroup>
+        <hgroup data-l="6" hidden><p class="l-code">6.1.4 Knowledge of Activity</p><h1>Placing and Compaction (1)</h1><p class="l-sub">Lesson 7 of 11, 9 points</p></hgroup>
+        <hgroup data-l="7" hidden><p class="l-code">6.1.4 Knowledge of Activity</p><h1>Placing and Compaction (2)</h1><p class="l-sub">Lesson 8 of 11, 8 points</p></hgroup>
+        <hgroup data-l="8" hidden><p class="l-code">6.1.5 and 6.1.6 Knowledge of Activity</p><h1>Columns, Walls and Starter; Testing of Concrete</h1><p class="l-sub">Lesson 9 of 11, 11 points</p></hgroup>
+        <hgroup data-l="9" hidden><p class="l-code">6.2</p><h1>Tools to be used by Tradesmen</h1><p class="l-sub">Lesson 10 of 11, 2 points</p></hgroup>
+        <hgroup data-l="10" hidden><p class="l-code">6.3</p><h1>Inspection Methodology for Quality Assurance</h1><p class="l-sub">Lesson 11 of 11, 5 points</p></hgroup>
+      </div>
+
+      <section class="player" id="player" aria-label="Lesson video">
+        <div class="stage" id="stage">
+          <svg class="lsvg" data-l="0" viewBox="0 0 960 540" role="img" aria-label="Animated drawing for cement and aggregate">
+            <rect class="bg" width="960" height="540"/><rect width="960" height="540" fill="url(#p-grid)"/>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Cement: the right grade</text></g>
+              <g data-a="up" data-at=".2"><rect class="fw ln" x="160" y="160" width="260" height="240" rx="30"/><path class="lnd" d="M200 230h180M200 270h180"/><rect class="fy ln" x="210" y="310" width="160" height="50" rx="6"/><text class="tchip-d" x="290" y="342" text-anchor="middle">Grade as advised</text></g>
+              <g data-a="pop" data-at="1"><rect class="chip-y" x="520" y="230" width="260" height="56" rx="28"/><text class="tchip-d" x="650" y="265" text-anchor="middle">IS 456:2000</text></g>
+              <text class="td" x="650" y="320" text-anchor="middle" data-a="fade" data-at="1.4">as recommended by the consultant</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Test certificate, used within 1 month</text></g>
+              <g data-a="up" data-at=".2"><rect class="card" x="120" y="130" width="300" height="260" rx="12"/><text class="tb" x="150" y="176">Manufacturers</text><text class="tb" x="150" y="204">test certificate</text><path class="lnd" d="M150 240h240M150 272h240M150 304h200"/><circle class="fy" cx="370" cy="350" r="24"/></g>
+              <use href="#s-cal" x="520" y="150" width="110" height="110" data-a="pop" data-at="1"/>
+              <text class="tbig" x="575" y="320" text-anchor="middle" data-a="pop" data-at="1.4">1 month</text>
+              <text class="td" x="575" y="350" text-anchor="middle" data-a="fade" data-at="1.6">of the manufacturing date</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Storing cement</text></g>
+              <rect class="fw ln" x="80" y="120" width="40" height="350" style="fill:rgba(244,239,230,.3)" data-a="grow-y"/>
+              <path class="lnd" d="M80 470H700" data-a="draw"/>
+              <g data-a="up" data-at=".5"><use href="#s-bag" x="240" y="434" width="200" height="36"/><use href="#s-bag" x="240" y="398" width="200" height="36"/><use href="#s-bag" x="240" y="362" width="200" height="36"/><use href="#s-bag" x="240" y="326" width="200" height="36"/><use href="#s-bag" x="240" y="290" width="200" height="36"/></g>
+              <g data-a="up" data-at=".8"><use href="#s-bag" x="240" y="254" width="200" height="36"/><use href="#s-bag" x="240" y="218" width="200" height="36"/><use href="#s-bag" x="240" y="182" width="200" height="36"/><use href="#s-bag" x="240" y="146" width="200" height="36"/><use href="#s-bag" x="240" y="110" width="200" height="36"/></g>
+              <path class="dim" d="M120 490H240M120 480v20M240 480v20" data-a="draw" data-at="1.4"/><text class="ty" x="180" y="526" text-anchor="middle" data-a="pop" data-at="1.6">1 meter</text>
+              <text class="tbig" x="480" y="230" data-a="pop" data-at="1.8">≤ 10 bags</text>
+              <g data-a="pop" data-at="2.4"><rect class="chip" x="480" y="300" width="280" height="44" rx="22"/><use href="#s-bad" x="486" y="306" width="32" height="32"/><text class="tchip" x="530" y="329">Polythene wrapping</text></g>
+              <text class="td" x="480" y="372" data-a="fade" data-at="2.6">sweating may occur</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">First in, first out</text></g>
+              <path class="lnd" d="M40 420H920" data-a="draw"/>
+              <g data-a="up" data-at=".3"><use href="#s-bag" x="100" y="384" width="160" height="36"/><use href="#s-bag" x="100" y="348" width="160" height="36"/><text class="ty" x="180" y="330" text-anchor="middle">Lot 1</text></g>
+              <g data-a="up" data-at=".6"><use href="#s-bag" x="300" y="384" width="160" height="36"/><use href="#s-bag" x="300" y="348" width="160" height="36"/><text class="td" x="380" y="330" text-anchor="middle">Lot 2</text></g>
+              <g data-a="up" data-at=".9"><use href="#s-bag" x="500" y="384" width="160" height="36"/><use href="#s-bag" x="500" y="348" width="160" height="36"/><text class="td" x="580" y="330" text-anchor="middle">Lot 3</text></g>
+              <path class="rope" d="M180 300Q180 200 700 200" marker-end="url(#m-arr)" data-a="draw" data-at="1.6"/>
+              <text class="tb" x="760" y="210" data-a="fade" data-at="2.2">Issued first</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Tested in-house</text></g>
+              <use href="#s-bag" x="160" y="250" width="240" height="72" data-a="up" data-at=".2"/>
+              <g data-a="pop" data-at=".8"><rect class="chip" x="520" y="160" width="260" height="46" rx="23"/><text class="tchip" x="650" y="190" text-anchor="middle">Consistency</text></g>
+              <g data-a="pop" data-at="1.2"><rect class="chip" x="520" y="226" width="260" height="46" rx="23"/><text class="tchip" x="650" y="256" text-anchor="middle">Setting time</text></g>
+              <g data-a="pop" data-at="1.6"><rect class="chip-y" x="520" y="292" width="260" height="46" rx="23"/><text class="tchip-d" x="650" y="322" text-anchor="middle">Strength</text></g>
+              <text class="td" x="280" y="380" text-anchor="middle" data-a="fade" data-at="2">Each consignment</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Coarse aggregate</text></g>
+              <g data-a="pop" data-at=".3" class="fw" stroke="#F4EFE6" stroke-width="3"><path d="M160 300l30-30 40 10 10 40-30 24-40-10z"/><path d="M270 320l24-34 40 6 6 38-34 16z"/><path d="M200 380l26-20 36 12-4 32-36 6z"/><path d="M320 390l20-24 34 10 2 30-30 10z"/></g>
+              <path class="dim" d="M270 260H334M270 250v20M334 250v20" data-a="draw" data-at="1"/>
+              <text class="ty" x="302" y="242" text-anchor="middle" data-a="pop" data-at="1.2">20mm and down</text>
+              <g data-a="pop" data-at="1.6"><rect class="chip-y" x="520" y="230" width="160" height="46" rx="23"/><text class="tchip-d" x="600" y="260" text-anchor="middle">IS 383</text></g>
+              <g data-a="pop" data-at="1.9"><rect class="chip-y" x="700" y="230" width="160" height="46" rx="23"/><text class="tchip-d" x="780" y="260" text-anchor="middle">IS 2386</text></g>
+              <text class="td" x="690" y="310" text-anchor="middle" data-a="fade" data-at="2.2">For RCC works</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Crushed stone quality</text></g>
+              <g data-a="up" data-at=".2"><rect class="card" x="80" y="120" width="380" height="300" rx="14"/><text class="ty" x="110" y="160">Accept</text>
+                <g class="fw" stroke="#F4EFE6" stroke-width="3"><path d="M130 220l30-30 40 10 10 40-30 24-40-10z"/><path d="M260 230l24-34 40 6 6 38-34 16z"/></g>
+                <text class="t" x="110" y="330">Granite, trap, basalt</text><text class="td" x="110" y="360">chemically inert, rounded or angular</text></g>
+              <g data-a="up" data-at="1"><rect class="card" x="500" y="120" width="380" height="300" rx="14"/><text class="ty" x="530" y="160" style="fill:var(--red)">Reject</text>
+                <g class="fw" stroke="#F4EFE6" stroke-width="3"><path d="M550 220l120-20 6 10-120 22z"/><path d="M700 210l40-30 30 40-40 20z" style="stroke-dasharray:4 4"/></g>
+                <text class="t" x="530" y="330">Thin, porous, laminated</text><text class="td" x="530" y="360">or flaky; dust, foreign matter</text></g>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Fine aggregate</text></g>
+              <path class="fa ln" d="M80 440q140-200 300 0z" data-a="grow-y" data-at=".2"/>
+              <rect class="chip" x="440" y="160" width="420" height="20" rx="10" data-a="fade" data-at=".6"/>
+              <rect class="fg" x="560" y="160" width="120" height="20" rx="10" data-a="grow-x" data-at="1"/>
+              <text class="ty" x="620" y="150" text-anchor="middle" data-a="fade" data-at="1.2">FM 2.6 to 3.2</text>
+              <g data-a="left" data-at="1.6"><use href="#s-ok" x="440" y="220" width="32" height="32"/><text class="t" x="484" y="243">Gritty sand</text></g>
+              <g data-a="left" data-at="1.9"><use href="#s-ok" x="440" y="270" width="32" height="32"/><text class="t" x="484" y="293">Silt not more than 5%</text></g>
+              <g data-a="left" data-at="2.2"><use href="#s-ok" x="440" y="320" width="32" height="32"/><text class="t" x="484" y="343">No traces of salt</text></g>
+              <g data-a="left" data-at="2.5"><use href="#s-bad" x="440" y="370" width="32" height="32"/><text class="t" x="484" y="393">Specific gravity less than 2.6</text></g>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Wash dirty sand</text></g>
+              <path class="lnd" d="M40 440H920" data-a="draw"/>
+              <path class="fa ln" d="M160 440q160-220 340 0z" data-a="grow-y" data-at=".2"/>
+              <g data-a="fade out" data-at=".6 2" class="fbp"><circle cx="260" cy="400" r="6"/><circle cx="330" cy="370" r="5"/><circle cx="390" cy="410" r="6"/></g>
+              <g data-a="fade" data-at="1.2" class="fwater"><circle cx="240" cy="260" r="6"/><circle cx="300" cy="240" r="6"/><circle cx="360" cy="250" r="6"/><circle cx="420" cy="270" r="6"/></g>
+              <text class="tb" x="640" y="290" data-a="fade" data-at="2.4">Clear of organic</text><text class="tb" x="640" y="320" data-a="fade" data-at="2.5">materials</text>
+            </g>
+          </svg>
+
+          <svg class="lsvg" data-l="1" viewBox="0 0 960 540" role="img" aria-label="Animated drawing for water and admixtures" hidden>
+            <rect class="bg" width="960" height="540"/><rect width="960" height="540" fill="url(#p-grid)"/>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Water: clean and fresh</text></g>
+              <path class="fwater ln" d="M300 140q90 120 90 190a90 90 0 0 1-180 0q0-70 90-190z" data-a="pop" data-at=".2"/>
+              <g data-a="pop" data-at="1"><rect class="chip" x="520" y="150" width="200" height="44" rx="22"/><use href="#s-bad" x="526" y="156" width="32" height="32"/><text class="tchip" x="570" y="179">Oil</text></g>
+              <g data-a="pop" data-at="1.2"><rect class="chip" x="520" y="206" width="200" height="44" rx="22"/><use href="#s-bad" x="526" y="212" width="32" height="32"/><text class="tchip" x="570" y="235">Acid</text></g>
+              <g data-a="pop" data-at="1.4"><rect class="chip" x="520" y="262" width="200" height="44" rx="22"/><use href="#s-bad" x="526" y="268" width="32" height="32"/><text class="tchip" x="570" y="291">Alkali</text></g>
+              <g data-a="pop" data-at="1.6"><rect class="chip" x="520" y="318" width="240" height="44" rx="22"/><use href="#s-bad" x="526" y="324" width="32" height="32"/><text class="tchip" x="570" y="347">Organic matter</text></g>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Potable water</text></g>
+              <g data-a="down" data-at=".2"><path class="ln thick" d="M200 140h140v40"/><rect class="fy ln" x="250" y="126" width="40" height="18" rx="4"/></g>
+              <path class="lny" d="M340 186v80" style="stroke:var(--water);stroke-width:8" data-a="grow-y" data-at="1"/>
+              <path class="fw ln" d="M300 270h80l-10 120h-60z" data-a="up" data-at=".6"/>
+              <rect class="fwater" x="306" y="300" width="68" height="86" data-a="grow-y" data-at="1.4"/>
+              <text class="tb" x="520" y="280" data-a="fade" data-at="1.8">Good for concreting</text>
+              <text class="tb" x="520" y="310" data-a="fade" data-at="1.9">and curing</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Permissible limits of solids</text></g>
+              <use href="#s-book" x="240" y="150" width="400" height="275" data-a="up" data-at=".2"/>
+              <text class="tbig" x="350" y="250" text-anchor="middle" data-a="pop" data-at="1">IS 456</text>
+              <text class="tb" x="530" y="250" text-anchor="middle" data-a="pop" data-at="1.2">2000</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Admixtures: clearance first</text></g>
+              <use href="#s-bottle" x="160" y="160" width="140" height="227" data-a="up" data-at=".2"/>
+              <g data-a="up" data-at=".8"><rect class="card" x="400" y="140" width="360" height="260" rx="12"/><text class="tb" x="430" y="186">Technical clearance</text><path class="lnd" d="M430 220h300M430 252h300M430 284h220"/></g>
+              <path d="M560 360c12-26 26-26 30 0s16-20 26-4 18 6 34-12" style="fill:none;stroke:var(--water);stroke-width:4;stroke-linecap:round" data-a="draw" data-at="1.6"/>
+              <text class="td" x="620" y="440" text-anchor="middle" data-a="fade" data-at="2.2">from technical consultant</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Clearly understood</text></g>
+              <use href="#s-bottle" x="140" y="170" width="120" height="195" data-a="up" data-at=".2"/>
+              <g data-a="pop" data-at=".8"><rect class="chip" x="360" y="170" width="300" height="46" rx="23"/><text class="tchip" x="510" y="200" text-anchor="middle">Dosage</text></g>
+              <g data-a="pop" data-at="1.2"><rect class="chip" x="360" y="236" width="300" height="46" rx="23"/><text class="tchip" x="510" y="266" text-anchor="middle">Point of application</text></g>
+              <g data-a="pop" data-at="1.6"><rect class="chip-y" x="360" y="302" width="300" height="46" rx="23"/><text class="tchip-d" x="510" y="332" text-anchor="middle">The desired results</text></g>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Additives commonly used</text></g>
+              <g data-a="up" data-at=".2"><use href="#s-bottle" x="100" y="160" width="110" height="178"/><text class="tchip" x="155" y="380" text-anchor="middle">Accelerators</text></g>
+              <g data-a="up" data-at=".5"><use href="#s-bottle" x="300" y="160" width="110" height="178"/><text class="tchip" x="355" y="380" text-anchor="middle">Retarders</text></g>
+              <g data-a="up" data-at=".8"><use href="#s-bottle" x="500" y="160" width="110" height="178"/><text class="tchip" x="555" y="380" text-anchor="middle">Plasticizers</text></g>
+              <g data-a="up" data-at="1.1"><use href="#s-bottle" x="700" y="160" width="110" height="178"/><text class="tchip" x="755" y="380" text-anchor="middle">Integral-</text><text class="tchip" x="755" y="404" text-anchor="middle">waterproofing</text></g>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Expiry date checked</text></g>
+              <use href="#s-bottle" x="200" y="150" width="160" height="260" data-a="up" data-at=".2"/>
+              <g data-a="pop" data-at="1"><rect class="fw ln" x="380" y="250" width="180" height="70" rx="8"/><text class="td" x="396" y="278">Expiry date</text><text class="tb" x="396" y="306">03/2027</text></g>
+              <use href="#s-cal" x="620" y="200" width="100" height="100" data-a="pop" data-at="1.6"/>
+              <use href="#s-ok" x="700" y="180" width="50" height="50" data-a="pop" data-at="2"/>
+              <text class="tb" x="560" y="400" text-anchor="middle" data-a="fade" data-at="2.2">Before use</text>
+            </g>
+          </svg>
+          <svg class="lsvg" data-l="2" viewBox="0 0 960 540" role="img" aria-label="Animated drawing for in-situ mixing, part 1" hidden>
+            <rect class="bg" width="960" height="540"/><rect width="960" height="540" fill="url(#p-grid)"/>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Stock for the day’s work</text></g>
+              <path class="lnd" d="M40 440H920" data-a="draw"/>
+              <g data-a="up" data-at=".3"><use href="#s-bag" x="80" y="404" width="160" height="36"/><use href="#s-bag" x="80" y="368" width="160" height="36"/><use href="#s-bag" x="80" y="332" width="160" height="36"/><text class="tchip" x="160" y="480" text-anchor="middle">Cement</text></g>
+              <g data-a="up" data-at=".6"><path class="fw ln" d="M280 440q70-110 140 0z"/><text class="tchip" x="350" y="480" text-anchor="middle">Aggregate</text></g>
+              <g data-a="up" data-at=".9"><path class="fa ln" d="M460 440q70-100 140 0z"/><text class="tchip" x="530" y="480" text-anchor="middle">Sand</text></g>
+              <g data-a="up" data-at="1.2"><rect class="fw ln" x="640" y="330" width="80" height="110" rx="10"/><rect class="fwater" x="644" y="360" width="72" height="76"/><text class="tchip" x="680" y="480" text-anchor="middle">Water</text></g>
+              <g data-a="up" data-at="1.5"><use href="#s-bottle" x="760" y="340" width="60" height="98"/><text class="tchip" x="790" y="326" text-anchor="middle">Admixture</text></g>
+              <text class="tb" x="480" y="200" text-anchor="middle" data-a="fade" data-at="2">Adequate stock of all ingredients</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Calibrated farma</text></g>
+              <use href="#s-farma" x="140" y="220" width="240" height="160" data-a="up" data-at=".2"/>
+              <use href="#s-cal" x="420" y="200" width="90" height="90" data-a="pop" data-at=".8"/>
+              <text class="td" x="465" y="320" text-anchor="middle" data-a="fade" data-at="1">calibrated once a month</text>
+              <text class="tb" x="580" y="250" data-a="fade" data-at="1.4">or</text>
+              <g data-a="up" data-at="1.8"><rect class="fy ln" x="640" y="180" width="200" height="160" rx="10"/><rect class="fbp ln" x="670" y="200" width="140" height="50" rx="4"/><text class="ty" x="740" y="234" text-anchor="middle">250.0 kg</text></g>
+              <text class="td" x="740" y="370" text-anchor="middle" data-a="fade" data-at="2.2">weigh batcher machine</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Charge the drum with water</text></g>
+              <use href="#s-mixer" x="200" y="160" width="300" height="245" data-a="up" data-at=".2"/>
+              <path class="lny" d="M360 100v80" style="stroke:var(--water);stroke-width:10" data-a="grow-y" data-at="1"/>
+              <text class="tbig" x="640" y="250" data-a="pop" data-at="1.4">25%</text>
+              <text class="td" x="640" y="280" data-a="fade" data-at="1.6">of the required water</text>
+              <path class="rope" d="M330 260a40 40 0 1 1 40 40" marker-end="url(#m-arr)" data-a="draw" data-at="2"/>
+              <text class="tb" x="640" y="330" data-a="fade" data-at="2.4">rotate 3-4 times</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Water per bag</text></g>
+              <use href="#s-bag" x="120" y="250" width="220" height="66" data-a="up" data-at=".2"/>
+              <text class="tq" x="380" y="300" data-a="fade" data-at=".6" style="font-size:60px;fill:var(--bp-line)">+</text>
+              <g data-a="up" data-at="1"><rect class="fw ln" x="440" y="190" width="120" height="160" rx="12"/><rect class="fwater" x="446" y="230" width="108" height="114"/></g>
+              <text class="tbig" x="500" y="400" text-anchor="middle" data-a="pop" data-at="1.4">20 to 25 litres</text>
+              <g data-a="pop" data-at="2"><rect class="card" x="620" y="180" width="260" height="120" rx="14"/><text class="td" x="644" y="216">Water cement ratio</text><text class="tbig" x="644" y="270">0.4 to 0.5</text></g>
+              <text class="td" x="750" y="340" text-anchor="middle" data-a="fade" data-at="2.4">aggregate moisture checked often</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Loading the hopper</text></g>
+              <path class="fw ln" d="M200 120h300l-60 320H260z" data-a="fade" data-at=".1"/>
+              <rect class="fw" x="250" y="380" width="200" height="50" style="fill:#A39C90" data-a="down" data-at=".4"/>
+              <rect class="fa" x="246" y="330" width="208" height="50" data-a="down" data-at=".8"/>
+              <rect class="fw" x="240" y="290" width="220" height="40" style="fill:#D7DEE5" data-a="down" data-at="1.2"/>
+              <rect class="fa" x="234" y="240" width="232" height="50" data-a="down" data-at="1.6"/>
+              <rect class="fw" x="226" y="190" width="248" height="50" style="fill:#A39C90" data-a="down" data-at="2"/>
+              <text class="t" x="540" y="414" data-a="fade" data-at=".6">½ coarse aggregate</text>
+              <text class="t" x="540" y="364" data-a="fade" data-at="1">½ fine aggregate</text>
+              <text class="ty" x="540" y="316" data-a="fade" data-at="1.4">entire cement</text>
+              <text class="t" x="540" y="270" data-a="fade" data-at="1.8">½ fine aggregate</text>
+              <text class="t" x="540" y="220" data-a="fade" data-at="2.2">balance coarse aggregate</text>
+              <text class="td" x="540" y="160" data-a="fade" data-at="2.6">Sandwiching: no cement spills</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Rotate the drum</text></g>
+              <use href="#s-mixer" x="160" y="160" width="300" height="245" data-a="up" data-at=".2"/>
+              <path class="rope" d="M290 250a40 40 0 1 1 40 40" marker-end="url(#m-arr)" data-a="draw" data-at=".8"/>
+              <g data-a="pop" data-at="1.4"><rect class="card" x="540" y="150" width="320" height="110" rx="14"/><text class="td" x="564" y="186">At least</text><text class="tbig" x="564" y="236">1 ½ to 2 min</text></g>
+              <g data-a="pop" data-at="2"><rect class="card" x="540" y="280" width="320" height="110" rx="14"/><text class="td" x="564" y="316">Rotation</text><text class="tbig" x="564" y="366">15 to 20 rpm</text></g>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Plasticizer and minimum cement</text></g>
+              <g data-a="up" data-at=".2"><rect class="fw ln" x="80" y="150" width="90" height="120" rx="10"/><rect class="fwater" x="84" y="190" width="82" height="76"/><text class="tb" x="125" y="300" text-anchor="middle">1 litre</text></g>
+              <path class="rope" d="M180 210h60" marker-end="url(#m-arr)" data-a="draw" data-at=".8"/>
+              <text class="td" x="130" y="330" text-anchor="middle" data-a="fade" data-at="1">after 1 min, then</text>
+              <text class="td" x="130" y="352" text-anchor="middle" data-a="fade" data-at="1.1">1 min more</text>
+              <g data-a="fade" data-at="1.4"><rect class="card" x="300" y="120" width="580" height="320" rx="12"/>
+                <text class="td" x="324" y="156">Grade</text><text class="td" x="440" y="156">7 days</text><text class="td" x="560" y="156">28 days</text><text class="td" x="690" y="156">Min. cement / Cum</text><path class="lnd" d="M316 170h548"/></g>
+              <g data-a="left" data-at="1.7"><text class="t" x="324" y="206">M10</text><text class="t" x="440" y="206">7</text><text class="t" x="560" y="206">10</text><text class="t" x="690" y="206">220 kgs</text></g>
+              <g data-a="left" data-at="1.9"><text class="t" x="324" y="250">M 15</text><text class="t" x="440" y="250">10</text><text class="t" x="560" y="250">15</text><text class="t" x="690" y="250">280 kgs</text></g>
+              <g data-a="left" data-at="2.1"><text class="ty" x="324" y="294">M 20</text><text class="t" x="440" y="294">13.5</text><text class="t" x="560" y="294">20</text><text class="t" x="690" y="294">320 kgs</text></g>
+              <g data-a="left" data-at="2.3"><text class="t" x="324" y="338">M 25</text><text class="t" x="440" y="338">17</text><text class="t" x="560" y="338">25</text><text class="t" x="690" y="338">360 kgs</text></g>
+              <g data-a="left" data-at="2.5"><text class="t" x="324" y="382">M 30</text><text class="t" x="440" y="382">20</text><text class="t" x="560" y="382">30</text><text class="t" x="690" y="382">390 kgs</text></g>
+              <text class="td" x="590" y="420" text-anchor="middle" data-a="fade" data-at="2.8">Characteristic strength in N/mm2</text>
+            </g>
+          </svg>
+
+          <svg class="lsvg" data-l="3" viewBox="0 0 960 540" role="img" aria-label="Animated drawing for in-situ mixing, part 2" hidden>
+            <rect class="bg" width="960" height="540"/><rect width="960" height="540" fill="url(#p-grid)"/>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">For RCC works</text></g>
+              <g data-a="pop" data-at=".3"><rect class="chip" x="120" y="220" width="160" height="60" rx="30"/><text class="tb" x="200" y="258" text-anchor="middle">M 15</text></g>
+              <use href="#s-bad" x="260" y="200" width="40" height="40" data-a="pop" data-at=".8"/>
+              <g data-a="pop" data-at="1.2"><rect class="chip-y" x="400" y="210" width="200" height="80" rx="40"/><text class="tbig" x="500" y="266" text-anchor="middle" style="fill:var(--on-yellow)">M 20</text></g>
+              <text class="tb" x="500" y="350" text-anchor="middle" data-a="fade" data-at="1.8">No grade below M 20</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Within half an hour</text></g>
+              <circle class="ln" cx="300" cy="280" r="110" data-a="fade" data-at=".2"/>
+              <path class="fy" d="M300 280V170A110 110 0 0 1 300 390z" opacity=".6" data-a="pop" data-at=".8"/>
+              <path class="ln thick" d="M300 280V196M300 280h60" data-a="draw" data-at="1.2"/>
+              <text class="tb" x="520" y="260" data-a="fade" data-at="1.6">Placed in position</text>
+              <text class="tb" x="520" y="290" data-a="fade" data-at="1.7">and compacted</text>
+              <text class="td" x="520" y="320" data-a="fade" data-at="1.9">within ½ hour of mixing</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">A supervisor on the mixer</text></g>
+              <path class="lnd" d="M40 440H920" data-a="draw"/>
+              <use href="#s-mixer" x="140" y="200" width="290" height="237" data-a="up" data-at=".2"/>
+              <use href="#s-foreman" x="520" y="220" width="88" height="220" data-a="right" data-at=".8"/>
+              <use href="#s-eye" x="500" y="150" width="110" height="64" data-a="pop" data-at="1.4"/>
+              <text class="tb" x="700" y="300" data-a="fade" data-at="1.8">Monitors the works</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Transporting</text></g>
+              <path class="lnd" d="M40 440H920" data-a="draw"/>
+              <use href="#s-barrow" x="100" y="330" width="200" height="110" data-a="right" data-at=".3"/>
+              <g data-a="up" data-at=".8"><path class="fw ln" d="M380 380h120l-14 50h-92z"/><text class="tchip" x="440" y="470" text-anchor="middle">Bandly</text></g>
+              <g data-a="up" data-at="1.2"><rect class="fw ln" x="600" y="140" width="20" height="300"/><rect class="fy ln" x="620" y="260" width="90" height="60"/><text class="tchip" x="660" y="470" text-anchor="middle">Hoist</text></g>
+              <g data-a="fade" data-at="1.8" class="fwater"><circle cx="160" cy="350" r="5"/><circle cx="200" cy="340" r="5"/><circle cx="420" cy="384" r="5"/></g>
+              <text class="tb" x="760" y="200" data-a="fade" data-at="2.2">Wet the carrier</text>
+              <text class="td" x="760" y="228" data-a="fade" data-at="2.3">avoids moisture loss</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Avoid segregation</text></g>
+              <path class="fw ln" d="M120 420q120-140 240 0z" data-a="grow-y" data-at=".2"/>
+              <g data-a="fade" data-at=".8" class="fw" stroke="#F4EFE6" stroke-width="2"><circle cx="150" cy="410" r="10"/><circle cx="330" cy="410" r="10"/><circle cx="175" cy="395" r="8"/></g>
+              <use href="#s-bad" x="220" y="300" width="40" height="40" data-a="pop" data-at="1.2"/>
+              <path class="rope" d="M400 380h100" marker-end="url(#m-arr)" data-a="draw" data-at="1.6"/>
+              <use href="#s-mixer" x="540" y="220" width="220" height="180" data-a="pop" data-at="2"/>
+              <text class="tb" x="650" y="450" text-anchor="middle" data-a="fade" data-at="2.4">Remix before placing</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Concrete by vision</text></g>
+              <path class="fw ln" d="M140 400q90-110 180-10 30 20 0 40H160q-30-10-20-30z" style="fill:#D2CCC2" data-a="grow-y" data-at=".2"/>
+              <circle class="fw ln" cx="360" cy="380" r="40" style="fill:#C4BDB2" data-a="pop" data-at="1"/>
+              <g data-a="left" data-at="1.6"><use href="#s-ok" x="440" y="170" width="30" height="30"/><text class="t" x="480" y="193">Homogeneous in colour</text></g>
+              <g data-a="left" data-at="1.9"><use href="#s-ok" x="440" y="220" width="30" height="30"/><text class="t" x="480" y="243">Well graded</text></g>
+              <g data-a="left" data-at="2.2"><use href="#s-ok" x="440" y="270" width="30" height="30"/><text class="t" x="480" y="293">Fluffy</text></g>
+              <g data-a="left" data-at="2.5"><use href="#s-ok" x="440" y="320" width="30" height="30"/><text class="t" x="480" y="343">Forms a shape of ball</text></g>
+            </g>
+          </svg>
+          <svg class="lsvg" data-l="4" viewBox="0 0 960 540" role="img" aria-label="Animated drawing for batching plant mix, part 1" hidden>
+            <rect class="bg" width="960" height="540"/><rect width="960" height="540" fill="url(#p-grid)"/>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Ready-mix concrete</text></g>
+              <path class="lnd" d="M40 440H920" data-a="draw"/>
+              <g data-a="up" data-at=".2"><rect class="fw ln" x="100" y="200" width="160" height="240"/><path class="fy ln" d="M120 200l60-80 60 80z"/><rect class="fw ln" x="260" y="300" width="100" height="140"/></g>
+              <text class="tb" x="230" y="476" text-anchor="middle" data-a="fade" data-at=".8">Automated batching plant</text>
+              <use href="#s-tm" x="420" y="300" width="240" height="120" data-a="right" data-at="1.2"/>
+              <use href="#s-tm" x="660" y="300" width="240" height="120" data-a="right" data-at="1.5"/>
+              <g data-a="pop" data-at="2"><rect class="chip-y" x="420" y="200" width="300" height="50" rx="25"/><text class="tchip-d" x="570" y="232" text-anchor="middle">at least 30 cum per hour</text></g>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Logistics</text></g>
+              <path class="lnd" d="M40 440H920" data-a="draw"/>
+              <use href="#s-tm" x="80" y="310" width="240" height="120" data-a="right" data-at=".3"/>
+              <use href="#s-tm" x="360" y="310" width="240" height="120" data-a="right" data-at="1"/>
+              <use href="#s-tm" x="640" y="310" width="240" height="120" data-a="right" data-at="1.7"/>
+              <text class="ty" x="200" y="290" text-anchor="middle" data-a="fade" data-at=".6">6 cum</text><text class="ty" x="480" y="290" text-anchor="middle" data-a="fade" data-at="1.3">6 cum</text><text class="ty" x="760" y="290" text-anchor="middle" data-a="fade" data-at="2">6 cum</text>
+              <text class="tbig" x="480" y="200" text-anchor="middle" data-a="pop" data-at="2.4">every 10 to 15 minutes</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Check the empty drum</text></g>
+              <use href="#s-tm" x="160" y="200" width="420" height="210" data-a="up" data-at=".2"/>
+              <path class="fw" d="M370 300q60-20 100 10v30H360z" style="fill:#D2CCC2" data-a="pop" data-at="1"/>
+              <use href="#s-mag" x="380" y="180" width="120" height="120" data-a="float" data-at="1.4"/>
+              <text class="tb" x="640" y="270" data-a="fade" data-at="2">Preset concrete</text>
+              <text class="td" x="640" y="298" data-a="fade" data-at="2.2">affects the quantum received</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Challan and data cycle sheet</text></g>
+              <g data-a="up" data-at=".2"><rect class="card" x="100" y="110" width="400" height="360" rx="12"/><text class="tb" x="130" y="150">Data cycle sheet</text></g>
+              <g data-a="left" data-at=".8"><text class="t" x="130" y="192">Grade</text><text class="t" x="320" y="192">Quantity</text></g>
+              <g data-a="left" data-at="1.1"><text class="t" x="130" y="232">W/C ratio</text><text class="t" x="320" y="232">Slump</text></g>
+              <g data-a="left" data-at="1.4"><text class="t" x="130" y="272">Cement content</text></g>
+              <g data-a="left" data-at="1.7"><text class="t" x="130" y="312">Time of manufacturing</text></g>
+              <g data-a="left" data-at="2"><text class="t" x="130" y="352">Dosage of additive</text></g>
+              <g data-a="left" data-at="2.3"><text class="t" x="130" y="392">Weight of ingredients</text></g>
+              <g data-a="up" data-at="2.6"><rect class="card" x="560" y="180" width="280" height="160" rx="12"/><text class="tb" x="590" y="226">Delivery challan</text><path class="lnd" d="M590 260h220M590 290h180"/></g>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Read the cycle data first</text></g>
+              <g data-a="up" data-at=".2"><rect class="card" x="160" y="130" width="340" height="300" rx="12"/><text class="tb" x="190" y="176">Data cycle sheet</text><path class="lnd" d="M190 214h280M190 246h280M190 278h240M190 310h260M190 342h200"/></g>
+              <use href="#s-mag" x="340" y="200" width="130" height="130" data-a="float" data-at=".8"/>
+              <use href="#s-ok" x="600" y="230" width="70" height="70" data-a="pop" data-at="2"/>
+              <text class="tb" x="635" y="340" text-anchor="middle" data-a="fade" data-at="2.3">Then accept</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Three hours of mixing</text></g>
+              <circle class="ln" cx="280" cy="280" r="120" data-a="fade" data-at=".2"/>
+              <path class="fo" d="M280 280V160A120 120 0 0 1 384 340z" opacity=".55" data-a="pop" data-at=".8"/>
+              <path class="ln thick" d="M280 280V180M280 280l84 50" data-a="draw" data-at="1.2"/>
+              <use href="#s-tm" x="500" y="260" width="260" height="130" data-a="right" data-at="1.6"/>
+              <use href="#s-no" x="570" y="220" width="160" height="160" data-a="pop" data-at="2.2"/>
+              <text class="tb" x="630" y="440" text-anchor="middle" data-a="fade" data-at="2.6">Not accepted after 3 hours</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Do not recharge the concrete</text></g>
+              <use href="#s-tm" x="120" y="240" width="320" height="160" data-a="up" data-at=".2"/>
+              <g data-a="pop" data-at=".8"><rect class="chip" x="500" y="150" width="200" height="44" rx="22"/><use href="#s-bad" x="506" y="156" width="32" height="32"/><text class="tchip" x="550" y="179">Additive</text></g>
+              <g data-a="pop" data-at="1.1"><rect class="chip" x="500" y="206" width="200" height="44" rx="22"/><use href="#s-bad" x="506" y="212" width="32" height="32"/><text class="tchip" x="550" y="235">Water</text></g>
+              <g data-a="pop" data-at="1.4"><rect class="chip" x="500" y="262" width="200" height="44" rx="22"/><use href="#s-bad" x="506" y="268" width="32" height="32"/><text class="tchip" x="550" y="291">Cement</text></g>
+              <text class="tb" x="500" y="360" data-a="fade" data-at="1.9">Without prior permission</text>
+              <text class="td" x="500" y="388" data-a="fade" data-at="2.1">from the project in-charge</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Slump for RMC mix</text></g>
+              <path class="lnd" d="M120 420H560" data-a="draw"/>
+              <use href="#s-slump" x="190" y="230" width="140" height="182" data-a="sweep" data-at="1"/>
+              <path class="fw ln" d="M180 420q80-130 160 0z" style="fill:#D2CCC2" data-a="grow-y" data-at="1.4"/>
+              <path class="dim" d="M370 230V320M358 230h24M358 320h24" data-a="draw" data-at="2"/>
+              <text class="tbig" x="420" y="300" data-a="pop" data-at="2.4">100mm to 125mm</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Placing the concrete pump</text></g>
+              <path class="lnd" d="M40 430H920" data-a="draw"/>
+              <use href="#s-cpump" x="140" y="300" width="200" height="136" data-a="up" data-at=".3"/>
+              <use href="#s-tm" x="420" y="310" width="240" height="120" data-a="right" data-at="1"/>
+              <path class="dim" d="M360 460H420M420 460H660" data-a="draw" data-at="1.6"/>
+              <text class="td" x="540" y="494" text-anchor="middle" data-a="fade" data-at="1.8">approach free of materials</text>
+              <g data-a="pop" data-at="2.2"><path class="fw" d="M700 430l200-60v60z" style="fill:rgba(244,239,230,.25)"/><use href="#s-bad" x="800" y="330" width="40" height="40"/></g>
+              <text class="td" x="800" y="300" text-anchor="middle" data-a="fade" data-at="2.4">no slope toward the pump</text>
+              <text class="tb" x="240" y="270" text-anchor="middle" data-a="fade" data-at="2.6">Horizontal, hard, even</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Before the vertical bend</text></g>
+              <path class="lnd" d="M40 430H920" data-a="draw"/>
+              <use href="#s-cpump" x="80" y="300" width="200" height="136" data-a="up" data-at=".2"/>
+              <path class="ln thick" d="M80 370H40" style="opacity:0"/>
+              <path class="lny" d="M280 380H620V140" style="stroke:#C9BBA0;stroke-width:12" data-a="draw" data-at=".8" data-d="1.4"/>
+              <path class="dim" d="M280 410H620M280 400v20M620 400v20" data-a="draw" data-at="2"/>
+              <text class="tbig" x="450" y="470" text-anchor="middle" data-a="pop" data-at="2.4">at least 7 metres</text>
+              <text class="td" x="640" y="200" data-a="fade" data-at="2.6">vertical bend</text>
+            </g>
+          </svg>
+
+          <svg class="lsvg" data-l="5" viewBox="0 0 960 540" role="img" aria-label="Animated drawing for batching plant mix, part 2" hidden>
+            <rect class="bg" width="960" height="540"/><rect width="960" height="540" fill="url(#p-grid)"/>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Keep the pipe short</text></g>
+              <path class="lnd" d="M40 430H920" data-a="draw"/>
+              <use href="#s-cpump" x="80" y="300" width="200" height="136" data-a="up" data-at=".2"/>
+              <path class="lny" d="M280 380H500V180" style="stroke:#C9BBA0;stroke-width:12" data-a="draw" data-at=".8"/>
+              <path class="crack" d="M280 360Q500 300 600 380T880 380" style="stroke-dasharray:8 6" data-a="draw" data-at="1.6"/>
+              <use href="#s-bad" x="780" y="320" width="40" height="40" data-a="pop" data-at="2"/>
+              <text class="tb" x="620" y="200" data-a="fade" data-at="2.2">Less friction,</text><text class="tb" x="620" y="230" data-a="fade" data-at="2.3">less strain on the pump</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Pipeline supported independently</text></g>
+              <rect class="fa ln" x="300" y="200" width="300" height="20" data-a="grow-x" data-at=".2"/>
+              <use href="#s-prop" x="340" y="220" width="30" height="210" data-a="up" data-at=".4"/><use href="#s-prop" x="530" y="220" width="30" height="210" data-a="up" data-at=".5"/>
+              <path class="lny" d="M200 430V140H300" style="stroke:#C9BBA0;stroke-width:12" data-a="draw" data-at="1"/>
+              <path class="ln thick" d="M140 260h60M140 360h60M140 160v240" data-a="draw" data-at="1.6"/>
+              <text class="tb" x="660" y="260" data-a="fade" data-at="2.2">Not on the shuttering</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Pumping vibrations</text></g>
+              <rect class="fa ln" x="300" y="200" width="300" height="20" data-a="grow-x" data-at=".2"/>
+              <use href="#s-prop" x="340" y="220" width="30" height="210" data-a="up" data-at=".4"/><use href="#s-prop" x="530" y="220" width="30" height="210" data-a="up" data-at=".5"/>
+              <path class="wave" d="M160 300q10 16 0 32M180 290q16 26 0 52M200 280q22 36 0 72" data-a="wave" data-at="1"/>
+              <use href="#s-ok" x="640" y="250" width="56" height="56" data-a="pop" data-at="2"/>
+              <text class="tb" x="460" y="470" text-anchor="middle" data-a="fade" data-at="2.2">Must not affect or displace shuttering works</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Rich slurry first</text></g>
+              <use href="#s-cpump" x="80" y="300" width="200" height="136" data-a="up" data-at=".2"/>
+              <use href="#s-bag" x="100" y="240" width="160" height="48" data-a="down" data-at=".6"/>
+              <path class="lny" d="M280 380H840" style="stroke:#C9BBA0;stroke-width:16" data-a="draw" data-at="1"/>
+              <path class="lny" d="M280 380H840" style="stroke:#DDE3E8;stroke-width:6" data-a="draw" data-at="1.6"/>
+              <text class="tb" x="560" y="320" text-anchor="middle" data-a="fade" data-at="2.2">One bag: lubricates the pipes</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Intermittent supply</text></g>
+              <path class="lnd" d="M40 430H920" data-a="draw"/>
+              <use href="#s-cpump" x="80" y="300" width="200" height="136" data-a="up" data-at=".2"/>
+              <use href="#s-tm" x="300" y="310" width="240" height="120" data-a="right" data-at=".6"/>
+              <text class="td" x="420" y="290" text-anchor="middle" data-a="fade" data-at="1">keeps unloading slowly</text>
+              <use href="#s-tm" x="620" y="310" width="240" height="120" data-a="right" data-at="1.8" data-d="1.6"/>
+              <text class="td" x="740" y="290" text-anchor="middle" data-a="fade" data-at="2.4">next mixer arrives</text>
+              <g data-a="pop" data-at="3"><rect class="chip" x="300" y="150" width="380" height="46" rx="23"/><use href="#s-bad" x="306" y="156" width="34" height="34"/><text class="tchip" x="352" y="180">Reverse stroke to clear a choke</text></g>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Flexible end pipe</text></g>
+              <path class="lny" d="M160 160H420Q520 160 520 260T620 400" style="stroke:#C9BBA0;stroke-width:14" data-a="draw" data-at=".3"/>
+              <path class="dim" d="M440 200A80 80 0 0 1 500 300" data-a="draw" data-at="1.2"/>
+              <text class="tbig" x="700" y="260" data-a="pop" data-at="1.6">≤ 135°</text>
+              <text class="td" x="700" y="290" data-a="fade" data-at="1.8">not bent more while concreting</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Constricted areas</text></g>
+              <rect class="fw ln" x="180" y="200" width="60" height="240" style="fill:rgba(244,239,230,.3)" data-a="grow-y"/><rect class="fw ln" x="400" y="200" width="60" height="240" style="fill:rgba(244,239,230,.3)" data-a="grow-y"/>
+              <path class="lny" d="M320 100V190" style="stroke:#C9BBA0;stroke-width:14" data-a="draw" data-at=".6"/>
+              <use href="#s-no" x="270" y="140" width="100" height="100" data-a="pop" data-at="1.2"/>
+              <g data-a="up" data-at="1.8"><path class="fw ln" d="M560 300h140l-16 60H576z"/><text class="tchip" x="630" y="400" text-anchor="middle">Bandly</text></g>
+              <g data-a="up" data-at="2.2"><rect class="fy ln" x="760" y="260" width="20" height="120"/><path class="fw ln" d="M740 260h60l-10 30h-40z"/><text class="tchip" x="770" y="400" text-anchor="middle">Mumty</text></g>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Passing the ball</text></g>
+              <path class="lny" d="M120 300H840" style="stroke:#C9BBA0;stroke-width:30" data-a="draw" data-at=".2"/>
+              <circle class="fy ln" cx="160" cy="300" r="12" data-a="right" data-at="1" data-d="1.6"/>
+              <use href="#s-warn" x="760" y="160" width="90" height="81" data-a="pulse" data-at="2"/>
+              <text class="tb" x="480" y="400" text-anchor="middle" data-a="fade" data-at="2.4">Be excessively careful: somebody could get hurt</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Professional hands</text></g>
+              <path class="lny" d="M120 300H400M440 300H840" style="stroke:#C9BBA0;stroke-width:16" data-a="draw" data-at=".2"/>
+              <rect class="fy ln" x="396" y="282" width="48" height="36" rx="6" data-a="pop" data-at="1"/>
+              <use href="#s-worker" x="380" y="120" width="64" height="160" data-a="down" data-at="1.4"/>
+              <text class="tb" x="480" y="400" text-anchor="middle" data-a="fade" data-at="2">Neater, faster, no safety problems</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Leave it clean</text></g>
+              <path class="lnd" d="M40 430H920" data-a="draw"/>
+              <use href="#s-cpump" x="140" y="300" width="200" height="136" data-a="up" data-at=".2"/>
+              <g data-a="pop out" data-at=".6 2" fill="#D2CCC2" stroke="#F4EFE6" stroke-width="2"><ellipse cx="240" cy="432" rx="40" ry="8"/><ellipse cx="420" cy="432" rx="30" ry="7"/><ellipse cx="560" cy="432" rx="36" ry="8"/></g>
+              <use href="#s-ok" x="620" y="260" width="64" height="64" data-a="pop" data-at="2.4"/>
+              <text class="td" x="480" y="480" text-anchor="middle" data-a="fade" data-at="2.6">Pipeline, under the pump, adjacent areas</text>
+            </g>
+          </svg>
+          <svg class="lsvg" data-l="6" viewBox="0 0 960 540" role="img" aria-label="Animated drawing for placing and compaction, part 1" hidden>
+            <rect class="bg" width="960" height="540"/><rect width="960" height="540" fill="url(#p-grid)"/>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Chutes</text></g>
+              <path class="lnd" d="M40 450H920" data-a="draw"/>
+              <path d="M180 180L480 440" style="stroke:#B3A894;stroke-width:18;stroke-linecap:round" data-a="draw" data-at=".3"/>
+              <path class="dim" d="M180 450H480" data-a="draw" data-at="1"/>
+              <path class="dim" d="M420 450A60 60 0 0 0 434 400" data-a="draw" data-at="1.3"/>
+              <text class="ty" x="500" y="430" data-a="pop" data-at="1.5">≤ 45°</text>
+              <text class="tbig" x="620" y="260" data-a="pop" data-at="1.8">≤ 4.5m</text>
+              <text class="td" x="620" y="290" data-a="fade" data-at="2">long chute</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Vibrate to release air</text></g>
+              <rect class="fw" x="160" y="220" width="420" height="200" style="fill:#D2CCC2" data-a="grow-y" data-at=".2"/>
+              <g data-a="fade out" data-at=".6 2" fill="#F4EFE6"><circle cx="220" cy="300" r="6"/><circle cx="300" cy="360" r="5"/><circle cx="400" cy="280" r="7"/><circle cx="500" cy="380" r="5"/><circle cx="450" cy="330" r="4"/></g>
+              <path d="M370 120V380" style="stroke:#3A3A3A;stroke-width:12" data-a="down" data-at="1"/>
+              <path class="wave" d="M350 300q-10 10 0 20M390 300q10 10 0 20" data-a="wave" data-at="1.4"/>
+              <text class="tb" x="640" y="320" data-a="fade" data-at="2.2">Entrapped air released</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Beams first, then slab</text></g>
+              <path class="fw ln" d="M120 220H700V260H520V360H400V260H120Z" style="fill:rgba(244,239,230,.15)" data-a="fade"/>
+              <rect x="402" y="262" width="116" height="96" style="fill:#D2CCC2" data-a="grow-y" data-at=".6"/>
+              <text class="ty" x="460" y="400" text-anchor="middle" data-a="fade" data-at="1">1</text>
+              <rect x="122" y="222" width="576" height="36" style="fill:#D2CCC2" data-a="grow-x" data-at="1.6"/>
+              <text class="ty" x="740" y="246" data-a="fade" data-at="2">2</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Bonding to previous pour</text></g>
+              <rect x="100" y="260" width="300" height="140" style="fill:#BDB6AB" data-a="fade"/>
+              <rect x="100" y="250" width="300" height="10" style="fill:#E8E1C8" data-a="out" data-at="1"/>
+              <g data-a="up" data-at=".4"><rect class="card" x="460" y="130" width="420" height="120" rx="12"/><text class="ty" x="484" y="166">Less than 4 hours</text><text class="td" x="484" y="196">laitance film and porous layer removed</text></g>
+              <g data-a="up" data-at="1.4"><rect class="card" x="460" y="270" width="420" height="130" rx="12"/><text class="ty" x="484" y="306">4 hours to 30 days</text><text class="td" x="484" y="336">same, plus expose aggregate with wire</text><text class="td" x="484" y="360">mesh and wash with clean water</text></g>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Joint more than a month old</text></g>
+              <rect x="120" y="260" width="300" height="140" style="fill:#9AA3AB" data-a="fade"/>
+              <rect x="120" y="248" width="300" height="12" style="fill:#F5C518" data-a="grow-x" data-at=".8"/>
+              <use href="#s-bottle" x="480" y="190" width="100" height="162" data-a="up" data-at=".5"/>
+              <text class="tb" x="620" y="260" data-a="fade" data-at="1.4">Bonding agents</text><text class="td" x="620" y="288" data-a="fade" data-at="1.6">as per manufacturer’s specification</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Deep beams in layers</text></g>
+              <path class="fw ln" d="M240 140V440H440V140" style="fill:none" data-a="draw"/>
+              <rect x="242" y="360" width="196" height="78" style="fill:#D2CCC2" data-a="grow-y" data-at=".6"/>
+              <rect x="242" y="280" width="196" height="78" style="fill:#BCC4CB" data-a="grow-y" data-at="1.2"/>
+              <rect x="242" y="200" width="196" height="78" style="fill:#D2CCC2" data-a="grow-y" data-at="1.8"/>
+              <path class="dim" d="M480 140V440M468 140h24M468 440h24" data-a="draw" data-at="2.2"/>
+              <text class="ty" x="500" y="296" data-a="pop" data-at="2.4">&gt; 500mm</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Concrete top pre-marked</text></g>
+              <path class="fw ln" d="M300 120V440H420V120" style="fill:none" data-a="draw"/>
+              <path class="rb" d="M330 120V440M390 120V440" data-a="draw" data-at=".4"/>
+              <path d="M300 220H420" style="stroke:var(--red);stroke-width:4;stroke-dasharray:8 4" data-a="draw" data-at="1"/>
+              <text class="ty" x="440" y="226" data-a="fade" data-at="1.2">concrete top</text>
+              <text class="tb" x="560" y="320" data-a="fade" data-at="1.6">Columns, beam, slab</text><text class="td" x="560" y="348" data-a="fade" data-at="1.8">marked before concreting</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Checking the slab level</text></g>
+              <rect x="100" y="320" width="600" height="40" style="fill:#D2CCC2" data-a="grow-x" data-at=".2"/>
+              <path class="lny" d="M100 316H700" style="stroke-width:2" data-a="draw" data-at=".8"/>
+              <text class="td" x="110" y="300" data-a="fade" data-at="1">line dori</text>
+              <use href="#s-dumpy" x="720" y="200" width="100" height="157" data-a="up" data-at="1.4"/>
+              <text class="tb" x="400" y="430" text-anchor="middle" data-a="fade" data-at="2">and the levelling instrument</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Vibrator needles</text></g>
+              <g data-a="up" data-at=".2"><path d="M180 140V340" style="stroke:#3A3A3A;stroke-width:24;stroke-linecap:round"/><text class="tbig" x="180" y="400" text-anchor="middle">60mm</text><text class="td" x="180" y="430" text-anchor="middle">big footings</text></g>
+              <g data-a="up" data-at=".6"><path d="M400 140V340" style="stroke:#3A3A3A;stroke-width:16;stroke-linecap:round"/><text class="tbig" x="400" y="400" text-anchor="middle">40mm</text><text class="td" x="400" y="430" text-anchor="middle">slabs</text></g>
+              <g data-a="up" data-at="1"><path d="M620 140V340" style="stroke:#3A3A3A;stroke-width:10;stroke-linecap:round"/><text class="tbig" x="620" y="400" text-anchor="middle">25mm</text><text class="td" x="620" y="430" text-anchor="middle">starters, lintels</text></g>
+              <g data-a="pop" data-at="1.6"><rect class="chip-y" x="720" y="160" width="190" height="46" rx="23"/><text class="tchip-d" x="815" y="190" text-anchor="middle">≥ 10,000 rpm</text></g>
+              <text class="td" x="815" y="240" text-anchor="middle" data-a="fade" data-at="2">over vibration is very bad</text>
+            </g>
+          </svg>
+
+          <svg class="lsvg" data-l="7" viewBox="0 0 960 540" role="img" aria-label="Animated drawing for placing and compaction, part 2" hidden>
+            <rect class="bg" width="960" height="540"/><rect width="960" height="540" fill="url(#p-grid)"/>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Wooden runner</text></g>
+              <rect x="100" y="300" width="600" height="60" style="fill:#D2CCC2" data-a="fade"/>
+              <rect class="fa ln" x="200" y="270" width="260" height="24" rx="4" data-a="right" data-at=".5" data-d="1.4"/>
+              <rect x="100" y="294" width="600" height="8" style="fill:#DDE2E6" data-a="grow-x" data-at="1.4"/>
+              <text class="tb" x="400" y="430" text-anchor="middle" data-a="fade" data-at="2">Rammed to form slurry on top</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Clean spilled concrete</text></g>
+              <rect class="fa ln" x="120" y="200" width="300" height="200" data-a="fade"/>
+              <g data-a="pop sweep" data-at=".5 1.6" fill="#D2CCC2"><ellipse cx="200" cy="260" rx="24" ry="10"/><ellipse cx="320" cy="340" rx="20" ry="8"/></g>
+              <text class="tb" x="500" y="290" data-a="fade" data-at="2">Immediately after concreting</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Vertical construction joints</text></g>
+              <rect x="100" y="260" width="300" height="60" style="fill:#BDB6AB" data-a="fade"/>
+              <rect x="400" y="260" width="300" height="60" style="fill:#D2CCC2" data-a="grow-x" data-at="1.2"/>
+              <path d="M400 250V330" style="stroke:var(--yellow);stroke-width:4" data-a="draw" data-at=".6"/>
+              <use href="#s-worker" x="740" y="200" width="64" height="160" data-a="right" data-at="1.6"/>
+              <text class="td" x="400" y="400" text-anchor="middle" data-a="fade" data-at="2">after consultation with the structural engineer</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Match the rate of concreting</text></g>
+              <use href="#s-tm" x="80" y="300" width="240" height="120" data-a="right" data-at=".2"/>
+              <use href="#s-worker" x="400" y="260" width="60" height="150" data-a="up" data-at=".6"/>
+              <use href="#s-worker" x="480" y="260" width="60" height="150" data-a="up" data-at=".8"/>
+              <path d="M600 200V380" style="stroke:#3A3A3A;stroke-width:12" data-a="down" data-at="1.2"/>
+              <path d="M660 200V380" style="stroke:#3A3A3A;stroke-width:12" data-a="down" data-at="1.4"/>
+              <text class="tb" x="480" y="470" text-anchor="middle" data-a="fade" data-at="1.8">Vibrators and masons matched</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Moisten the shuttering</text></g>
+              <rect class="fa ln" x="120" y="300" width="560" height="24" data-a="grow-x"/>
+              <g data-a="fade" data-at=".6" class="fwater"><circle cx="200" cy="290" r="6"/><circle cx="320" cy="286" r="6"/><circle cx="440" cy="290" r="6"/><circle cx="560" cy="286" r="6"/></g>
+              <text class="tb" x="400" y="400" text-anchor="middle" data-a="fade" data-at="1.4">Less water lost by absorption</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Curing the slab</text></g>
+              <rect x="100" y="320" width="600" height="60" style="fill:#D2CCC2" data-a="fade"/>
+              <rect x="100" y="310" width="600" height="10" style="fill:#B38B5E" data-a="grow-x" data-at=".4"/>
+              <text class="td" x="110" y="410" data-a="fade" data-at=".6">hessain, after 3 hours</text>
+              <rect class="fa ln" x="100" y="276" width="14" height="34" data-a="grow-y" data-at="1.4"/><rect class="fa ln" x="686" y="276" width="14" height="34" data-a="grow-y" data-at="1.4"/>
+              <rect class="fwater" x="114" y="286" width="572" height="24" data-a="grow-y" data-at="1.8"/>
+              <path class="dim" d="M720 286V310" data-a="draw" data-at="2.2"/><text class="ty" x="736" y="304" data-a="pop" data-at="2.3">25mm</text>
+              <use href="#s-cal" x="360" y="140" width="90" height="90" data-a="pop" data-at="2.6"/>
+              <text class="tbig" x="470" y="200" data-a="pop" data-at="2.8">7 days</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Do not ignore curing</text></g>
+              <rect x="100" y="320" width="600" height="60" style="fill:#D2CCC2" data-a="fade"/>
+              <rect class="fwater" x="114" y="296" width="572" height="24" data-a="fade" data-at=".4"/>
+              <use href="#s-worker" x="380" y="160" width="56" height="140" data-a="down" data-at="1"/>
+              <use href="#s-warn" x="480" y="190" width="70" height="63" data-a="pulse" data-at="1.6"/>
+              <text class="td" x="400" y="440" text-anchor="middle" data-a="fade" data-at="2">even while marking columns for the upper slab</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Beam bottoms cleaned</text></g>
+              <path class="fw ln" d="M100 160H700V200H460V300H340V200H100Z" style="fill:#D2CCC2" data-a="fade"/>
+              <path d="M400 440L400 310" style="stroke:var(--water);stroke-width:4;stroke-dasharray:6 4" data-a="draw" data-at=".8"/>
+              <rect class="fy ln" x="370" y="440" width="60" height="30" rx="6" data-a="up" data-at=".5"/>
+              <text class="tb" x="520" y="400" data-a="fade" data-at="1.6">High-pressure cleaners</text>
+            </g>
+          </svg>
+          <svg class="lsvg" data-l="8" viewBox="0 0 960 540" role="img" aria-label="Animated drawing for columns curing and concrete testing" hidden>
+            <rect class="bg" width="960" height="540"/><rect width="960" height="540" fill="url(#p-grid)"/>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Next day: hessain on columns</text></g>
+              <rect class="fa ln" x="240" y="120" width="20" height="320" data-a="out" data-at=".8"/><rect class="fa ln" x="380" y="120" width="20" height="320" data-a="out" data-at=".8"/>
+              <rect x="260" y="120" width="120" height="320" style="fill:#D2CCC2" data-a="fade"/>
+              <g data-a="fade" data-at="1.2" class="fwater"><circle cx="300" cy="200" r="6"/><circle cx="340" cy="300" r="6"/></g>
+              <rect x="254" y="120" width="132" height="320" style="fill:#B38B5E;opacity:.85" data-a="grow-y" data-at="1.6"/>
+              <text class="tb" x="460" y="280" data-a="fade" data-at="2.2">Reduces the heat of hydration</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Columns and walls</text></g>
+              <rect x="200" y="120" width="120" height="320" style="fill:#B38B5E;opacity:.85" data-a="fade"/>
+              <use href="#s-cal" x="420" y="180" width="100" height="100" data-a="pop" data-at=".6"/>
+              <text class="tbig" x="470" y="340" text-anchor="middle" data-a="pop" data-at="1">7 days</text>
+              <text class="td" x="470" y="370" text-anchor="middle" data-a="fade" data-at="1.2">minimum</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Starters</text></g>
+              <rect x="100" y="380" width="500" height="40" style="fill:#BDB6AB" data-a="fade"/>
+              <rect x="260" y="330" width="120" height="50" style="fill:#D2CCC2" data-a="grow-y" data-at=".4"/>
+              <path class="rb" d="M280 330V140M360 330V140" data-a="grow-y" data-at=".8"/>
+              <use href="#s-cal" x="460" y="190" width="90" height="90" data-a="pop" data-at="1.2"/>
+              <text class="tbig" x="560" y="250" data-a="pop" data-at="1.6">3 days</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Slump cone test</text></g>
+              <path class="lnd" d="M60 440H900" data-a="draw"/>
+              <g data-a="up" data-at=".3"><use href="#s-slump" x="120" y="300" width="100" height="130"/><text class="tchip" x="170" y="480" text-anchor="middle">Start</text></g>
+              <g data-a="up" data-at=".8"><use href="#s-slump" x="400" y="300" width="100" height="130"/><text class="tchip" x="450" y="480" text-anchor="middle">Midday</text></g>
+              <g data-a="up" data-at="1.3"><use href="#s-slump" x="640" y="300" width="100" height="130"/><text class="tchip" x="690" y="480" text-anchor="middle">Close of day</text></g>
+              <circle class="fy" cx="170" cy="200" r="30" data-a="pop" data-at=".4"/><circle class="fy" cx="450" cy="160" r="30" data-a="pop" data-at=".9"/><circle class="fo" cx="690" cy="200" r="30" data-a="pop" data-at="1.4"/>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">A suspect load</text></g>
+              <use href="#s-tm" x="100" y="260" width="300" height="150" data-a="right" data-at=".2"/>
+              <text class="tq" x="250" y="230" text-anchor="middle" data-a="pop" data-at=".8" style="font-size:70px">?</text>
+              <use href="#s-slump" x="520" y="280" width="100" height="130" data-a="up" data-at="1.2"/>
+              <text class="tb" x="660" y="340" data-a="fade" data-at="1.6">Case-to-case basis</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Cube sample</text></g>
+              <use href="#s-tm" x="80" y="220" width="320" height="160" data-a="right" data-at=".2"/>
+              <path d="M330 290L380 380" style="stroke:#B3A894;stroke-width:14" data-a="draw" data-at=".8"/>
+              <use href="#s-cube" x="400" y="340" width="100" height="100" data-a="up" data-at="1.2"/>
+              <text class="tb" x="560" y="390" data-a="fade" data-at="1.6">At the point of discharge</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">7 days and 28 days</text></g>
+              <g data-a="up" data-at=".2"><use href="#s-cube" x="120" y="220" width="80" height="80"/><use href="#s-cube" x="200" y="220" width="80" height="80"/><use href="#s-cube" x="280" y="220" width="80" height="80"/><text class="tbig" x="240" y="360" text-anchor="middle">7 days</text></g>
+              <g data-a="up" data-at=".8"><use href="#s-cube" x="500" y="220" width="80" height="80"/><use href="#s-cube" x="580" y="220" width="80" height="80"/><use href="#s-cube" x="660" y="220" width="80" height="80"/><text class="tbig" x="620" y="360" text-anchor="middle">28 days</text></g>
+              <text class="td" x="430" y="430" text-anchor="middle" data-a="fade" data-at="1.4">3 samples each</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Sampling frequency</text></g>
+              <g data-a="pop" data-at=".3"><rect class="card" x="100" y="160" width="300" height="160" rx="14"/><text class="tbig" x="130" y="240">100 cum</text></g>
+              <text class="tb" x="440" y="250" data-a="fade" data-at=".8">or</text>
+              <g data-a="pop" data-at="1"><rect class="card" x="500" y="160" width="300" height="160" rx="14"/><text class="tbig" x="530" y="240">10 batches</text></g>
+              <text class="tb" x="450" y="390" text-anchor="middle" data-a="fade" data-at="1.6">whichever is smaller: a sample of test cubes</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Site-mixed concrete</text></g>
+              <g data-a="pop" data-at=".3"><use href="#s-cube" x="100" y="200" width="100" height="100"/><text class="tchip" x="150" y="340" text-anchor="middle">Footing</text></g>
+              <g data-a="pop" data-at=".6"><use href="#s-cube" x="280" y="200" width="100" height="100"/><text class="tchip" x="330" y="340" text-anchor="middle">Slab</text></g>
+              <g data-a="pop" data-at=".9"><use href="#s-cube" x="460" y="200" width="100" height="100"/><text class="tchip" x="510" y="340" text-anchor="middle">Column</text></g>
+              <g data-a="pop" data-at="1.2"><use href="#s-cube" x="640" y="200" width="100" height="100"/><text class="tchip" x="690" y="340" text-anchor="middle">Wall</text></g>
+              <text class="tb" x="420" y="420" text-anchor="middle" data-a="fade" data-at="1.6">Representative samples for the day’s work</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Results discussed</text></g>
+              <g data-a="up" data-at=".2"><rect class="card" x="140" y="140" width="320" height="260" rx="12"/><text class="tb" x="170" y="184">Cube test results</text><path class="lnd" d="M170 220h260M170 252h260M170 284h200"/></g>
+              <use href="#s-foreman" x="560" y="200" width="80" height="200" data-a="right" data-at=".8"/>
+              <use href="#s-ok" x="440" y="350" width="44" height="44" data-a="pop" data-at="1.4"/>
+              <text class="td" x="600" y="440" text-anchor="middle" data-a="fade" data-at="1.8">even if satisfactory</text>
+            </g>
+
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Cube failure</text></g>
+              <use href="#s-cube" x="120" y="200" width="120" height="120" data-a="pop" data-at=".2"/>
+              <path class="crack" d="M150 230l30 30-14 30 30 20" data-a="draw" data-at=".8"/>
+              <path class="rope" d="M270 260h90" marker-end="url(#m-arr)" data-a="draw" data-at="1.2"/>
+              <rect x="400" y="200" width="200" height="120" style="fill:#D2CCC2" data-a="pop" data-at="1.4"/>
+              <use href="#s-mag" x="480" y="200" width="110" height="110" data-a="float" data-at="1.8"/>
+              <text class="tb" x="400" y="380" data-a="fade" data-at="2.2">Element identified; non-destructive test</text>
+              <text class="td" x="400" y="408" data-a="fade" data-at="2.4">RMC supplier’s results for the same batch</text>
+            </g>
+          </svg>
+
+          <svg class="lsvg" data-l="9" viewBox="0 0 960 540" role="img" aria-label="Animated drawing for concreting tools" hidden>
+            <rect class="bg" width="960" height="540"/><rect width="960" height="540" fill="url(#p-grid)"/>
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Tools available at site</text></g>
+              <use href="#s-toolbox" x="300" y="170" width="260" height="195" data-a="down" data-at=".3"/>
+              <use href="#s-ok" x="580" y="160" width="70" height="70" data-a="pop" data-at="1.2"/>
+              <text class="tb" x="480" y="430" text-anchor="middle" data-a="fade" data-at="1.6">To ensure correct work</text>
+            </g>
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Basic tools of the concreting gang (18)</text></g>
+              <g data-a="fade" data-at=".3"><text class="t" x="60" y="130" style="font-size:16px">Trowels</text><text class="t" x="60" y="162" style="font-size:16px">Shovels</text><text class="t" x="60" y="194" style="font-size:16px">Line dori</text><text class="t" x="60" y="226" style="font-size:16px">Gum boots</text><text class="ty" x="60" y="258" style="font-size:16px">Vibrator</text><text class="t" x="60" y="290" style="font-size:16px">Dumpy levels</text></g>
+              <g data-a="fade" data-at=".7"><text class="t" x="340" y="130" style="font-size:16px">Spirit levels 1-3m</text><text class="t" x="340" y="162" style="font-size:16px">Measuring tape</text><text class="t" x="340" y="194" style="font-size:16px">Masons trowels</text><text class="t" x="340" y="226" style="font-size:16px">Floating trowels</text><text class="t" x="340" y="258" style="font-size:16px">Screed finishing darby</text><text class="t" x="340" y="290" style="font-size:16px">Steel trash tracks</text></g>
+              <g data-a="fade" data-at="1.1"><text class="t" x="620" y="130" style="font-size:16px">Hammer</text><text class="t" x="620" y="162" style="font-size:16px">Levelling trowels</text><text class="t" x="620" y="194" style="font-size:16px">Wheelbarrow</text><text class="t" x="620" y="226" style="font-size:16px">Long handle Aluminium leveller</text><text class="t" x="620" y="258" style="font-size:16px">Masons brushes and buckets</text><text class="ty" x="620" y="290" style="font-size:16px">High pressure water cleaners</text></g>
+              <use href="#s-barrow" x="100" y="360" width="200" height="110" data-a="up" data-at="1.6"/>
+              <use href="#s-boot" x="360" y="380" width="80" height="87" data-a="up" data-at="1.8"/>
+            </g>
+          </svg>
+
+          <svg class="lsvg" data-l="10" viewBox="0 0 960 540" role="img" aria-label="Animated drawing for inspection of concreting" hidden>
+            <rect class="bg" width="960" height="540"/><rect width="960" height="540" fill="url(#p-grid)"/>
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">1 Personnel</text></g>
+              <path class="lnd" d="M40 450H920" data-a="draw"/>
+              <use href="#s-worker" x="220" y="200" width="100" height="250" data-a="up" data-at=".2"/>
+              <use href="#s-boot" x="214" y="400" width="54" height="58" data-a="pop" data-at=".8"/><use href="#s-boot" x="272" y="400" width="54" height="58" data-a="pop" data-at=".9"/>
+              <use href="#s-glove" x="190" y="320" width="44" height="60" data-a="pop" data-at="1.1"/>
+              <use href="#s-harness" x="230" y="270" width="80" height="80" data-a="pop" data-at="1.4"/>
+              <g data-a="left" data-at="1.8"><text class="t" x="420" y="240">Gumboots and rubber gloves</text><text class="t" x="420" y="290">Safety belts at heights</text><text class="td" x="420" y="314">or on the periphery</text></g>
+            </g>
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">2 Before concreting</text></g>
+              <g data-a="left" data-at=".3"><use href="#s-ok" x="80" y="150" width="30" height="30"/><text class="t" x="120" y="173">Base plates cleaned, sealed with sealing tape</text></g>
+              <g data-a="left" data-at=".7"><use href="#s-ok" x="80" y="210" width="30" height="30"/><text class="t" x="120" y="233">All reinforcements in place, especially chairs</text></g>
+              <g data-a="left" data-at="1.1"><use href="#s-ok" x="80" y="270" width="30" height="30"/><text class="t" x="120" y="293">Damaged cover blocks replaced</text></g>
+              <g data-a="left" data-at="1.5"><use href="#s-ok" x="80" y="330" width="30" height="30"/><text class="t" x="120" y="353">Sunken areas cleaned with high-pressure water</text></g>
+            </g>
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">3 During concreting</text></g>
+              <g data-a="left" data-at=".3"><use href="#s-ok" x="80" y="140" width="30" height="30"/><text class="t" x="120" y="163">Proper grade as recommended by the consultant</text></g>
+              <g data-a="left" data-at=".6"><use href="#s-ok" x="80" y="196" width="30" height="30"/><text class="t" x="120" y="219">Expansion joints as per drawings, protected</text></g>
+              <g data-a="left" data-at=".9"><use href="#s-ok" x="80" y="252" width="30" height="30"/><text class="t" x="120" y="275">Slab and beam parallelism with spirit levels</text></g>
+              <g data-a="left" data-at="1.2"><use href="#s-ok" x="80" y="308" width="30" height="30"/><text class="t" x="120" y="331">Top surface even</text></g>
+              <g data-a="left" data-at="1.5"><use href="#s-ok" x="80" y="364" width="30" height="30"/><text class="t" x="120" y="387">Compaction with correct needle size</text></g>
+            </g>
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">4 After concreting</text></g>
+              <g data-a="left" data-at=".3"><use href="#s-ok" x="80" y="140" width="30" height="30"/><text class="t" x="120" y="163">Curing as per guidelines</text></g>
+              <g data-a="left" data-at=".6"><use href="#s-ok" x="80" y="196" width="30" height="30"/><text class="t" x="120" y="219">Columns: damp hessain / jute cloth, 7 days</text></g>
+              <g data-a="left" data-at=".9"><use href="#s-ok" x="80" y="252" width="30" height="30"/><text class="t" x="120" y="275">Slabs: water level maintained in ponding</text></g>
+              <g data-a="left" data-at="1.2"><use href="#s-ok" x="80" y="308" width="30" height="30"/><text class="t" x="120" y="331">Honeycombing: immediate touch up</text></g>
+              <g data-a="left" data-at="1.5"><use href="#s-ok" x="80" y="364" width="30" height="30"/><text class="t" x="120" y="387">Cube test results available on time</text></g>
+            </g>
+            <g class="scene">
+              <g data-a="left"><rect class="sh-bar" x="48" y="42" width="8" height="32" rx="2"/><text class="tsh" x="68" y="68">Tools for quality inspection</text></g>
+              <g data-a="pop" data-at=".3"><rect class="chip" x="80" y="160" width="400" height="46" rx="23"/><text class="tchip" x="280" y="190" text-anchor="middle">Dumpy levels: finished slab level</text></g>
+              <g data-a="pop" data-at=".5"><rect class="chip" x="500" y="160" width="220" height="46" rx="23"/><text class="tchip" x="610" y="190" text-anchor="middle">Spirit levels 1-3m</text></g>
+              <g data-a="pop" data-at=".7"><rect class="chip" x="80" y="224" width="200" height="46" rx="23"/><text class="tchip" x="180" y="254" text-anchor="middle">Measuring tape</text></g>
+              <g data-a="pop" data-at=".9"><rect class="chip" x="300" y="224" width="160" height="46" rx="23"/><text class="tchip" x="380" y="254" text-anchor="middle">Plumb bob</text></g>
+              <g data-a="pop" data-at="1.1"><rect class="chip-y" x="80" y="288" width="480" height="46" rx="23"/><text class="tchip-d" x="320" y="318" text-anchor="middle">All related “Good for Construction” drawings</text></g>
+              <use href="#s-dumpy" x="680" y="280" width="100" height="157" data-a="up" data-at="1.4"/>
+            </g>
+          </svg>
+          <span hidden><b id="tbSheet"></b><b id="tbScene"></b></span>
+
+          <button class="start" id="start" type="button">
+            <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg>Play lesson</span>
+          </button>
+
+          <div class="endcard" id="endc" hidden>
+            <div class="endbox">
+              <span class="k">✓</span>
+              <strong>Lesson complete</strong>
+              <button class="pill pill-y" id="endNext" type="button">Next lesson: <span id="endNextT"></span></button>
+              <button class="pill pill-o" id="again" type="button">Watch again</button>
+            </div>
+          </div>
+
+          <div class="controls">
+            <div class="cg">
+              <button class="ib" id="prevL" type="button" aria-label="Previous lesson"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2.5v14H6zM20 5v14L9.5 12z" fill="currentColor"/></svg></button>
+              <button class="ib main" id="pp" type="button" aria-label="Play">
+                <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg>
+                <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z" fill="currentColor"/></svg>
+              </button>
+              <button class="ib" id="nextL" type="button" aria-label="Next lesson"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 5H18v14h-2.5zM4 5v14l10.5-7z" fill="currentColor"/></svg></button>
+            </div>
+            <button class="ib cg-x" id="rp" type="button" aria-label="Replay lesson"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z" fill="currentColor"/></svg></button>
+            <div class="segs" id="segs" role="group" aria-label="Jump to a point">
+              <button class="seg" type="button" aria-label="Point 1"><i></i></button><button class="seg" type="button" aria-label="Point 2"><i></i></button>
+              <button class="seg" type="button" aria-label="Point 3"><i></i></button><button class="seg" type="button" aria-label="Point 4"><i></i></button>
+              <button class="seg" type="button" aria-label="Point 5"><i></i></button><button class="seg" type="button" aria-label="Point 6"><i></i></button>
+              <button class="seg" type="button" aria-label="Point 7"><i></i></button><button class="seg" type="button" aria-label="Point 8"><i></i></button>
+              <button class="seg" type="button" aria-label="Point 9"><i></i></button><button class="seg" type="button" aria-label="Point 10"><i></i></button>
+              <button class="seg" type="button" aria-label="Point 11"><i></i></button><button class="seg" type="button" aria-label="Point 12"><i></i></button>
+              <button class="seg" type="button" aria-label="Point 13"><i></i></button><button class="seg" type="button" aria-label="Point 14"><i></i></button>
+              <button class="seg" type="button" aria-label="Point 15"><i></i></button>
+            </div>
+            <span class="tm" id="tm">0:00 / 0:00</span>
+            <select class="sp" id="sp" aria-label="Speed"><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option></select>
+            <button class="tg" id="nr" type="button" aria-pressed="false">Narrate</button>
+            <select class="sp nl" id="nl" aria-label="Narration language"><option value="en" selected>English</option><option value="hi">हिंदी</option></select>
+            <button class="ib" id="fs" type="button" aria-label="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
+          </div>
+        </div>
+        <p class="rot">For a bigger picture, tap full screen or turn your phone sideways.</p>
+      </section>
+
+      <section class="manual" id="manual" aria-labelledby="manualTitle">
+        <h2 id="manualTitle">Manual text</h2>
+        <p class="manual-note">Word for word from the Dhinwa Construction Engineering Technology Manual. The point playing now is highlighted; tap any point to jump to it.</p>
+        <ol class="mtext" data-l="0">
+          <li class="mh">Cement</li>
+          <li>Use appropriate grade of cement as recommended by the consultant and confirming to IS 456:2000.</li>
+          <li>Manufacturers test certificate should accompany each consignment and cement should be consumed within 1 month of their manufacturing date.</li>
+          <li>Cement should be stored properly in stacks not more than 10 bags, clear from the walls by 1 meter and protected at all time from moisture. However, do not wrap the bag with polythene sheets, sweating may occur.</li>
+          <li>Identify each lot / consignment of cement and follow a first in first out (FIFO) method of issue of bags.</li>
+          <li>Each consignment of cement should be tested in-house for consistency, setting time, and strength.</li>
+          <li class="mh">Aggregate for concrete</li>
+          <li>For RCC works coarse aggregates confirming to IS 383 and IS 2386 having maximum size of 20mm and down.</li>
+          <li>It should be obtained from crushed granite, trap, and basalt quarry. It should be chemically inert, rounded or angular in shape and free from dust, foreign matter and not thin, porous, laminated or flaky.</li>
+          <li>Fine aggregate shall be gritty sand with FM range between 2.6 to 3.2, silt content should not be more than 5% and there should be no traces of salt. Aggregate with specific gravity less than 2.6 should not be used.</li>
+          <li>If dirty, wash sand before use. Sand should be clear of organic materials.</li>
+        </ol>
+        <ol class="mtext" data-l="1" hidden>
+          <li class="mh">Water</li>
+          <li>Water should be clean, fresh and free from oil, acid, alkali and organic matter.</li>
+          <li>Potable water is considered good for concreting and curing.</li>
+          <li>IS 456:2000 gives permissible limits of solids.</li>
+          <li class="mh">Admixtures</li>
+          <li>Use of admixture / additive should be done only after obtaining technical clearances from technical consultant.</li>
+          <li>Dosage, point of application, the desired results should be clearly understood.</li>
+          <li>Accelerators, retarders, plasticizers, integral-waterproofing compound are the additives commonly used.</li>
+          <li>Expiry date of the chemical should be checked before use.</li>
+        </ol>
+        <ol class="mtext" data-l="2" hidden>
+          <li>Ensure adequate stock of all ingredients of concrete i.e., cement, aggregate, water and any admixture if used for the day’s work.</li>
+          <li>Use calibrated farma (calibration done once in a month) for measurement or in case of weigh batching, use a weigh batcher machine.</li>
+          <li>Charge the rotating drum with 25% of required water to rotate 3-4 times.</li>
+          <li>Generally 20 to 25 litres is recommended for 1 bag of cement. The water cement ratio is kept 0.4 to 0.5. The moisture content of aggregates has to be checked at frequent intervals</li>
+          <li>Load the hopper with ½ the coarse aggregate followed by ½ the fine aggregate. Above this the entire quantity of cement should be spread. Then half the quantity of fine aggregate followed by balanced coarse aggregate should be loaded. This type of sandwiching is done to avoid spilling of cement while discharging into the drum. Immediately after loading the drum balance quantity of water is added.</li>
+          <li>The drum should be rotated for at least 1 ½ to 2 minutes. The rotation of the drum is about 15 to 20 revolutions per minute.</li>
+          <li><span>If plasticizer is used, one litre of water should be held back. Add requisite quantity of plasticizer to the water and mix it thoroughly. This mixture is poured into the drum after the drum has rotated for about one minute. The drum should be rotated for at least 1 minute after adding the plasticizer mixture to ensure proper dispersion.<br>Minimum cement content per cum of concrete is as given below:<div class="tbl-wrap"><table><tr><th>Grade</th><th>Characteristic strength after 7 days (N/mm2)</th><th>Characteristic strength after 28 days (N/mm2)</th><th>Minimum cement content per Cum</th></tr>
+<tr><td>M10</td><td>7</td><td>10</td><td>220 kgs</td></tr><tr><td>M 15</td><td>10</td><td>15</td><td>280 kgs</td></tr><tr><td>M 20</td><td>13.5</td><td>20</td><td>320 kgs</td></tr><tr><td>M 25</td><td>17</td><td>25</td><td>360 kgs</td></tr><tr><td>M 30</td><td>20</td><td>30</td><td>390 kgs</td></tr></table></div></span></li>
+        </ol>
+        <ol class="mtext" data-l="3" hidden>
+          <li>No grade below M 20 shall be used for RCC works.</li>
+          <li>Concrete should be placed in position and compacted within half an hour of mixing of the same.</li>
+          <li>Always keep a supervisor on the mixer to monitor the works.</li>
+          <li>Use large bandlies, wheelbarrows, hoist machine to expedite transporting process. Wet the surface of the carrier to avoid moisture loss due to adsorption.</li>
+          <li>Be careful to avoid segregation and wastage during transportation. In case of segregation, remix the concrete before placing.</li>
+          <li>Concrete by vision should be homogeneous in colour, well graded, fluffy and it should form a shape of ball when rounded in</li>
+        </ol>
+        <ol class="mtext" data-l="4" hidden>
+          <li>Preference for ready-mix concrete from reputed companies possessing automated batching plant, of at least 30 cum per hour capacity supported by adequate number of transit mixers.</li>
+          <li>The logistics should be worked out so as to receive at least 1 load of 6 cum every 10 to 15 minutes.</li>
+          <li>Check the empty transit mixer for preset concrete in the drum. Preset quantity affects the quantum of concrete received.</li>
+          <li>Concrete should be received with a delivery challan and data cycle sheet showing grade, quantity, water cement ratio, slump, cement content, time of manufacturing, dosage of additive added, weight of various ingredients of concrete.</li>
+          <li>Go through the cycle data before accepting the concrete.</li>
+          <li>Do not accept concrete after 3 hours of mixing.</li>
+          <li>Do not recharge the concrete by adding additive, water, cement without prior permission from the project in-charge.</li>
+          <li>Slump recommended for RMC mix is 100mm to 125mm</li>
+          <li>Place the concrete pump on horizontal, hard even surface and keep the approach area free of materials to facilitate easy manoeuvrability of transit mixers. The approach should not slope towards the concrete pump.</li>
+          <li>The horizontal section of pipe should be at least 7 metres before the vertical bend is put.</li>
+        </ol>
+        <ol class="mtext" data-l="5" hidden>
+          <li>Reduce the length of pipe to the minimum to reduce frictional losses and excessive strain on the pump.</li>
+          <li>The pipeline should be independently supported on vertical segment and not on the shuttering.</li>
+          <li>The vibrations due to pumping should not affect or displace shuttering works.</li>
+          <li>Pump rich slurry (one bag) before pumping concrete to lubricate the inner surface of the pipes.</li>
+          <li>In case of intermittent supply keep the current transit mixer unloading in progress until the next mixer arrives at site. This avoids choking of pipeline due to non-pumping for long duration. Avoid reverse stroke to clear a choke. The fluid gets flushed out and the problem gets compounded.</li>
+          <li>Do not bend the flexible end pipe by more than 135o while concreting.</li>
+          <li>In constricted areas do not unload directly from the pipe. Use bandly and mumty to shift and place concrete in such areas.</li>
+          <li>Be excessively careful while passing the ball while clearing the concrete in the pipeline after the day’s work is over. Due to negligence somebody could get hurt.</li>
+          <li>Employ professional hands for connecting pipeline. They will do a neater and faster job without any safety problems.</li>
+          <li>Leave the pipeline, under the pump and adjacent areas clean of concrete dumping after the work is completed.</li>
+        </ol>
+        <ol class="mtext" data-l="6" hidden>
+          <li>Do not use chutes longer than 4.5m or inclined at more than 45 to horizontal to pour concrete.</li>
+          <li>Place cement concrete to the required depth and vibrate it until entrapped air inside concrete is released.</li>
+          <li>Pour concrete first into beams and then over the slab portion.</li>
+          <li><span><b>Bond new concrete to previously poured concrete.</b><ul><li>If the previous pour was less than 4 hours prior, the laitance film and porous layer shall be removed from the surface of previous pour.</li><li>If the previous pour was more than 4 hours prior but less than 30 days old observe the above process and expose aggregate with wire mesh and wash with clean water.</li></ul></span></li>
+          <li>If the joint is more than a month old use bonding agents as per specification of the manufacturer.</li>
+          <li>If the beam is more than 500mm deep, concrete it in layers.</li>
+          <li>Columns, beam, slab level of concrete top should be pre-marked before start of concreting works.</li>
+          <li>Check the slab level during concreting with line dori method and also the levelling instrument.</li>
+          <li>Use appropriate needles for vibration depending on the aggregate size, reinforcement spacing and element to concrete. For big footings use 60mm needle, for slabs use 40mm needle, and for starters and precast lintels use 25mm needle. Vibrators should operate for a speed not less than 10,000 rpm. Ensure that just adequate vibration is only done. Over vibration is very bad.</li>
+        </ol>
+        <ol class="mtext" data-l="7" hidden>
+          <li>Use wooden runner to ram so as to form slurry on top of the concrete surface.</li>
+          <li>Clean the shuttering works of all spilled concrete immediately after concreting.</li>
+          <li>Leave vertical construction joints after consultation with the structural engineer.</li>
+          <li>Match the vibrators, masons to the rate of concreting.</li>
+          <li>All surfaces of shuttering shall be moistened before placing of concrete to reduce water loss due to absorption.</li>
+          <li><span>Slab should be sprayed with water after covering with hessain cloth 3 hours after concreting, i.e. initial setting is over and ensure that hessain cloth will remain wet till ponding of water.<ul><li>Pond water to a depth of 25mm using bunds the next day and keep water standing for 7 days at a stretch.</li><li>In case ponding is not possible, cover it with hessain cloth and keep it moist throughout.</li></ul></span></li>
+          <li>Do not ignore curing of slab to facilitate marking of columns for the upper slab.</li>
+          <li>The beam bottoms should be cleaned using high-pressure cleaners.</li>
+        </ol>
+        <ol class="mtext" data-l="8" hidden>
+          <li class="mh">6.1.5 Columns, Walls and Starter</li>
+          <li>Remove the shuttering the next day and wrap with moist hessain cloth after spraying the column with water to reduce the heat of hydration.</li>
+          <li>The columns and walls should be cured for a minimum of 7 days.</li>
+          <li>Starters are to be cured for 3 days</li>
+          <li class="mh">6.1.6 Testing of Concrete: Slump Test</li>
+          <li>Conduct slump cone test, one during the start, one at midday and one towards the close of day’s work.</li>
+          <li>Again any load under suspect can be checked for slump on case-to-case basis.</li>
+          <li class="mh">Cube Test</li>
+          <li>The sample is made at point of discharge of mixture.</li>
+          <li>Take 3 samples after 7 days and 3 samples after 28 days strength.</li>
+          <li>Every 100 cum or 10 batches of concrete (whichever is smaller) should be represented by a sample of test cubes.</li>
+          <li>For concrete manufactured at site, there must be representative samples for the day’s work and for different elements like footing, slab, column and wall.</li>
+          <li>Test results should be discussed with the project in-charge even if the results are satisfactory.</li>
+          <li><span>In case of cube failure, the element to be identified and non-destructive test to be conducted.<ul><li>Cube results of the RMC supplier for the same batch may be checked.</li></ul></span></li>
+        </ol>
+        <ol class="mtext" data-l="9" hidden>
+          <li>Required tools must be available at site to ensure correct work.</li>
+          <li><span><b>Basic tools of the concreting gang are:</b><ul><li>Trowels</li><li>Shovels</li><li>Line dori</li><li>Gum boots</li><li>Vibrator</li><li>Dumpy levels</li><li>Spirit levels 1-3m</li><li>Measuring tape</li><li>Masons trowels</li><li>Floating trowels</li><li>Screed finishing darby</li><li>Steel trash tracks</li><li>Hammer</li><li>Levelling trowels</li><li>Wheelbarrow</li><li>Long handle Aluminium leveller</li><li>Masons brushes and buckets</li><li>High pressure water cleaners</li></ul></span></li>
+        </ol>
+        <ol class="mtext" data-l="10" hidden>
+          <li><span><b>Personnel</b><ul><li>Ensure all personnel are wearing gumboots and rubber gloves</li><li>Ensure personnel are wearing safety belts during concreting at heights or on periphery of structures</li></ul></span></li>
+          <li><span><b>Before Concreting</b><ul><li>Ensure base plates have been cleaned and sealed with sealing tape so that there is no leakage of slurry</li><li>All reinforcements are in place especially chairs.</li><li>All cover blocks damaged during reinforcement laying are replaced.</li><li>All sunken areas (sunken beams, toilets and cut-out areas) have been properly cleaned of dust and oily substances using high-pressure water cleaners</li></ul></span></li>
+          <li><span><b>During Concreting</b><ul><li>Ensure proper grade of concrete as recommended by the consultant is employed</li><li>Ensure proper expansion joints as per working drawings and protected</li><li>Check slab and beam for parallelism using spirit levels before and after concreting</li><li>Check the top surface of fresh concrete for evenness</li><li>Ensure sufficient compaction using correct needle size of vibrator</li></ul></span></li>
+          <li><span><b>After Concreting</b><ul><li>Curing carried out as per guidelines</li><li>Columns are covered with a damp hessain / jute cloth for 7 days</li><li>Slabs – water level is maintained during ponding</li><li>If honeycombing seen after de-shuttering, immediate touch up without delay</li><li>Ensure the cube test results are available at the end of the term indicated</li></ul></span></li>
+          <li><span><b>6.3.1 Tools to be used for quality inspection</b><ul><li>Dumpy levels to check finished slab level</li><li>Spirit levels 1-3m</li><li>Measuring tape</li><li>Plumb bob</li><li>All related “Good for Construction” drawings</li></ul></span></li>
+        </ol>
+      </section>
+    </main>
+  </div>
+</div>
+<script>
+/* Lessons 1 to 5 player. Reads the markup and data-a attributes above; it never writes HTML. */
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const heads=$$('.heads hgroup'), lessons=$$('.ls'), segs=$$('#segs .seg'), N=lessons.length;
+const svgOf=i=>$(`.lsvg[data-l="${i}"]`), textOf=i=>$(`.mtext[data-l="${i}"]`), listOf=i=>$(`.clist[data-l="${i}"]`);
+const SHEETS=['6.1.1','6.1.1','6.1.2','6.1.2','6.1.3','6.1.3','6.1.4','6.1.4','6.1.5','6.2','6.3','Form','Form','Form','Form'];
+const ui={stage:$('#stage'),start:$('#start'),endc:$('#endc'),endNext:$('#endNext'),endNextT:$('#endNextT'),again:$('#again'),pp:$('#pp'),rp:$('#rp'),
+  prevL:$('#prevL'),nextL:$('#nextL'),tm:$('#tm'),sp:$('#sp'),nr:$('#nr'),nl:$('#nl'),fs:$('#fs'),tbSheet:$('#tbSheet'),tbScene:$('#tbScene'),mbarT:$('#mbarT')};
+let cur=-1, tl=null, starts=[], durs=[], point=-1, narrate=false, fresh=true, playing=false, lang='en';
+const HI=[["कंसल्टेंट की सिफ़ारिश के अनुसार और आईएस 456:2000 के अनुरूप उपयुक्त ग्रेड का सीमेंट इस्तेमाल करें।", "हर खेप के साथ निर्माता का टेस्ट सर्टिफ़िकेट होना चाहिए, और सीमेंट उसकी निर्माण तिथि से 1 महीने के अंदर इस्तेमाल हो जाना चाहिए।", "सीमेंट को 10 बैग से ऊँचे नहीं, दीवारों से 1 मीटर दूर, और हर समय नमी से सुरक्षित रखते हुए ठीक से रखा जाना चाहिए। लेकिन बैग को पॉलीथीन शीट में न लपेटें, इससे पसीना आ सकता है।", "सीमेंट के हर लॉट या खेप की पहचान करें और बैग देने में फ़र्स्ट इन फ़र्स्ट आउट, यानी फ़ीफ़ो, तरीका अपनाएँ।", "सीमेंट की हर खेप की कंसिस्टेंसी, सेटिंग टाइम और मज़बूती की इन-हाउस जाँच होनी चाहिए।", "आरसीसी के काम के लिए आईएस 383 और आईएस 2386 के अनुरूप, अधिकतम 20 मिमी और उससे छोटे साइज़ की मोटी गिट्टी।", "यह क्रश्ड ग्रेनाइट, ट्रैप और बेसाल्ट खदान से ली जानी चाहिए। यह रासायनिक रूप से निष्क्रिय, गोल या कोणीय आकार की, धूल और बाहरी चीज़ों से मुक्त हो, और पतली, छिद्रदार, परतदार या चपटी न हो।", "बारीक एग्रीगेट 2.6 से 3.2 के बीच एफ़एम वाली दानेदार रेत होगी, गाद 5% से ज़्यादा न हो और नमक का कोई अंश न हो। 2.6 से कम स्पेसिफ़िक ग्रैविटी वाला एग्रीगेट इस्तेमाल नहीं होना चाहिए।", "अगर रेत गंदी हो, तो इस्तेमाल से पहले धो लें। रेत जैविक पदार्थों से मुक्त होनी चाहिए।"], ["पानी साफ़, ताज़ा, और तेल, अम्ल, क्षार और जैविक पदार्थों से मुक्त होना चाहिए।", "पीने योग्य पानी कंक्रीटिंग और क्योरिंग के लिए अच्छा माना जाता है।", "आईएस 456:2000 ठोस पदार्थों की स्वीकार्य सीमा बताता है।", "एडमिक्सचर या एडिटिव का इस्तेमाल टेक्निकल कंसल्टेंट से तकनीकी मंज़ूरी लेने के बाद ही करें।", "खुराक, डालने का समय और मनचाहे नतीजे स्पष्ट रूप से समझ लेने चाहिए।", "एक्सेलरेटर, रिटार्डर, प्लास्टिसाइज़र और इंटीग्रल वॉटरप्रूफ़िंग कम्पाउंड आमतौर पर इस्तेमाल होने वाले एडिटिव हैं।", "इस्तेमाल से पहले रसायन की एक्सपायरी तिथि जाँच लेनी चाहिए।"], ["दिन के काम के लिए कंक्रीट की सभी सामग्री, यानी सीमेंट, एग्रीगेट, पानी और इस्तेमाल हो तो एडमिक्सचर, का पर्याप्त स्टॉक सुनिश्चित करें।", "माप के लिए कैलिब्रेटेड फ़र्मा इस्तेमाल करें, जिसका कैलिब्रेशन महीने में एक बार हो; या वेट बैचिंग के मामले में वेट बैचर मशीन इस्तेमाल करें।", "घूमते ड्रम में ज़रूरी पानी का 25% डालकर उसे 3 से 4 बार घुमाएँ।", "आमतौर पर 1 बैग सीमेंट के लिए 20 से 25 लीटर पानी की सलाह दी जाती है। वॉटर सीमेंट अनुपात 0.4 से 0.5 रखा जाता है। एग्रीगेट की नमी बार-बार जाँचनी होती है।", "हॉपर में आधी मोटी गिट्टी, फिर आधी बारीक रेत डालें। इसके ऊपर पूरा सीमेंट फैलाया जाना चाहिए। फिर बाकी आधी बारीक रेत और बची हुई मोटी गिट्टी डालनी चाहिए। ड्रम में डालते समय सीमेंट बिखरने से बचाने के लिए यह सैंडविच तरीका अपनाया जाता है। ड्रम लोड होते ही बाकी पानी डाल दिया जाता है।", "ड्रम को कम से कम डेढ़ से 2 मिनट तक घुमाना चाहिए। ड्रम लगभग 15 से 20 चक्कर प्रति मिनट घूमता है।", "अगर प्लास्टिसाइज़र इस्तेमाल हो, तो एक लीटर पानी रोककर रखें। उस पानी में ज़रूरी मात्रा में प्लास्टिसाइज़र डालकर अच्छी तरह मिलाएँ। ड्रम के लगभग एक मिनट घूमने के बाद यह मिश्रण ड्रम में डालें। सही फैलाव के लिए प्लास्टिसाइज़र मिश्रण डालने के बाद ड्रम कम से कम 1 मिनट और घुमाएँ। प्रति घन मीटर कंक्रीट में न्यूनतम सीमेंट इस प्रकार है: एम10, 7 दिन बाद 7 और 28 दिन बाद 10 न्यूटन प्रति वर्ग मिमी, 220 किलो; एम15, 10 और 15, 280 किलो; एम20, 13.5 और 20, 320 किलो; एम25, 17 और 25, 360 किलो; एम30, 20 और 30, 390 किलो।"], ["आरसीसी के काम के लिए एम20 से कम कोई ग्रेड इस्तेमाल नहीं होगा।", "कंक्रीट मिलाने के आधे घंटे के अंदर उसे जगह पर डालकर कॉम्पैक्ट किया जाना चाहिए।", "काम की निगरानी के लिए मिक्सर पर हमेशा एक सुपरवाइज़र रखें।", "ढुलाई तेज़ करने के लिए बड़े बंडली, व्हीलबैरो और होइस्ट मशीन इस्तेमाल करें। सोखने से नमी के नुकसान से बचने के लिए ढोने वाले बर्तन की सतह गीली करें।", "ढुलाई के दौरान सेग्रिगेशन और बर्बादी से सावधानी से बचें। सेग्रिगेशन होने पर डालने से पहले कंक्रीट को दोबारा मिलाएँ।", "देखने में कंक्रीट रंग में एक जैसा, अच्छी ग्रेडिंग वाला और भुरभुरा होना चाहिए, और हाथ में गोल करने पर गेंद का आकार बनाना चाहिए।"], ["प्रतिष्ठित कंपनियों के रेडी-मिक्स कंक्रीट को प्राथमिकता दें, जिनके पास कम से कम 30 घन मीटर प्रति घंटा क्षमता वाला ऑटोमेटेड बैचिंग प्लांट हो और पर्याप्त संख्या में ट्रांज़िट मिक्सर हों।", "लॉजिस्टिक्स ऐसी हो कि हर 10 से 15 मिनट में 6 घन मीटर का कम से कम 1 लोड मिले।", "खाली ट्रांज़िट मिक्सर के ड्रम में पहले से जमा कंक्रीट की जाँच करें। जमा मात्रा मिलने वाले कंक्रीट की मात्रा पर असर डालती है।", "कंक्रीट डिलीवरी चालान और डेटा साइकल शीट के साथ मिलना चाहिए, जिसमें ग्रेड, मात्रा, वॉटर सीमेंट अनुपात, स्लम्प, सीमेंट की मात्रा, बनाने का समय, डाले गए एडिटिव की खुराक और कंक्रीट की विभिन्न सामग्रियों का वज़न हो।", "कंक्रीट स्वीकार करने से पहले साइकल डेटा देख लें।", "मिलाने के 3 घंटे बाद कंक्रीट स्वीकार न करें।", "प्रोजेक्ट इन-चार्ज की पूर्व अनुमति के बिना एडिटिव, पानी या सीमेंट डालकर कंक्रीट को रीचार्ज न करें।", "आरएमसी मिक्स के लिए सुझाया गया स्लम्प 100 मिमी से 125 मिमी है।", "कंक्रीट पंप को क्षैतिज, सख्त समतल सतह पर रखें और ट्रांज़िट मिक्सर के आसानी से घूमने के लिए पहुँच मार्ग को सामग्री से खाली रखें। पहुँच मार्ग की ढलान कंक्रीट पंप की ओर नहीं होनी चाहिए।", "ऊर्ध्वाधर मोड़ लगाने से पहले पाइप का क्षैतिज हिस्सा कम से कम 7 मीटर होना चाहिए।"], ["घर्षण से नुकसान और पंप पर ज़्यादा दबाव कम करने के लिए पाइप की लंबाई कम से कम रखें।", "पाइपलाइन को ऊर्ध्वाधर हिस्से पर अलग से सहारा दिया जाना चाहिए, शटरिंग पर नहीं।", "पंपिंग के कंपन से शटरिंग का काम प्रभावित या विस्थापित नहीं होना चाहिए।", "पाइप की अंदरूनी सतह को चिकना करने के लिए कंक्रीट पंप करने से पहले गाढ़ा स्लरी, एक बैग, पंप करें।", "रुक-रुक कर सप्लाई होने पर, अगला मिक्सर साइट पर आने तक मौजूदा ट्रांज़िट मिक्सर की अनलोडिंग जारी रखें। इससे लंबे समय तक पंपिंग न होने से पाइपलाइन जाम होने से बचाव होता है। जाम हटाने के लिए रिवर्स स्ट्रोक से बचें। इससे तरल बाहर निकल जाता है और समस्या और बढ़ जाती है।", "कंक्रीटिंग के दौरान फ़्लेक्सिबल एंड पाइप को 135 डिग्री से ज़्यादा न मोड़ें।", "तंग जगहों में सीधे पाइप से अनलोड न करें। ऐसी जगहों में कंक्रीट पहुँचाने और डालने के लिए बंडली और ममटी इस्तेमाल करें।", "दिन का काम खत्म होने के बाद पाइपलाइन का कंक्रीट साफ़ करने के लिए गेंद डालते समय बहुत सावधान रहें। लापरवाही से किसी को चोट लग सकती है।", "पाइपलाइन जोड़ने के लिए पेशेवर लोगों को लगाएँ। वे बिना सुरक्षा समस्या के साफ़ और तेज़ काम करेंगे।", "काम पूरा होने के बाद पाइपलाइन, पंप के नीचे और आसपास की जगह को गिरे कंक्रीट से साफ़ छोड़ें।"], ["कंक्रीट डालने के लिए 4.5 मीटर से लंबी या क्षैतिज से 45 डिग्री से ज़्यादा झुकी शूट इस्तेमाल न करें।", "सीमेंट कंक्रीट को ज़रूरी गहराई तक डालें और तब तक वाइब्रेट करें जब तक कंक्रीट के अंदर फँसी हवा बाहर न निकल जाए।", "कंक्रीट पहले बीम में और फिर स्लैब वाले हिस्से पर डालें।", "नए कंक्रीट को पहले डाले गए कंक्रीट से जोड़ें। अगर पिछली ढलाई 4 घंटे से कम पहले हुई है, तो पिछली ढलाई की सतह से लेटेंस फ़िल्म और छिद्रदार परत हटाई जाएगी। अगर पिछली ढलाई 4 घंटे से ज़्यादा लेकिन 30 दिन से कम पुरानी है, तो ऊपर वाली प्रक्रिया अपनाएँ, वायर ब्रश से एग्रीगेट खोलें और साफ़ पानी से धोएँ।", "अगर जोड़ एक महीने से ज़्यादा पुराना है, तो निर्माता के स्पेसिफ़िकेशन के अनुसार बॉन्डिंग एजेंट इस्तेमाल करें।", "अगर बीम 500 मिमी से ज़्यादा गहरी है, तो उसकी कंक्रीटिंग परतों में करें।", "कंक्रीटिंग शुरू होने से पहले कॉलम, बीम और स्लैब के कंक्रीट टॉप का लेवल पहले से चिह्नित होना चाहिए।", "कंक्रीटिंग के दौरान लाइन डोरी तरीके और लेवलिंग इंस्ट्रूमेंट से भी स्लैब का लेवल जाँचें।", "एग्रीगेट साइज़, सरिया की दूरी और कंक्रीट किए जा रहे हिस्से के अनुसार वाइब्रेशन के लिए उपयुक्त नीडल इस्तेमाल करें। बड़ी फ़ुटिंग के लिए 60 मिमी, स्लैब के लिए 40 मिमी, और स्टार्टर व प्रीकास्ट लिंटल के लिए 25 मिमी नीडल इस्तेमाल करें। वाइब्रेटर कम से कम 10,000 आरपीएम की गति से चलने चाहिए। सुनिश्चित करें कि केवल उतना ही वाइब्रेशन हो जितना ज़रूरी है। ज़्यादा वाइब्रेशन बहुत नुकसानदायक है।"], ["कंक्रीट की सतह पर स्लरी बनाने के लिए लकड़ी के रनर से ठोकें।", "कंक्रीटिंग के तुरंत बाद शटरिंग से सारा गिरा हुआ कंक्रीट साफ़ करें।", "ऊर्ध्वाधर कंस्ट्रक्शन जोड़ स्ट्रक्चरल इंजीनियर से सलाह के बाद ही छोड़ें।", "वाइब्रेटर और मिस्त्रियों की संख्या कंक्रीटिंग की रफ़्तार के अनुसार रखें।", "सोखने से पानी के नुकसान को कम करने के लिए कंक्रीट डालने से पहले शटरिंग की सभी सतहें गीली की जाएँगी।", "कंक्रीटिंग के 3 घंटे बाद, यानी इनिशियल सेटिंग पूरी होने पर, स्लैब को हेसियन कपड़े से ढककर पानी छिड़कें और सुनिश्चित करें कि पॉन्डिंग होने तक हेसियन कपड़ा गीला रहे। अगले दिन बंड बनाकर 25 मिमी गहराई तक पानी भरें और लगातार 7 दिन पानी भरा रखें। अगर पॉन्डिंग संभव न हो, तो हेसियन कपड़े से ढककर पूरे समय नम रखें।", "ऊपरी स्लैब के कॉलम की मार्किंग के लिए स्लैब की क्योरिंग को नज़रअंदाज़ न करें।", "बीम के निचले हिस्से हाई-प्रेशर क्लीनर से साफ़ किए जाने चाहिए।"], ["अगले दिन शटरिंग हटाएँ, और हाइड्रेशन की गर्मी कम करने के लिए कॉलम पर पानी छिड़ककर उसे नम हेसियन कपड़े से लपेटें।", "कॉलम और दीवारों की कम से कम 7 दिन क्योरिंग होनी चाहिए।", "स्टार्टर की 3 दिन क्योरिंग करनी है।", "स्लम्प कोन टेस्ट करें: एक काम की शुरुआत में, एक दोपहर में, और एक दिन का काम खत्म होने के करीब।", "इसके अलावा किसी भी संदिग्ध लोड का स्लम्प मामले-दर-मामले जाँचा जा सकता है।", "सैंपल मिश्रण निकलने की जगह पर बनाया जाता है।", "7 दिन की मज़बूती के लिए 3 सैंपल और 28 दिन की मज़बूती के लिए 3 सैंपल लें।", "हर 100 घन मीटर या कंक्रीट के 10 बैच, जो भी कम हो, का प्रतिनिधित्व टेस्ट क्यूब के एक सैंपल से होना चाहिए।", "साइट पर बने कंक्रीट के लिए दिन के काम के और फ़ुटिंग, स्लैब, कॉलम और दीवार जैसे अलग-अलग हिस्सों के प्रतिनिधि सैंपल होने चाहिए।", "नतीजे संतोषजनक हों तब भी टेस्ट रिज़ल्ट पर प्रोजेक्ट इन-चार्ज से चर्चा करनी चाहिए।", "क्यूब फ़ेल होने पर उस हिस्से की पहचान करें और नॉन-डिस्ट्रक्टिव टेस्ट करें। उसी बैच के लिए आरएमसी सप्लायर के क्यूब रिज़ल्ट भी जाँचे जा सकते हैं।"], ["सही काम सुनिश्चित करने के लिए साइट पर ज़रूरी औज़ार उपलब्ध होने चाहिए।", "कंक्रीटिंग गैंग के मूल औज़ार हैं: ट्रॉवेल, फावड़े, लाइन डोरी, गम बूट, वाइब्रेटर, डम्पी लेवल, 1 से 3 मीटर स्पिरिट लेवल, मेज़रिंग टेप, मिस्त्री की ट्रॉवेल, फ़्लोटिंग ट्रॉवेल, स्क्रीड फ़िनिशिंग डार्बी, स्टील ट्रैश ट्रैक, हथौड़ा, लेवलिंग ट्रॉवेल, व्हीलबैरो, लंबे हैंडल वाला एल्युमिनियम लेवलर, मिस्त्री के ब्रश और बाल्टियाँ, और हाई प्रेशर वॉटर क्लीनर।"], ["कर्मचारी: सुनिश्चित करें कि सभी कर्मचारी गम बूट और रबर के दस्ताने पहने हों। ऊँचाई पर या स्ट्रक्चर की परिधि पर कंक्रीटिंग के दौरान सुनिश्चित करें कि कर्मचारी सेफ़्टी बेल्ट पहने हों।", "कंक्रीटिंग से पहले: सुनिश्चित करें कि बेस प्लेट साफ़ करके सीलिंग टेप से सील की गई हों ताकि स्लरी का रिसाव न हो। सारा सरिया, खासकर चेयर, अपनी जगह पर हो। सरिया बिछाते समय खराब हुए सभी कवर ब्लॉक बदले गए हों। सभी धँसे हुए हिस्से, यानी सनकन बीम, टॉयलेट और कट-आउट क्षेत्र, हाई-प्रेशर वॉटर क्लीनर से धूल और तैलीय पदार्थों से ठीक से साफ़ किए गए हों।", "कंक्रीटिंग के दौरान: सुनिश्चित करें कि कंसल्टेंट द्वारा सुझाया गया सही ग्रेड का कंक्रीट इस्तेमाल हो। वर्किंग ड्रॉइंग के अनुसार सही एक्सपैंशन जोड़ हों और सुरक्षित हों। कंक्रीटिंग से पहले और बाद में स्पिरिट लेवल से स्लैब और बीम की समानांतरता जाँचें। ताज़ा कंक्रीट की ऊपरी सतह की समतलता जाँचें। वाइब्रेटर की सही नीडल से पर्याप्त कॉम्पैक्शन सुनिश्चित करें।", "कंक्रीटिंग के बाद: दिशानिर्देशों के अनुसार क्योरिंग हो। कॉलम 7 दिन तक नम हेसियन या जूट के कपड़े से ढके रहें। स्लैब पर पॉन्डिंग के दौरान पानी का लेवल बना रहे। डी-शटरिंग के बाद हनीकॉम्बिंग दिखे, तो बिना देरी के तुरंत टच-अप करें। सुनिश्चित करें कि बताई गई अवधि के अंत में क्यूब टेस्ट रिज़ल्ट उपलब्ध हों।", "6.3.1 क्वालिटी निरीक्षण के लिए इस्तेमाल होने वाले औज़ार: तैयार स्लैब का लेवल जाँचने के लिए डम्पी लेवल, 1 से 3 मीटर स्पिरिट लेवल, मेज़रिंग टेप, प्लम्ब बॉब, और सभी संबंधित “गुड फ़ॉर कंस्ट्रक्शन” ड्रॉइंग।"]];
+const pointsOf=i=>textOf(i)?$$(':scope > li:not(.mh)',textOf(i)):[];
+
+/* ---------- one animation per data-a token ---------- */
+function len(el){try{return Math.ceil(el.getTotalLength());}catch(e){return 600;}}
+function anim(t,el,a,at,d){
+  const o={transformOrigin:'50% 50%'};
+  switch(a){
+    case 'fade':t.from(el,{opacity:0,duration:d||.5},at);break;
+    case 'up':t.from(el,{opacity:0,y:40,duration:d||.6,ease:'power3.out'},at);break;
+    case 'down':t.from(el,{opacity:0,y:-120,duration:d||.8,ease:'bounce.out'},at);break;
+    case 'left':t.from(el,{opacity:0,x:-70,duration:d||.6,ease:'power3.out'},at);break;
+    case 'right':t.from(el,{opacity:0,x:90,duration:d||.7,ease:'power3.out'},at);break;
+    case 'pop':t.from(el,{...o,opacity:0,scale:0,duration:d||.5,ease:'back.out(2)'},at);break;
+    case 'draw':{const L=len(el);t.fromTo(el,{strokeDasharray:L,strokeDashoffset:L},{strokeDashoffset:0,duration:d||1,ease:'power2.inOut'},at);break;}
+    case 'grow-x':t.from(el,{scaleX:0,transformOrigin:'0% 50%',duration:d||.8,ease:'power2.out'},at);break;
+    case 'grow-y':t.from(el,{scaleY:0,transformOrigin:'50% 100%',duration:d||.8,ease:'power2.out'},at);break;
+    case 'pulse':t.from(el,{...o,opacity:0,scale:0,duration:.45,ease:'back.out(2)'},at);t.to(el,{...o,scale:1.12,duration:.4,yoyo:true,repeat:5,ease:'sine.inOut'},at+.5);break;
+    case 'ring':t.fromTo(el,{...o,scale:.6,opacity:.9},{scale:1.35,opacity:0,duration:1.4,repeat:2,ease:'power1.out'},at);break;
+    case 'wave':t.from(el,{opacity:0,duration:.2},at);t.to(el,{opacity:.15,duration:.35,yoyo:true,repeat:7},at+.2);break;
+    case 'float':t.from(el,{opacity:0,duration:.3},at);t.to(el,{y:-16,duration:.6,yoyo:true,repeat:5,ease:'sine.inOut'},at+.3);break;
+    case 'swing':t.from(el,{opacity:0,duration:.3},at);t.fromTo(el,{rotation:-6,transformOrigin:'50% 0%'},{rotation:6,duration:.9,yoyo:true,repeat:5,ease:'sine.inOut'},at);break;
+    case 'deflect':t.fromTo(el,{y:-160,opacity:1},{y:0,duration:.5,ease:'power2.in'},at);t.to(el,{x:150,y:-70,rotation:70,opacity:0,duration:.7,ease:'power2.out'},at+.5);break;
+    case 'lower':t.from(el,{y:-220,opacity:0,duration:1.5,ease:'power2.out'},at);break;
+    case 'out':t.to(el,{opacity:0,duration:d||.5},at);break;
+    case 'sweep':t.to(el,{x:280,opacity:0,duration:d||1,ease:'power2.in'},at);break;
+    case 'glow':t.from(el,{...o,opacity:0,scale:.3,duration:.8},at);t.to(el,{opacity:.5,duration:.6,yoyo:true,repeat:4},at+.8);break;
+    case 'waves':t.to(el,{x:-60,duration:1.6,yoyo:true,repeat:5,ease:'sine.inOut'},at);break;
+  }
+}
+
+/* ---------- build a lesson timeline ---------- */
+function build(i){
+  if(tl)tl.revert();
+  const svg=svgOf(i),scenes=$$('.scene',svg),pts=pointsOf(i);
+  tl=gsap.timeline({paused:true,onUpdate:tick,onComplete:()=>{playing=false;stopNarr();setPP(false);lessons[i].classList.add('done');showEnd(true);}});
+  gsap.set(scenes,{autoAlpha:0});starts=[];durs=[];let t0=0;
+  scenes.forEach((sc,k)=>{
+    const words=(pts[k]?pts[k].textContent:'').trim().split(/\s+/).length;
+    const dur=Math.min(17,Math.max(6,words*.42+2.5));starts.push(t0);durs.push(dur);
+    if(k>0)tl.to(sc,{autoAlpha:1,duration:.4},t0);
+    $$('[data-a]',sc).forEach(el=>{const as=el.dataset.a.split(' '),ats=(el.dataset.at||'0').split(' '),d=+el.dataset.d||0;
+      as.forEach((a,n)=>anim(tl,el,a,t0+.25+(+ats[n]||+ats[0]||0),reduce?.01:d));});
+    tl.call(gate,[k],k<scenes.length-1?t0+dur-.42:t0+dur-.02);
+    if(k<scenes.length-1)tl.to(sc,{autoAlpha:0,duration:.4},t0+dur-.4);
+    else tl.to({},{duration:.01},t0+dur);
+    t0+=dur;
+  });
+  const total=t0;
+  segs.forEach((s,k)=>{s.hidden=k>=scenes.length;if(k<scenes.length)s.style.flexGrow=durs[k];});
+  gsap.set(scenes[0],{autoAlpha:1});
+  /* poster: the first point fully drawn until Play is pressed */
+  point=-1;fresh=true;tl.seek(Math.max(0,durs[0]-.5));tick();
+}
+function setLesson(i,{play=false}={}){
+  if(i<0||i>=N)return;cur=i;
+  if(tl){tl.revert();tl=null;}
+  const list=listOf(i);
+  $$('.lsvg').forEach(s=>s.toggleAttribute('hidden',s!==svgOf(i)));
+  $$('.mtext').forEach(t=>t.hidden=t!==textOf(i));
+  $$('.clist').forEach(c=>c.hidden=c!==list);
+  heads.forEach((h,k)=>h.hidden=k!==i);
+  $('#player').hidden=!!list;$('#manual').hidden=!!list;
+  lessons.forEach((l,k)=>l.classList.toggle('on',k===i));
+  ui.prevL.disabled=i===0;ui.nextL.disabled=i===N-1;
+  ui.endNext.hidden=i===N-1;ui.endNextT.textContent=i<N-1?heads[i+1].querySelector('h1').textContent:'';
+  ui.tbSheet.textContent=SHEETS[i]||'';ui.mbarT.textContent=heads[i].querySelector('h1').textContent;
+  showEnd(false);ui.start.hidden=false;playing=false;stopNarr();setPP(false);
+  if(list)showList(i,list);else build(i);
+  try{history.replaceState(null,'','#lesson-'+(i+1));}catch(e){}
+  if(play&&!list)begin();
+  window.scrollTo(0,0);
+}
+
+/* ---------- checklists ---------- */
+function showList(i,list){
+  const KEY='dh-ch6-cl-'+i,rows=$$('.cl-row[data-k]',list);let ans={};
+  try{ans=JSON.parse(localStorage.getItem(KEY))||{};}catch(e){}
+  const count=()=>{const c=Object.values(ans).filter(Boolean).length;$('.cl-count',list).textContent=`${c} of ${rows.length} checked`;
+    $('.cl-meter i',list).style.width=(c/rows.length*100)+'%';if(c===rows.length)lessons[i].classList.add('done');};
+  rows.forEach(r=>{const k=r.dataset.k,[y,na]=$$('button',r);r.querySelector('.seg2').setAttribute('aria-label',r.querySelector('.tx').textContent);
+    const paint=()=>{y.setAttribute('aria-pressed',ans[k]==='y');na.setAttribute('aria-pressed',ans[k]==='na');};paint();
+    const set=v=>{ans[k]=ans[k]===v?undefined:v;paint();try{localStorage.setItem(KEY,JSON.stringify(ans));}catch(e){}count();};
+    y.onclick=()=>set('y');na.onclick=()=>set('na');});
+  $('.cl-reset',list).onclick=()=>{ans={};try{localStorage.removeItem(KEY);}catch(e){}rows.forEach(r=>$$('button',r).forEach(b=>b.setAttribute('aria-pressed','false')));count();};
+  $('.cl-prev',list).disabled=i===0;$('.cl-next',list).disabled=i===N-1;
+  $('.cl-prev',list).onclick=()=>setLesson(i-1);$('.cl-next',list).onclick=()=>setLesson(i+1);
+  $$('.pt',lessons[i]).forEach(b=>{b.classList.remove('now','seen');});
+  count();
+}
+
+/* ---------- progress ---------- */
+const fmt=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
+function tick(){if(!tl||listOf(cur))return;const t=tl.time();let k=0;starts.forEach((s,n)=>{if(t>=s-.001)k=n;});
+  segs.forEach((s,n)=>{s.classList.toggle('done',n<k);if(n===k)gsap.set(s.firstElementChild,{scaleX:Math.min(1,(t-starts[k])/durs[k])});else if(n>k)gsap.set(s.firstElementChild,{scaleX:0});});
+  ui.tm.textContent=fmt(t)+' / '+fmt(tl.duration());
+  if(k!==point){point=k;const pts=pointsOf(cur);
+    pts.forEach((p,n)=>p.classList.toggle('now',n===k));
+    $$('.pt',lessons[cur]).forEach((b,n)=>{b.classList.toggle('now',n===k);b.classList.toggle('seen',n<k);});
+    ui.tbScene.textContent=`${k+1} of ${starts.length}`;
+    const li=pts[k];
+    if(narrate&&playing&&li)speakScene(k);
+  }}
+
+/* ---------- controls ---------- */
+function setPP(on){ui.pp.classList.toggle('playing',on);ui.pp.setAttribute('aria-label',on?'Pause':'Play');}
+function showEnd(on){ui.endc.hidden=!on;if(on&&!reduce)gsap.fromTo(ui.endc.firstElementChild,{opacity:0,y:16,scale:.96},{opacity:1,y:0,scale:1,duration:.45,ease:'back.out(1.6)'});}
+function inView(){const r=ui.stage.getBoundingClientRect(),bar=$('.mbar'),top=(bar&&getComputedStyle(bar).display!=='none'?bar.offsetHeight:0)+8;
+  if(r.top<top-2||r.bottom>innerHeight+2)window.scrollBy({top:r.top-top,behavior:reduce?'auto':'smooth'});}
+function begin(){ui.start.hidden=true;showEnd(false);inView();playing=true;setPP(true);
+  if(fresh||tl.progress()>=1){fresh=false;point=-1;stopNarr();tl.restart();}
+  else if(NS.wait){resumeNarr();}
+  else{tl.play();if(narrate)resumeNarr();}}
+function jump(k){if(!tl||k>=starts.length)return;fresh=false;ui.start.hidden=true;showEnd(false);stopNarr();playing=true;point=-1;tl.seek(starts[k]+.01);tl.play();setPP(true);tick();inView();}
+ui.start.onclick=begin;
+ui.pp.onclick=()=>{if(!tl)return;if(!playing||tl.progress()>=1)begin();else{playing=false;tl.pause();pauseNarr();setPP(false);}};
+ui.rp.onclick=()=>{fresh=false;ui.start.hidden=true;showEnd(false);stopNarr();playing=true;point=-1;tl.restart();setPP(true);};
+ui.again.onclick=ui.rp.onclick;
+ui.endNext.onclick=()=>setLesson(cur+1,{play:true});
+ui.prevL.onclick=()=>setLesson(cur-1,{play:playing});
+ui.nextL.onclick=()=>setLesson(cur+1,{play:playing});
+segs.forEach((s,k)=>s.onclick=()=>jump(k));
+ui.sp.onchange=e=>{tl&&tl.timeScale(+e.target.value);if(narrate&&playing&&!NS.done)restartChunk();};
+if(!window.speechSynthesis)ui.nr.hidden=true;
+ui.nr.onclick=()=>{narrate=!narrate;ui.nr.setAttribute('aria-pressed',narrate);
+  if(!narrate){const w=NS.wait;stopNarr();if(w&&playing)tl.play();}
+  else if(playing&&point>=0)speakScene(point);};
+ui.nl.onchange=e=>{lang=e.target.value;try{localStorage.setItem('dh-narr-lang',lang);}catch(x){}
+  if(narrate&&playing&&point>=0&&!NS.done)speakScene(point);};
+try{const v=localStorage.getItem('dh-narr-lang');if(v==='hi'||v==='en'){lang=v;ui.nl.value=v;}}catch(x){}
+if(!window.speechSynthesis)ui.nl.hidden=true;
+
+/* ---------- narration engine: event-based sync with the visual timeline ----------
+   A point (scene) moves on only when BOTH its visuals reached the end-of-scene gate AND
+   its narration has been fully spoken. Pause/resume holds both; resume restarts speech
+   from the last spoken word (boundary events) so nothing is skipped or repeated twice. */
+const NS={gen:0,k:-1,chunks:[],ci:0,off:0,bnd:0,done:true,wait:false,paused:false,dog:0};
+const SS=window.speechSynthesis;
+function voiceFor(l){const vs=SS?SS.getVoices():[];const want=l==='hi'?['hi-IN','hi']:['en-IN','en-GB','en-US','en'];
+  for(const w of want){const v=vs.find(v=>v.lang&&v.lang.replace('_','-').toLowerCase().startsWith(w.toLowerCase()));if(v)return v;}return null;}
+if(SS&&SS.addEventListener)SS.addEventListener('voiceschanged',()=>{});
+function narrText(k){const pts=pointsOf(cur);if(lang==='hi'&&HI[cur]&&HI[cur][k])return HI[cur][k];
+  return pts[k]?liText(pts[k]):'';}
+function liText(li){const c=li.cloneNode(true);
+  c.querySelectorAll('li,td,th').forEach(e=>e.append(document.createTextNode(', ')));
+  c.querySelectorAll('tr,p,div').forEach(e=>e.append(document.createTextNode('. ')));
+  c.querySelectorAll('br').forEach(e=>e.replaceWith(document.createTextNode(' ')));
+  return c.textContent.replace(/[✓✔]/g,' ').replace(/\s+/g,' ').replace(/\s*,\s*(?=[,.])/g,'').replace(/\.\s*\./g,'.').replace(/:\s*,/g,':').replace(/[\s,]+$/,'').trim();}
+function chunk(t){const out=[];t.split(/(?<=[.;:!?।])\s+/).forEach(s=>{
+  while(s.length>200){let c=s.lastIndexOf(', ',200);if(c<60)c=s.lastIndexOf(' ',200);if(c<1)c=200;out.push(s.slice(0,c+1).trim());s=s.slice(c+1);}
+  if(s.trim())out.push(s.trim());});return out;}
+function clearDog(){if(NS.dog){clearTimeout(NS.dog);NS.dog=0;}}
+function stopNarr(){NS.gen++;clearDog();NS.done=true;NS.wait=false;NS.paused=false;NS.k=-1;if(SS)SS.cancel();}
+function speakScene(k){if(!SS)return;NS.gen++;clearDog();SS.cancel();
+  NS.k=k;NS.chunks=chunk(narrText(k));NS.ci=0;NS.off=0;NS.bnd=0;NS.done=false;NS.paused=false;NS.wait=false;
+  if(SS.paused)SS.resume();speakChunk();}
+function speakChunk(){
+  if(NS.ci>=NS.chunks.length){NS.done=true;clearDog();narrDone();return;}
+  const g=++NS.gen,txt=NS.chunks[NS.ci].slice(NS.off);
+  if(!txt.trim()){NS.ci++;NS.off=0;NS.bnd=0;speakChunk();return;}
+  const u=new SpeechSynthesisUtterance(txt),v=voiceFor(lang);
+  u.lang=lang==='hi'?'hi-IN':'en-IN';if(v)u.voice=v;u.rate=Math.min(2,Math.max(.5,+ui.sp.value||1));
+  let started=false;const base=NS.off;NS.bnd=base;
+  const next=()=>{if(g!==NS.gen||NS.paused)return;clearDog();NS.ci++;NS.off=0;NS.bnd=0;speakChunk();};
+  u.onstart=()=>{if(g!==NS.gen)return;started=true;clearDog();
+    NS.dog=setTimeout(()=>{if(g===NS.gen&&!NS.paused){SS.cancel();next();}},(txt.length*170/u.rate)+6000);};
+  u.onboundary=e=>{if(g===NS.gen&&e.name!=='sentence'&&e.charIndex>=0)NS.bnd=base+e.charIndex;};
+  u.onend=next;
+  u.onerror=e=>{if(g!==NS.gen||NS.paused)return;if(e.error==='interrupted'||e.error==='canceled')return;next();};
+  NS.dog=setTimeout(()=>{if(g===NS.gen&&!started&&!NS.paused){SS.cancel();next();}},5000);
+  SS.speak(u);}
+function restartChunk(){if(NS.done)return;NS.gen++;clearDog();SS.cancel();NS.off=NS.bnd;speakChunk();}
+function pauseNarr(){if(!SS||NS.done)return;NS.paused=true;NS.gen++;clearDog();NS.off=NS.bnd;SS.cancel();}
+function resumeNarr(){if(!SS)return;
+  if(NS.k!==point&&point>=0&&narrate){speakScene(point);return;}
+  if(NS.done){if(NS.wait)narrDone();return;}
+  NS.paused=false;speakChunk();}
+function narrDone(){if(NS.wait&&playing){NS.wait=false;tl.play();}}
+function gate(k){if(!narrate||!SS)return;
+  if(NS.k!==k){speakScene(k);}
+  if(!NS.done){NS.wait=true;tl.pause();}}
+lessons.forEach((l,i)=>pointsOf(i).forEach((li,k)=>li.addEventListener('click',()=>{if(i===cur)jump(k);})));
+lessons.forEach((l,i)=>{
+  l.querySelector('.ls-btn').onclick=()=>{if(i!==cur)setLesson(i);closeMenu();};
+  $$('.pt',l).forEach((b,k)=>b.onclick=()=>{if(i!==cur)setLesson(i);const list=listOf(i);
+    if(list){const sec=$$('.cl-sec',list)[k];if(sec)sec.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});}else jump(k);closeMenu();});
+});
+
+/* full screen */
+function exitFs(){ui.stage.classList.remove('fs');const fe=document.fullscreenElement||document.webkitFullscreenElement;if(fe)(document.exitFullscreen||document.webkitExitFullscreen).call(document);}
+ui.fs.onclick=async()=>{const fe=document.fullscreenElement||document.webkitFullscreenElement;
+  if(fe||ui.stage.classList.contains('fs')){exitFs();return;}
+  const req=ui.stage.requestFullscreen||ui.stage.webkitRequestFullscreen;
+  if(req){try{await req.call(ui.stage);try{await screen.orientation.lock('landscape');}catch(e){}}catch(e){ui.stage.classList.add('fs');}}else ui.stage.classList.add('fs');};
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement){try{screen.orientation.unlock();}catch(e){}}});
+
+/* menu and keys */
+const side=$('#side'),scrim=$('#scrim'),menuBtn=$('#menuBtn');
+function closeMenu(){side.classList.remove('show');scrim.classList.remove('show');menuBtn.setAttribute('aria-expanded','false');}
+menuBtn.onclick=()=>{const s=side.classList.toggle('show');scrim.classList.toggle('show',s);menuBtn.setAttribute('aria-expanded',s);};
+scrim.onclick=closeMenu;$('#sideClose').onclick=closeMenu;
+document.addEventListener('keydown',e=>{
+  if(e.key===' '&&e.target===document.body){e.preventDefault();ui.pp.click();}
+  if(e.key==='ArrowRight'&&e.target===document.body&&point<starts.length-1)jump(point+1);
+  if(e.key==='ArrowLeft'&&e.target===document.body&&point>0)jump(point-1);
+  if(e.key==='Escape'){closeMenu();ui.stage.classList.remove('fs');}});
+
+/* start on the lesson in the address, or lesson 1 */
+const m=location.hash.match(/lesson-(\d+)/);
+(document.fonts?document.fonts.ready:Promise.resolve()).then(()=>setLesson(m?Math.min(N-1,Math.max(0,+m[1]-1)):0));
+</script>
+</body>
+</html>
